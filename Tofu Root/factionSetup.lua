@@ -1,0 +1,771 @@
+----------------------
+-- Created for Tofu Worldview
+-- By cdenq
+----------------------
+self.setName("Tofu Draft Tool")
+-- reachButton index 0
+-- playerButtons index 1-5
+-- factionButtons index 6+
+-- finalizeButton index -1
+
+----------------------
+-- pre-helper functions
+----------------------
+function initialPlayerCountSet()
+    local seated = getSeatedPlayers()
+    local n = #seated
+    if n < 2 then 
+        n = 2
+    elseif n > 6 then
+        n = 6
+    end
+    myBookkeepingVariables.currentPlayerCount = n
+    myBookkeepingVariables.reachThreshold = playerReachCounts[tostring(n)]
+    myBookkeepingVariables.maxDrafts = n
+    myBookkeepingVariables.draftsLeft = n
+end
+
+----------------------
+-- button variables
+----------------------
+myColors = {
+    white = {1, 1, 1},
+    gray = {0.5, 0.5, 0.5},
+    green = {0, 1, 0},
+    red = {1, 0, 0},
+    black = {0, 0, 0},
+    whiteShade = {1, 1, 1, 0.65},
+    grayShade = {0.5, 0.5, 0.5, 0.75},
+    greenShade = {0, 1, 0, 0.85},
+    redShade = {1, 0, 0, 0.85}
+}
+globalButtonLift = 0.18
+myButtons = {
+    settingButtons = {
+        startX = -1.75, 
+        startZ = -0.85, 
+        spacingX = 0.5833, 
+        buttonHeight = 90, 
+        buttonWidth = 350,
+        buttonLift = globalButtonLift,
+        fontSize = 50,
+        scale = {0.75, 0.75, 0.75},
+        defaultColor = myColors.white
+    },
+    factionButtons = {
+        startX = -1.75, 
+        startZ = -0.5, 
+        spacingX = 0.5833, 
+        spacingZ = 0.3, 
+        numCols = 7,
+        buttonHeight = 150, 
+        buttonWidth = 150,
+        buttonLift = globalButtonLift,
+        fontSize = 35, 
+        defaultColor = myColors.whiteShade
+    }
+}
+
+----------------------
+-- object variables
+----------------------
+myIterations = {
+    --, "frog", "bat", "skunk"
+    factions = {"cat", "bird", "wa", "vaga", "vaga2", "otter", "lizard", "mole", "crow", "rat", "badger"},
+    settingButtonLabels = {"setting", "player", "reach", "finalize", "randomize", "deal", "reset"}
+}
+--draftVariables
+myBookkeepingVariables = {
+    currentFormat = "",
+    currentPlayerCount = 0,
+    reachThreshold = 0,
+    reachTally = 0,
+    draftsLeft = 0,
+    maxDrafts = 0,
+    sortedReach = {},
+    validDraft = {}
+}
+myBagObjs = {
+    playerBoardBag = getObjectFromGUID("078548"),
+    deckZone = getObjectFromGUID("cf89ff")
+}
+mySettingButtons = {
+    setting = {
+        color = myColors.white,
+        tooltip = "Manually adjust the format.",
+        label = "<Setting>"
+    }, 
+    player = {
+        color = myColors.white,
+        tooltip = "Manually adjust the number of players in the match.",
+        label = "<PlayerCount>"
+    }, 
+    reach = {
+        color = myColors.white,
+        tooltip = "Displays the running total reach. Used in Classic setups only.",
+        label = "<Reach>"
+    }, 
+    finalize = {
+        color = myColors.green,
+        tooltip = "Finalize all selected factions. Used in Classic setups only.",
+        label = "Finalize"
+    }, 
+    randomize = {
+        color = myColors.white,
+        tooltip = "Randomize the limited faction pool. Used in AdSet setups only.",
+        label = "Randomize"
+    }, 
+    deal = {
+        color = myColors.green,
+        tooltip = "Deal the most recently selected faction. Used in AdSet setups only.",
+        label = "Deal Faction"
+    }, 
+    reset = {
+        color = myColors.white,
+        tooltip = "Reset all pieces and settings.",
+        label = "Reset"
+    }
+}
+playerReachCounts = {
+   ["2"] = 17,
+   ["3"] = 18, 
+   ["4"] = 21,
+   ["5"] = 25,
+   ["6"] = 28
+}
+factions = {
+   ["cat"] = {
+       reach = 10,
+       full = "Marquise de Cat",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = "c33191"
+   },
+   ["bird"] = {
+       reach = 7,
+       full = "Eyrie Dynasty",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = "259983"
+   },
+   ["wa"] = {
+       reach = 3,
+       full = "Woodland Alliance",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = "9e5675"
+   },
+   ["vaga"] = {
+       reach = 5,
+       full = "Vagabond",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = "bb1469"
+   },
+   ["vaga2"] = {
+       reach = 2,
+       full = "Vagabond 2",
+       state = "unpickable",
+       owner = "",
+       playerBoardGUID = "615fc6"
+   },
+   ["otter"] = {
+       reach = 5,
+       full = "Riverfolk Company",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = "572d09"
+   },
+   ["lizard"] = {
+       reach = 2,
+       full = "Lizard Cult",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = "d6f37d"
+   },
+   ["mole"] = {
+       reach = 8,
+       full = "Underground Duchy",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = "c6b48f"
+   },
+   ["crow"] = {
+       reach = 3,
+       full = "Corvid Conspiracy",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = "b3a6dc"
+   },
+   ["rat"] = {
+       reach = 9,
+       full = "Lord of the Hundreds",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = "1093bf"
+   },
+   ["badger"] = {
+       reach = 8,
+       full = "Keepers in Iron",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = "f1bd2f"
+   }
+   --[[["frog"] = {
+       reach = 0,
+       full = "Tidepool Diaspora",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = ""
+   },
+   ["bat"] = {
+       reach = 0,
+       full = "Twilight Assembly",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = ""
+   }
+   ["skunk"] = {
+       reach = 0,
+       full = "Knaves of the Deepwood",
+       state = "pickable",
+       owner = "",
+       playerBoardGUID = ""
+   }]]
+}
+orderedFactionsByReach = {
+    ["cat"] = 10,
+    ["rat"] = 9,
+    ["badger"] = 8,
+    ["mole"] = 8,
+    ["bird"] = 7,
+    ["vaga"] = 5,
+    ["otter"] = 5,
+    ["wa"] = 3, 
+    ["crow"] = 3,
+    ["vaga2"] = 2,
+    ["lizard"] = 2
+}
+spawns = {
+   ["red"] = {
+       position = {60.00, 1.6, 57.00},
+       rotation = {0.00, 180.00, 0.00}
+   },
+   ["purple"] = {
+       position = {0.00, 1.6, 57.00},
+       rotation = {0.00, 180.00, 0.00}
+   },
+   ["white"] = {
+       position = {-60.00, 1.6, 57.00},
+       rotation = {0.00, 180.00, 0.00}
+   },
+   ["blue"] = {
+       position = {-60.00, 1.6, -57.00},
+       rotation = {0.00, 0.00, 0.00}
+   },
+   ["green"] = {
+       position = {0.00, 1.6, -57.00},
+       rotation = {0.00, 0.00, 0.00}
+   },
+   ["yellow"] = {
+       position = {60.00, 1.6, -57.00},
+       rotation = {0.00, 0.00, 0.00}
+   }
+}
+
+----------------------
+-- onload and once functions
+----------------------
+function onLoad()
+    initialPlayerCountSet()
+    checkValidFactions()
+    createAllButtons()
+end
+
+----------------------
+-- helper functions
+----------------------
+function doNothing()
+end
+
+----------------------
+-- create button functions
+----------------------
+function createAllButtons()
+    createSettingButtons()
+    setFormatButtons()
+end
+
+function createSettingButtons() --sets the format
+    for i, name in ipairs(myIterations.settingButtonLabels) do
+        if name == "setting" then
+            checkSetting = Global.getVar("GLOBALSETTING")
+            if checkSetting == "ModAdSet" or checkSetting == "AdSet" then
+                myBookkeepingVariables.currentFormat = "AdSet"
+            else
+                myBookkeepingVariables.currentFormat = "Classic"
+            end
+            goLabel = myBookkeepingVariables.currentFormat
+        elseif name == "player" then
+            goLabel = myBookkeepingVariables.currentPlayerCount
+        elseif name == "reach" then
+            goLabel = myBookkeepingVariables.reachTally .. "/" .. myBookkeepingVariables.reachThreshold .. " (" .. myBookkeepingVariables.draftsLeft .. " picks)"
+        else
+            goLabel = mySettingButtons[name].label
+        end
+
+        self.createButton({
+            click_function = "onSettingClick_" .. name,
+            function_owner = self,
+            position = {
+                myButtons.settingButtons.startX + ((i - 1) * myButtons.settingButtons.spacingX), 
+                myButtons.settingButtons.buttonLift, 
+                myButtons.settingButtons.startZ
+            },
+            height = myButtons.settingButtons.buttonHeight,
+            width = myButtons.settingButtons.buttonWidth,
+            scale = myButtons.settingButtons.scale,
+            font_size = myButtons.settingButtons.fontSize,
+            color = mySettingButtons[name].color,
+            label = goLabel,
+            tooltip = mySettingButtons[name].tooltip
+        })
+    end
+end
+
+function setFormatButtons()
+    if myBookkeepingVariables.currentFormat == "Classic" then
+        createFactionButtons()
+        classicButtonEnable()
+    else
+        deleteFactionButtons()
+        adSetButtonEnable()
+    end
+end
+
+function createFactionButtons()
+    for i, faction in ipairs(myIterations.factions) do
+        local row = math.floor((i-1) / myButtons.factionButtons.numCols)
+        local col = (i-1) % myButtons.factionButtons.numCols        
+        local posX = myButtons.factionButtons.startX + (col * myButtons.factionButtons.spacingX)
+        local posZ = myButtons.factionButtons.startZ + (row * myButtons.factionButtons.spacingZ)
+        local buttonColor = myButtons.factionButtons.defaultColor
+
+        if factions[faction].state ~= "unpickable" then
+            if factions[faction].state == "picked" then
+                buttonColor = myColors.greenShade
+            elseif factions[faction].state == "pickable" then
+                buttonColor = myColors.whiteShade
+            elseif factions[faction].state == "banned" then
+                buttonColor = myColors.redShade
+            end
+            self.createButton({
+                click_function = "onFactionClick_" .. faction,
+                function_owner = self,
+                position = {
+                    posX, 
+                    myButtons.factionButtons.buttonLift,
+                    posZ
+                },
+                height = myButtons.factionButtons.buttonHeight,
+                width = myButtons.factionButtons.buttonWidth,
+                font_size = myButtons.factionButtons.fontSize,
+                color = buttonColor,
+                label = factions[faction].owner,
+                tooltip = factions[faction].full
+            })
+        end
+    end
+end
+
+function refreshFactionButtons()
+    deleteFactionButtons()
+    createFactionButtons()
+end
+
+function deleteFactionButtons()
+    local buttonsToRemove = {}
+    for i, button in ipairs(self.getButtons()) do
+        if string.match(button.click_function, "^onFactionClick_") then
+            table.insert(buttonsToRemove, i)
+        end
+    end
+    for i = #buttonsToRemove, 1, -1 do
+        self.removeButton(buttonsToRemove[i] - 1)
+    end
+end
+
+----------------------
+-- onclick button functions
+----------------------
+function onSettingClick_setting(obj, color, alt_click)
+    cycleSetting(obj, color, alt_click)
+end
+
+function onSettingClick_player(obj, color, alt_click)
+    cyclePlayerCount(obj, color, alt_click)
+end
+
+function onSettingClick_reach(obj, color, alt_click)
+    doNothing()
+end
+
+function onSettingClick_finalize(obj, color, alt_click)
+    dealClassic()
+    dealPlayerBoards()
+    finalized()
+end
+
+function onSettingClick_randomize(obj, color, alt_click)
+    
+end
+
+function onSettingClick_deal(obj, color, alt_click)
+    
+end
+
+function onSettingClick_reset(obj, color, alt_click)
+    updateDraftMax()
+    updateSettings()
+    -- return playerboards
+    -- return adset cards
+end
+
+for i, faction in ipairs(myIterations.factions) do
+    _G["onFactionClick_" .. faction] = function(obj, color, alt_click)
+        onFactionClick(faction, color)
+    end
+end
+
+----------------------
+-- setting functions
+----------------------
+function cycleSetting(obj, color, alt_click)
+    if myBookkeepingVariables.currentFormat == "AdSet" then
+        myBookkeepingVariables.currentFormat = "Classic"
+    else 
+        myBookkeepingVariables.currentFormat = "AdSet"
+    end
+
+    self.editButton({
+        index = 0,
+        label = myBookkeepingVariables.currentFormat
+    })
+
+    setFormatButtons()
+end
+
+function adSetButtonEnable()
+    self.editButton({ --reach button
+        click_function = "doNothing",
+        index = 2,
+        color = myColors.gray,
+        label = "-",
+        tooltip = ""
+    })
+    self.editButton({ --finalize
+        click_function = "doNothing",
+        index = 3,
+        color = myColors.gray,
+        label = "-",
+        tooltip = ""
+    })
+    self.editButton({ --randomize
+        click_function = "onSettingClick_randomize",
+        index = 4,
+        color = mySettingButtons["randomize"].color,
+        label = mySettingButtons["randomize"].label,
+        tooltip = mySettingButtons["randomize"].tooltip
+    })
+    self.editButton({ --deal faction
+        click_function = "onSettingClick_deal",
+        index = 5,
+        color = mySettingButtons["deal"].color,
+        label = mySettingButtons["deal"].label,
+        tooltip = mySettingButtons["deal"].tooltip
+    })
+end
+
+function classicButtonEnable()
+    self.editButton({ --reach button
+        click_function = "onSettingClick_reach",
+        index = 2,
+        color = mySettingButtons["reach"].color,
+        label = myBookkeepingVariables.reachTally .. "/" .. myBookkeepingVariables.reachThreshold .. "\n(" .. myBookkeepingVariables.draftsLeft .. " pick(s) left)",
+        tooltip = mySettingButtons["reach"].tooltip
+    })
+    updateReachButton()
+    self.editButton({ --finalize
+        click_function = "onSettingClick_finalize",
+        index = 3,
+        color = mySettingButtons["finalize"].color,
+        label = mySettingButtons["finalize"].label,
+        tooltip = mySettingButtons["finalize"].tooltip
+    })
+    self.editButton({ --randomize
+        click_function = "doNothing",
+        index = 4,
+        color = myColors.gray,
+        label = "-",
+        tooltip = ""
+    })
+    self.editButton({ --deal faction
+        click_function = "doNothing",
+        index = 5,
+        color = myColors.gray,
+        label = "-",
+        tooltip = ""
+    })
+end
+
+----------------------
+-- player & reach functions
+----------------------
+function cyclePlayerCount(obj, color, alt_click)
+    local oldCount = myBookkeepingVariables.currentPlayerCount
+    if not alt_click then
+        myBookkeepingVariables.currentPlayerCount = math.min(myBookkeepingVariables.currentPlayerCount + 1, 6)
+    else
+        myBookkeepingVariables.currentPlayerCount = math.max(myBookkeepingVariables.currentPlayerCount - 1, 2)
+    end
+
+    if oldCount == myBookkeepingVariables.currentPlayerCount then
+        doNothing()
+    else
+        updateDraftMax()
+        updatePlayerCountButton()
+        updateSettings()
+    end
+end
+
+function updateDraftMax()
+    myBookkeepingVariables.reachThreshold = playerReachCounts[tostring(myBookkeepingVariables.currentPlayerCount)]
+    myBookkeepingVariables.maxDrafts = myBookkeepingVariables.currentPlayerCount
+    myBookkeepingVariables.draftsLeft = myBookkeepingVariables.currentPlayerCount
+end
+
+function updatePlayerCountButton()
+    self.editButton({
+        index = 1,
+        label = myBookkeepingVariables.currentPlayerCount
+    })
+end
+
+function updateSettings()
+    if myBookkeepingVariables.currentFormat == "Classic" then
+        hardResetFactions()
+        updateReachButton()
+        checkValidFactions()
+        refreshFactionButtons()
+    else 
+        doNothing()
+    end
+end
+
+function updateReachButton()
+    local buttonColor = myColors.white
+    local goLabel = ""
+
+    if myBookkeepingVariables.draftsLeft == 0 then
+        goLabel = myBookkeepingVariables.reachTally .. "/" .. myBookkeepingVariables.reachThreshold
+        if myBookkeepingVariables.reachTally < myBookkeepingVariables.reachThreshold then
+            buttonColor = myColors.red
+        else
+            buttonColor = myColors.green
+        closeRemainingFactions()
+        end
+    else
+        goLabel = myBookkeepingVariables.reachTally .. "/" .. myBookkeepingVariables.reachThreshold .. "\n(" .. myBookkeepingVariables.draftsLeft .. " pick(s) left)"
+        if myBookkeepingVariables.reachTally >= myBookkeepingVariables.reachThreshold then
+            buttonColor = myColors.green
+        else
+            buttonColor = myColors.white
+        end
+    end
+
+    self.editButton({
+        index = 2,
+        color = buttonColor,
+        label = goLabel
+    })
+end
+
+----------------------
+-- faction functions
+----------------------
+function onFactionClick(faction, color)
+    if faction == "vaga2" then 
+        broadcastToAll("Remember to have the vagabond players sit together! (Re-click factions if seats changed.)")
+    end
+    cycleFactionState(faction, color)
+    updateReachTally(faction)
+    updateDraftLeft()
+    checkValidFactions()
+    vagabondExtraForce()
+    updateReachButton()
+    refreshFactionButtons()
+end
+
+function cycleFactionState(faction, color)
+    if factions[faction].state == "pickable" then
+        factions[faction].state = "picked"
+        factions[faction].owner = Player[color].steam_name
+    elseif factions[faction].state == "picked" then
+        factions[faction].state = "banned"
+        factions[faction].owner = "x"  
+    elseif factions[faction].state == "banned" then
+        factions[faction].state = "pickable"
+        factions[faction].owner = ""
+    end
+end
+
+function updateReachTally(faction)
+    if factions[faction].state == "picked" then
+        myBookkeepingVariables.reachTally = myBookkeepingVariables.reachTally + factions[faction].reach
+    elseif factions[faction].state == "banned" then
+        myBookkeepingVariables.reachTally = myBookkeepingVariables.reachTally - factions[faction].reach 
+    end
+end
+
+function updateDraftLeft()
+    local pickedCount = 0
+    for i, faction in ipairs(myIterations.factions) do
+        if factions[faction].state == "picked" then
+            pickedCount = pickedCount + 1
+        end
+    end
+    myBookkeepingVariables.draftsLeft = myBookkeepingVariables.maxDrafts - pickedCount
+end
+
+function checkValidFactions()
+    validDraft = {}
+    softResetFactions()
+    vagabondExtraForce()
+    for i, faction in ipairs(myIterations.factions) do
+        if factions[faction].state == "pickable" then
+            if (myBookkeepingVariables.reachTally + getMaxPossibleReach(myBookkeepingVariables.draftsLeft - 1) + factions[faction].reach >= myBookkeepingVariables.reachThreshold) then
+                table.insert(validDraft, {label = faction, reach = factions[faction].reach})
+            else
+                factions[faction].state = "unpickable"
+            end
+        end
+    end     
+end
+
+function softResetFactions()
+    for i, faction in ipairs(myIterations.factions) do
+        if factions[faction].state == "unpickable" then
+            factions[faction].state = "pickable"
+        end
+    end
+end
+
+function getMaxPossibleReach(draftsLeft)
+    local tempSortedReach = {}
+    local sum = 0
+    if draftsLeft <= 0 then
+        return sum
+    else
+        for i, faction in ipairs(myIterations.factions) do
+            if factions[faction].state == "pickable" then
+                table.insert(tempSortedReach, {label = faction, reach = factions[faction].reach})
+            end
+        end
+        table.sort(tempSortedReach, function(a, b) return a.reach > b.reach end)
+        for i = 1, math.min(draftsLeft, #tempSortedReach) do
+            sum = sum + tempSortedReach[i].reach
+        end
+        return sum
+    end
+end
+
+function vagabondExtraForce()
+    if factions["vaga"].state ~= "picked" then
+        factions["vaga2"].state = "unpickable"
+        factions["vaga2"].owner = ""
+    end
+end
+
+function closeRemainingFactions()
+    for i, faction in ipairs(myIterations.factions) do
+        if factions[faction].state == "pickable" then
+            factions[faction].state = "unpickable"
+        end
+    end
+end
+
+function hardResetFactions()
+    for i, faction in ipairs(myIterations.factions) do
+        factions[faction].state = "pickable"
+        factions[faction].owner = ""
+    end
+    myBookkeepingVariables.reachTally = 0
+end
+
+----------------------
+-- finalize functions
+----------------------
+function dealPlayerBoards()
+    for factionKey, faction in pairs(factions) do
+        local playerColor = nil
+        local playerName = nil
+        
+        if faction.owner ~= "" and faction.owner ~= "x" then
+            for _, player in ipairs(Player.getPlayers()) do
+                if player.steam_name == faction.owner then
+                    playerColor = player.color
+                    playerName = player.steam_name
+                    break
+                end
+            end
+
+            if playerColor then
+                local selectedBoard = myBagObjs.playerBoardBag.takeObject({
+                    guid = faction.playerBoardGUID,
+                    position = spawns[string.lower(playerColor)].position,
+                    rotation = spawns[string.lower(playerColor)].rotation,
+                    smooth = true
+                })
+                selectedBoard.setLock(true)
+                broadcastToAll(playerName .. " drafts " .. faction.full .. ".", playerColor)
+            end
+        end
+    end
+end
+
+function dealClassic()
+    local deck = nil
+    for _, obj in ipairs(myBagObjs.deckZone.getObjects()) do
+        if obj.tag == "Deck" then
+            deck = obj
+            break
+        end
+    end
+
+    local turnOrder = Turns.order
+    if not turnOrder or #turnOrder == 0 then
+        Turns.enable = true
+        Turns.type = 2
+        Turns.order = players
+        turnOrder = Turns.order
+    end
+
+    if not turnOrder or #turnOrder == 0 then
+        turnOrder = players
+    end
+
+    deck.shuffle()
+    for i, playerColor in ipairs(turnOrder) do
+        local cardsToDeal = i + 2
+        deck.dealToColor(cardsToDeal, playerColor)
+    end
+end
+
+function finalized()
+    self.editButton({
+        index = 3,
+        click_function = "doNothing",
+        color = myColors.gray,
+        label = "Finalized"
+    })
+end

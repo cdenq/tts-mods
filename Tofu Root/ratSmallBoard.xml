@@ -1,0 +1,16 @@
+<Panel width="240" height="105" position="0 43 -20" rotation="0 0 180">
+  <VerticalLayout childForceExpandHeight="false" childForceExpandWidth="false" spacing="1">
+    <HorizontalLayout spacing="3">
+      <Image id="1" image="Stubborn" color="rgba(1, 1, 1, 1)" onClick="toggle_image_alpha" preserveAspect="True"/>
+      <Image id="2" image="Wrathful" color="rgba(0.64, 0.45, 0.26, 1)" onClick="toggle_image_alpha" preserveAspect="True"/>
+      <Image id="3" image="Grandoise" color="rgba(0.64, 0.45, 0.26, 1)" onClick="toggle_image_alpha" preserveAspect="True"/>
+      <Image id="4" image="Bitter" color="rgba(0.64, 0.45, 0.26, 1)" onClick="toggle_image_alpha" preserveAspect="True"/>
+    </HorizontalLayout>
+    <HorizontalLayout spacing="3">
+      <Image id="5" image="Lavish" color="rgba(0.64, 0.45, 0.26, 1)" onClick="toggle_image_alpha" preserveAspect="True"/>
+      <Image id="6" image="Jubilant" color="rgba(0.64, 0.45, 0.26, 1)" onClick="toggle_image_alpha" preserveAspect="True"/>
+      <Image id="7" image="Relentless" color="rgba(0.64, 0.45, 0.26, 1)" onClick="toggle_image_alpha" preserveAspect="True"/>
+      <Image id="8" image="Rowdy" color="rgba(0.64, 0.45, 0.26, 1)" onClick="toggle_image_alpha" preserveAspect="True"/>
+    </HorizontalLayout>
+  </VerticalLayout>
+</Panel>

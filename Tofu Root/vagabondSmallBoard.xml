@@ -1,0 +1,25 @@
+<Panel width="325" height="80" position="-56 80 -20" rotation="0 0 180">
+  <VerticalLayout childForceExpandHeight="false" childForceExpandWidth="false" spacing="0">
+    <HorizontalLayout spacing="0">
+      <Cell dontUseTableCellBackground="True" cellBackgroundColor="clear">
+        <Image id="1" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="0 0 0"/>
+        <Image id="2" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="10 0 0"/>
+        <Image id="3" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="20 0 0"/>
+        <Image id="4" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="30 0 0"/>
+        <Image id="5" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="40 0 0"/>
+        <Image id="6" image="Quest Completer" color="rgba(1, 1, 1, 0)" preserveAspect="True" scale="0.7 0.7" position="50 0 0"/>
+        <Image id="7" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="60 0 0"/>
+        <Image id="8" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="70 0 0"/>
+        <Image id="9" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="80 0 0"/>
+        <Image id="10" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="90 0 0"/>
+        <Image id="11" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="100 0 0"/>
+        <Image id="12" image="Quest Completer" color="rgba(1, 1, 1, 0)" preserveAspect="True" scale="0.7 0.7" position="110 0 0"/>
+        <Image id="13" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="120 0 0"/>
+        <Image id="14" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="130 0 0"/>
+        <Image id="15" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="140 0 0"/>
+        <Image id="16" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="150 0 0"/>
+        <Image id="17" image="Quest Completer" color="rgba(1, 1, 1, 0)" onClick="toggle_image_alpha" preserveAspect="True" scale="0.7 0.7" position="160 0 0"/>
+      </Cell>
+    </HorizontalLayout>
+  </VerticalLayout>
+</Panel>
