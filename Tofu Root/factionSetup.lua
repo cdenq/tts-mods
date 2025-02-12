@@ -454,13 +454,11 @@ function onSettingClick_randomize(obj, color, alt_click)
 end
 
 function onSettingClick_deal(obj, color, alt_click)
-    
+    dealAdsetFaction()
 end
 
 function onSettingClick_reset(obj, color, alt_click)
     draftReset()
-    resetAdsetPool()
-    resetDraftedAdset()
 end
 
 for i, faction in ipairs(myIterations.factions) do
@@ -551,10 +549,11 @@ function classicButtonEnable()
 end
 
 function draftReset()
+    deleteFactionButtons()
     updateDraftMax()
     updateSettings()
-    -- return playerboards?
-    -- return adset cards
+    resetAdsetPool()
+    resetDraftedAdset()
 end
 ----------------------
 -- player & reach functions
@@ -636,11 +635,15 @@ function onFactionClick(faction, color)
         broadcastToAll("Remember to have the vagabond players sit together! (Re-click factions if seats changed.)")
     end
     cycleFactionState(faction, color)
-    updateReachTally(faction)
-    updateDraftLeft()
-    checkValidFactions()
-    vagabondExtraForce()
-    updateReachButton()
+    if myBookkeepingVariables.currentFormat == "Classic" then
+        updateReachTally(faction)
+        updateDraftLeft()
+        checkValidFactions()
+        vagabondExtraForce()
+        updateReachButton()
+    else
+        doNothing()
+    end
     refreshFactionButtons()
 end
 
@@ -813,6 +816,7 @@ end
 ----------------------
 function randomizeAdset()
     hardResetFactions()
+    deleteFactionButtons()
     resetAdsetPool()
     draftMilitant()
     draftRest()
@@ -826,7 +830,6 @@ function resetAdsetPool()
     myBookkeepingVariables.adSetVagaPool = {}
 
     local tempPool = {table.unpack(myIterations.factions)}
-    local tempVagaPool = {table.unpack(vagabondAdsetCardGUIDS)}
     local invalidHirelings = Global.getVar("HIRELINGSINPLAY")
 
     local indicesToRemove = {}
@@ -847,11 +850,14 @@ function resetAdsetPool()
     end
     
     myBookkeepingVariables.adSetPool = tempPool
+    local tempVagaPool = {}
+    for key, _ in pairs(vagabondAdsetCardGUIDS) do
+        table.insert(tempVagaPool, key)
+    end
     myBookkeepingVariables.adSetVagaPool = tempVagaPool
 end
 
 function draftMilitant()
-    -- Find all militant factions that are still in the pool
     local availableMilitants = {}
     for _, faction in ipairs(myBookkeepingVariables.adSetPool) do
         for _, militant in ipairs(myIterations.militantFactions) do
@@ -862,12 +868,10 @@ function draftMilitant()
         end
     end
     
-    -- Randomly select one militant faction
     if #availableMilitants > 0 then
         local randomIndex = math.random(#availableMilitants)
         local selectedFaction = availableMilitants[randomIndex]
         
-        -- Remove the selected faction from adSetPool
         for i = #myBookkeepingVariables.adSetPool, 1, -1 do
             if myBookkeepingVariables.adSetPool[i] == selectedFaction then
                 table.remove(myBookkeepingVariables.adSetPool, i)
@@ -875,17 +879,14 @@ function draftMilitant()
             end
         end
         
-        -- Add the selected faction to adSetPicked
         table.insert(myBookkeepingVariables.adSetPicked, selectedFaction)
     end
-    printAdsets()
 end
 
 function draftRest()
     local remainingPicks = myBookkeepingVariables.currentPlayerCount
     
     while remainingPicks > 0 do
-        -- Randomly select a faction from the pool
         local randomIndex = math.random(#myBookkeepingVariables.adSetPool)
         local selectedFaction = myBookkeepingVariables.adSetPool[randomIndex]
         
@@ -905,14 +906,10 @@ function draftRest()
             end
         end
         
-        -- Remove selected faction from pool
         table.remove(myBookkeepingVariables.adSetPool, randomIndex)
-        
-        -- Add selected faction to picked list
         table.insert(myBookkeepingVariables.adSetPicked, selectedFaction)
         
         remainingPicks = remainingPicks - 1
-        printAdsets()
         
         ::continue::
     end
@@ -952,7 +949,6 @@ function moveDraftedAdset()
             local selectedVaga = myBookkeepingVariables.adSetVagaPool[randomIndex]
             table.remove(myBookkeepingVariables.adSetVagaPool, randomIndex)
             
-            -- Place vagabond character card below faction card (adjusting Y position down)
             local vagaPosition = {
                 x = position.x,
                 y = position.y - 0.5,
@@ -970,7 +966,23 @@ function moveDraftedAdset()
 end
 
 function adSetSelectFactions()
-    -- update faction buttons related to pool
+    for _, faction in ipairs(myIterations.factions) do
+        factions[faction].state = "unpickable"
+        factions[faction].owner = ""
+    end
+    
+    for _, faction in ipairs(myBookkeepingVariables.adSetPicked) do
+        factions[faction].state = "pickable"
+    end
+    
+    refreshFactionButtons()
+end
+
+function dealAdsetFaction()
+    -- iterate through factions and give board to player for first owned entry found
+    -- factions[faction].state == "picked" -> give to the owner's color
+    -- if the board doesnt exist for that player, then skip it (its already been dealt)
+    -- this allows for people to misclick their faction and then cycle-click the misclicked faction to empty
 end
 
 ----------------------
