@@ -72,6 +72,7 @@ myButtons = {
 myIterations = {
     --, "frog", "bat", "skunk"
     factions = {"cat", "bird", "wa", "vaga", "vaga2", "otter", "lizard", "mole", "crow", "rat", "badger"},
+    militantFactions = {"cat", "bird", "mole", "rat", "badger"},
     settingButtonLabels = {"setting", "player", "reach", "finalize", "randomize", "deal", "reset"}
 }
 --draftVariables
@@ -83,10 +84,15 @@ myBookkeepingVariables = {
     draftsLeft = 0,
     maxDrafts = 0,
     sortedReach = {},
-    validDraft = {}
+    validDraft = {},
+    adSetPool = {},
+    adSetPicked = {},
+    adSetVagaPool = {},
+    adsetGUIDs = {}
 }
 myBagObjs = {
     playerBoardBag = getObjectFromGUID("078548"),
+    adsetCardBag = getObjectFromGUID("7528eb"),
     deckZone = getObjectFromGUID("cf89ff")
 }
 mySettingButtons = {
@@ -113,7 +119,7 @@ mySettingButtons = {
     randomize = {
         color = myColors.white,
         tooltip = "Randomize the limited faction pool. Used in AdSet setups only.",
-        label = "Randomize"
+        label = "Random Draft"
     }, 
     deal = {
         color = myColors.green,
@@ -134,83 +140,94 @@ playerReachCounts = {
    ["6"] = 28
 }
 factions = {
-   ["cat"] = {
-       reach = 10,
-       full = "Marquise de Cat",
-       state = "pickable",
-       owner = "",
-       playerBoardGUID = "c33191"
-   },
-   ["bird"] = {
-       reach = 7,
-       full = "Eyrie Dynasty",
-       state = "pickable",
-       owner = "",
-       playerBoardGUID = "259983"
-   },
-   ["wa"] = {
-       reach = 3,
-       full = "Woodland Alliance",
-       state = "pickable",
-       owner = "",
-       playerBoardGUID = "9e5675"
-   },
-   ["vaga"] = {
-       reach = 5,
-       full = "Vagabond",
-       state = "pickable",
-       owner = "",
-       playerBoardGUID = "bb1469"
-   },
-   ["vaga2"] = {
-       reach = 2,
-       full = "Vagabond 2",
-       state = "unpickable",
-       owner = "",
-       playerBoardGUID = "615fc6"
-   },
-   ["otter"] = {
-       reach = 5,
-       full = "Riverfolk Company",
-       state = "pickable",
-       owner = "",
-       playerBoardGUID = "572d09"
-   },
-   ["lizard"] = {
-       reach = 2,
-       full = "Lizard Cult",
-       state = "pickable",
-       owner = "",
-       playerBoardGUID = "d6f37d"
-   },
-   ["mole"] = {
-       reach = 8,
-       full = "Underground Duchy",
-       state = "pickable",
-       owner = "",
-       playerBoardGUID = "c6b48f"
-   },
-   ["crow"] = {
-       reach = 3,
-       full = "Corvid Conspiracy",
-       state = "pickable",
-       owner = "",
-       playerBoardGUID = "b3a6dc"
-   },
-   ["rat"] = {
-       reach = 9,
-       full = "Lord of the Hundreds",
-       state = "pickable",
-       owner = "",
-       playerBoardGUID = "1093bf"
-   },
-   ["badger"] = {
-       reach = 8,
-       full = "Keepers in Iron",
-       state = "pickable",
-       owner = "",
-       playerBoardGUID = "f1bd2f"
-   }
+    ["cat"] = {
+        reach = 10,
+        full = "Marquise de Cat",
+        state = "pickable",
+        owner = "",
+        playerBoardGUID = "c33191",
+        adsetCardGUID = "c8f4ed"
+    },
+    ["bird"] = {
+        reach = 7,
+        full = "Eyrie Dynasty",
+        state = "pickable",
+        owner = "",
+        playerBoardGUID = "259983",
+        adsetCardGUID = "8df1be"
+    },
+    ["wa"] = {
+        reach = 3,
+        full = "Woodland Alliance",
+        state = "pickable",
+        owner = "",
+        playerBoardGUID = "9e5675",
+        adsetCardGUID = "c7b1d4"
+    },
+    ["vaga"] = {
+        reach = 5,
+        full = "Vagabond",
+        state = "pickable",
+        owner = "",
+        playerBoardGUID = "bb1469",
+        adsetCardGUID = "304b65"
+    },
+    ["vaga2"] = {
+        reach = 2,
+        full = "Vagabond 2",
+        state = "unpickable",
+        owner = "",
+        playerBoardGUID = "615fc6",
+        adsetCardGUID = "ff9804"
+    },
+    ["otter"] = {
+        reach = 5,
+        full = "Riverfolk Company",
+        state = "pickable",
+        owner = "",
+        playerBoardGUID = "572d09",
+        adsetCardGUID = "201005"
+    },
+    ["lizard"] = {
+        reach = 2,
+        full = "Lizard Cult",
+        state = "pickable",
+        owner = "",
+        playerBoardGUID = "d6f37d",
+        adsetCardGUID = "bdce9c"
+    },
+    ["mole"] = {
+        reach = 8,
+        full = "Underground Duchy",
+        state = "pickable",
+        owner = "",
+        playerBoardGUID = "c6b48f",
+        adsetCardGUID = "e8f093"
+    },
+    ["crow"] = {
+        reach = 3,
+        full = "Corvid Conspiracy",
+        state = "pickable",
+        owner = "",
+        playerBoardGUID = "b3a6dc",
+        adsetCardGUID = "06ace2"
+    },
+    ["rat"] = {
+        reach = 9,
+        full = "Lord of the Hundreds",
+        state = "pickable",
+        owner = "",
+        playerBoardGUID = "1093bf",
+        adsetCardGUID = "39be49"
+    },
+    ["badger"] = {
+        reach = 8,
+        full = "Keepers in Iron",
+        state = "pickable",
+        owner = "",
+        playerBoardGUID = "f1bd2f",
+        adsetCardGUID = "ed28df"
+    }
    --[[["frog"] = {
        reach = 0,
        full = "Tidepool Diaspora",
@@ -232,6 +249,17 @@ factions = {
        owner = "",
        playerBoardGUID = ""
    }]]
+}
+vagabondAdsetCardGUIDS = {
+    tinker = "78ca46",
+    thief = "1c02a2",
+    ranger = "3db079",
+    vagrant = "a67db3",
+    scoundrel = "f69c98",
+    arbiter = "c33cb1",
+    adventurer = "8548a4",
+    harrier = "afbc63",
+    ronin = "946238"
 }
 orderedFactionsByReach = {
     ["cat"] = 10,
@@ -271,6 +299,10 @@ spawns = {
        position = {60.00, 1.6, -57.00},
        rotation = {0.00, 0.00, 0.00}
    }
+}
+adsetSpawns = {
+    start = {98.52, 3, -15.08},
+    increment = {0, 0, 5.78}
 }
 
 ----------------------
@@ -334,8 +366,9 @@ function createSettingButtons() --sets the format
 end
 
 function setFormatButtons()
+    draftReset()
+    
     if myBookkeepingVariables.currentFormat == "Classic" then
-        createFactionButtons()
         classicButtonEnable()
     else
         deleteFactionButtons()
@@ -417,7 +450,7 @@ function onSettingClick_finalize(obj, color, alt_click)
 end
 
 function onSettingClick_randomize(obj, color, alt_click)
-    
+    randomizeAdset()
 end
 
 function onSettingClick_deal(obj, color, alt_click)
@@ -425,10 +458,9 @@ function onSettingClick_deal(obj, color, alt_click)
 end
 
 function onSettingClick_reset(obj, color, alt_click)
-    updateDraftMax()
-    updateSettings()
-    -- return playerboards
-    -- return adset cards
+    draftReset()
+    resetAdsetPool()
+    resetDraftedAdset()
 end
 
 for i, faction in ipairs(myIterations.factions) do
@@ -438,7 +470,7 @@ for i, faction in ipairs(myIterations.factions) do
 end
 
 ----------------------
--- setting functions
+-- setting & reset functions
 ----------------------
 function cycleSetting(obj, color, alt_click)
     if myBookkeepingVariables.currentFormat == "AdSet" then
@@ -518,6 +550,12 @@ function classicButtonEnable()
     })
 end
 
+function draftReset()
+    updateDraftMax()
+    updateSettings()
+    -- return playerboards?
+    -- return adset cards
+end
 ----------------------
 -- player & reach functions
 ----------------------
@@ -558,7 +596,7 @@ function updateSettings()
         checkValidFactions()
         refreshFactionButtons()
     else 
-        doNothing()
+        hardResetFactions()
     end
 end
 
@@ -768,4 +806,207 @@ function finalized()
         color = myColors.gray,
         label = "Finalized"
     })
+end
+
+----------------------
+-- adset functions
+----------------------
+function randomizeAdset()
+    hardResetFactions()
+    resetAdsetPool()
+    draftMilitant()
+    draftRest()
+    moveDraftedAdset()
+    adSetSelectFactions()
+end
+
+function resetAdsetPool()
+    myBookkeepingVariables.adSetPool = {}
+    myBookkeepingVariables.adSetPicked = {}
+    myBookkeepingVariables.adSetVagaPool = {}
+
+    local tempPool = {table.unpack(myIterations.factions)}
+    local tempVagaPool = {table.unpack(vagabondAdsetCardGUIDS)}
+    local invalidHirelings = Global.getVar("HIRELINGSINPLAY")
+
+    local indicesToRemove = {}
+    for i = #tempPool, 1, -1 do
+        for _, hireling in ipairs(invalidHirelings) do
+            if hireling == "vaga" then
+                if tempPool[i] == "vaga" or tempPool[i] == "vaga2" then
+                    table.insert(indicesToRemove, i)
+                end
+            elseif tempPool[i] == hireling then
+                table.insert(indicesToRemove, i)
+            end
+        end
+    end
+    
+    for _, index in ipairs(indicesToRemove) do
+        table.remove(tempPool, index)
+    end
+    
+    myBookkeepingVariables.adSetPool = tempPool
+    myBookkeepingVariables.adSetVagaPool = tempVagaPool
+end
+
+function draftMilitant()
+    -- Find all militant factions that are still in the pool
+    local availableMilitants = {}
+    for _, faction in ipairs(myBookkeepingVariables.adSetPool) do
+        for _, militant in ipairs(myIterations.militantFactions) do
+            if faction == militant then
+                table.insert(availableMilitants, faction)
+                break
+            end
+        end
+    end
+    
+    -- Randomly select one militant faction
+    if #availableMilitants > 0 then
+        local randomIndex = math.random(#availableMilitants)
+        local selectedFaction = availableMilitants[randomIndex]
+        
+        -- Remove the selected faction from adSetPool
+        for i = #myBookkeepingVariables.adSetPool, 1, -1 do
+            if myBookkeepingVariables.adSetPool[i] == selectedFaction then
+                table.remove(myBookkeepingVariables.adSetPool, i)
+                break
+            end
+        end
+        
+        -- Add the selected faction to adSetPicked
+        table.insert(myBookkeepingVariables.adSetPicked, selectedFaction)
+    end
+    printAdsets()
+end
+
+function draftRest()
+    local remainingPicks = myBookkeepingVariables.currentPlayerCount
+    
+    while remainingPicks > 0 do
+        -- Randomly select a faction from the pool
+        local randomIndex = math.random(#myBookkeepingVariables.adSetPool)
+        local selectedFaction = myBookkeepingVariables.adSetPool[randomIndex]
+        
+        -- Check vagabond special cases
+        if selectedFaction == "vaga2" then
+            local vagaInPicked = false
+            for _, faction in ipairs(myBookkeepingVariables.adSetPicked) do
+                if faction == "vaga" then
+                    vagaInPicked = true
+                    break
+                end
+            end
+            
+            -- Skip this pick if vaga isn't picked yet
+            if not vagaInPicked then
+                goto continue
+            end
+        end
+        
+        -- Remove selected faction from pool
+        table.remove(myBookkeepingVariables.adSetPool, randomIndex)
+        
+        -- Add selected faction to picked list
+        table.insert(myBookkeepingVariables.adSetPicked, selectedFaction)
+        
+        remainingPicks = remainingPicks - 1
+        printAdsets()
+        
+        ::continue::
+    end
+end
+
+function resetDraftedAdset()
+    if myBookkeepingVariables.adsetGUIDs then
+        for _, guid in ipairs(myBookkeepingVariables.adsetGUIDs) do
+            local obj = getObjectFromGUID(guid)
+            if obj then
+                myBagObjs.adsetCardBag.putObject(obj)
+            end
+        end
+        myBookkeepingVariables.adsetGUIDs = {}
+    end
+end
+
+function moveDraftedAdset()
+    resetDraftedAdset()
+    
+    for i, faction in ipairs(myBookkeepingVariables.adSetPicked) do
+        local position = {
+            x = adsetSpawns.start[1] - (adsetSpawns.increment[1] * (i-1)),
+            y = adsetSpawns.start[2] - (adsetSpawns.increment[2] * (i-1)),
+            z = adsetSpawns.start[3] - (adsetSpawns.increment[3] * (i-1))
+        }
+        local factionCard = myBagObjs.adsetCardBag.takeObject({
+            guid = factions[faction].adsetCardGUID,
+            position = position,
+            smooth = true
+        })
+        table.insert(myBookkeepingVariables.adsetGUIDs, factionCard.getGUID())
+        
+        -- Handle vagabond special case
+        if faction == "vaga" or faction == "vaga2" then
+            local randomIndex = math.random(#myBookkeepingVariables.adSetVagaPool)
+            local selectedVaga = myBookkeepingVariables.adSetVagaPool[randomIndex]
+            table.remove(myBookkeepingVariables.adSetVagaPool, randomIndex)
+            
+            -- Place vagabond character card below faction card (adjusting Y position down)
+            local vagaPosition = {
+                x = position.x,
+                y = position.y - 0.5,
+                z = position.z
+            }
+            
+            local vagaCard = myBagObjs.adsetCardBag.takeObject({
+                guid = vagabondAdsetCardGUIDS[selectedVaga],
+                position = vagaPosition,
+                smooth = true
+            })
+            table.insert(myBookkeepingVariables.adsetGUIDs, vagaCard.getGUID())
+        end
+    end
+end
+
+function adSetSelectFactions()
+    -- update faction buttons related to pool
+end
+
+----------------------
+-- debug functions
+----------------------
+function printFactions()
+    for factionKey, factionData in pairs(factions) do
+        print(factionKey .. ": " .. factionData.full)
+        print(factionData.state .. "(" .. factionData.owner .. ")")
+        print("-")
+    end
+    print("---------")
+end
+
+function printAdsets()
+    local poolString = "Pool: "
+    local pickedString = "Picked: "
+    
+    -- Print adSetPool
+    for i, faction in ipairs(myBookkeepingVariables.adSetPool) do
+        if i == 1 then
+            poolString = poolString .. faction
+        else
+            poolString = poolString .. ", " .. faction
+        end
+    end
+    
+    -- Print adSetPicked
+    for i, faction in ipairs(myBookkeepingVariables.adSetPicked) do
+        if i == 1 then
+            pickedString = pickedString .. faction
+        else
+            pickedString = pickedString .. ", " .. faction
+        end
+    end
+    
+    print(poolString)
+    print(pickedString)
 end

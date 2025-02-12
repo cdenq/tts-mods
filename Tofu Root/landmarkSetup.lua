@@ -146,16 +146,16 @@ myPlacementPositions = {
     },
     markerRotation = self.getRotation(),
     ["1"] = {
-        cardPosition = {137.14, 2.63, 23.97},
-        markerPosition = {134.72, 4, 23.97}
+        cardPosition = {109.12, 2.63, 23.97},
+        markerPosition = {106.7, 4, 23.97}
     },
     ["2"] = {
-        cardPosition = {137.14, 2.63, 17.83},
-        markerPosition = {134.72, 4, 17.83}
+        cardPosition = {109.12, 2.63, 17.83},
+        markerPosition = {106.7, 4, 17.83}
     },
     ["3"] = {
-        cardPosition = {137.14, 2.63, 11.70},
-        markerPosition = {134.72, 4, 11.70}
+        cardPosition = {109.12, 2.63, 11.70},
+        markerPosition = {106.7, 4, 11.70}
     }
 }
 myBookkeepingVariables = {
