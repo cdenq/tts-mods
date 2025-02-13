@@ -149,17 +149,31 @@ function turmoil(obj, color)
         end
     end
     
-    print("Bird-suited cards in decree: " .. birdCount .. ".")
+    broadcastToAll("Bird-suited cards in decree: " .. birdCount .. ".")
     
     local vizierPilePosition = eyrieDecreeBoardObj.positionToWorld({-0.8, 1, 0})
     local otherPilePosition = eyrieDecreeBoardObj.positionToWorld({0.8, 1, 0})
     
+    -- Add offset for each vizier card
     for i, card in ipairs(vizierPile) do
-        card.setPositionSmooth(vizierPilePosition + Vector(0, 0.1 * i, 0))
+        local xOffset = 1.2 * (i - 1)  -- Spread cards horizontally
+        local zOffset = 1.2 * (i - 1)  -- Spread cards vertically
+        card.setPositionSmooth({
+            x = vizierPilePosition.x + xOffset,
+            y = vizierPilePosition.y + (0.1 * i),  -- Keep slight height offset
+            z = vizierPilePosition.z + zOffset
+        })
     end
     
+    -- Add offset for other cards
     for i, card in ipairs(otherPile) do
-        card.setPositionSmooth(otherPilePosition + Vector(0, 0.1 * i, 0))
+        local xOffset = 0.3 * (i - 1)  -- Spread cards horizontally
+        local zOffset = 0.3 * (i - 1)  -- Spread cards vertically
+        card.setPositionSmooth({
+            x = otherPilePosition.x + xOffset,
+            y = otherPilePosition.y + (0.1 * i),  -- Keep slight height offset
+            z = otherPilePosition.z + zOffset
+        })
     end
 end
 
@@ -221,7 +235,7 @@ function setupLeader()
             end
             
             if not vizierFound then
-                printToAll("Error: Vizier card not found for action: " .. action, {1,0,0})
+                broadcastToAll("Error: Vizier card not found for action: " .. action, {1,0,0})
             end
         end
     end

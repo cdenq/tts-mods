@@ -408,7 +408,7 @@ end
 function passBannedHirelings()
     if #myIterations.hirelings - settingButtonLabels["player"].numPlayers < #myBookkeepingVariables.availableHirelings then
         broadcastToAll("Make sure to veto same-faction Hirelings!")
-        return false 
+        return true --not allowing it to block due to adset updates 
     else 
         return true
     end
@@ -616,7 +616,6 @@ function returnAllItems()
         -- move the card into that selected bag
         local selectedItem = getObjectFromGUID(myHirelings[hireling].cardGUID)
         if selectedItem then
-            selectedItem.setLock(false)
             selectedBag.putObject(selectedItem)
         end
 
@@ -679,9 +678,6 @@ function moveHirelings()
             rotation = myHirelingZonesAndObjects["zone" .. j].rotation,
             smooth = false
         })
-        Wait.time(function()
-            selectedCard.setLock(true)
-        end, 2)
         table.insert(myBookkeepingVariables.hirelingCardsInPlay, myHirelings[selectedFaction].cardGUID)
 
         -- take all the items out

@@ -979,10 +979,44 @@ function adSetSelectFactions()
 end
 
 function dealAdsetFaction()
-    -- iterate through factions and give board to player for first owned entry found
-    -- factions[faction].state == "picked" -> give to the owner's color
-    -- if the board doesnt exist for that player, then skip it (its already been dealt)
-    -- this allows for people to misclick their faction and then cycle-click the misclicked faction to empty
+    for factionKey, faction in pairs(factions) do
+        local playerColor = nil
+        local playerName = nil
+        
+        if faction.owner ~= "" and faction.owner ~= "x" then
+            for _, player in ipairs(Player.getPlayers()) do
+                if player.steam_name == faction.owner then
+                    playerColor = player.color
+                    playerName = player.steam_name
+                    break
+                end
+            end
+
+            if playerColor then
+                -- Try to find the board in the bag first
+                local boardExists = false
+                for _, obj in ipairs(myBagObjs.playerBoardBag.getObjects()) do
+                    if obj.guid == faction.playerBoardGUID then
+                        boardExists = true
+                        break
+                    end
+                end
+
+                -- Only attempt to take and place the board if it exists
+                if boardExists then
+                    local selectedBoard = myBagObjs.playerBoardBag.takeObject({
+                        guid = faction.playerBoardGUID,
+                        position = spawns[string.lower(playerColor)].position,
+                        rotation = spawns[string.lower(playerColor)].rotation,
+                        smooth = true
+                    })
+                    selectedBoard.setLock(true)
+                    -- Only broadcast if we successfully dealt the board
+                    broadcastToAll(playerName .. " drafts " .. faction.full .. ".", playerColor)
+                end
+            end
+        end
+    end
 end
 
 ----------------------

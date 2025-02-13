@@ -104,7 +104,7 @@ function onCollisionEnter(collision_info)
             handleWarrior(collidingObj, factionBoardGUIDs.ratBoard, {x = 0.2, z = 0.2})
         elseif gmNotes == "ratPiece" or gmNotes == "ratStronghold" then
             handleWarrior(collidingObj, factionBoardGUIDs.ratBoard, {x = 3.5, z = 3.75})
-        elseif gmNotes == "catSawmill" or gmNotes == "catPiece" then
+        elseif gmNotes == "catSawmill" or gmNotes == "catPiece" or gmNotes == "catRecruiter" then
             handleWarrior(collidingObj, factionBoardGUIDs.catBoard, {x = 0, z = 5})
         elseif gmNotes == "birdPiece" then
             handleWarrior(collidingObj, factionBoardGUIDs.birdBoard, {x = 0, z = 5})

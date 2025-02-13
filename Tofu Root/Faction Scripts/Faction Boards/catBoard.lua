@@ -203,35 +203,36 @@ function wood(obj, color)
     end
 
     if #sawmills == 0 then
-        print("No sawmills built.")
+        broadcastToAll("No sawmills found on the map.")
         return
-    end
-
-    local totalWood = 0
-    for _, sawmill in ipairs(sawmills) do
-        if woodBagObj.getQuantity() == 0 then
-            print("No more wood to place.")
-            return
+    elseif woodBagObj.getQuantity() == 0 then
+        broadcastToAll("No more wood to place.")
+        return
+    elseif woodBagObj.getQuantity() < #sawmills then
+        broadcastToAll("Not enough wood to auto-place. You need to add " .. #sawmills .. " wood but only have " .. woodBagObj.getQuantity() .. " left.")
+        return
+    else
+        local totalWood = 0
+        for _, sawmill in ipairs(sawmills) do
+            local sawmillPosition = sawmill.getPosition()
+            local sawmillRotation = sawmill.getRotation()
+    
+            local woodPosition = {
+                x = sawmillPosition.x + 1,
+                y = sawmillPosition.y + 4,
+                z = sawmillPosition.z + 1
+            }
+    
+            woodBagObj.takeObject({
+                position = woodPosition,
+                rotation = sawmillRotation
+            })
+            totalWood = totalWood + 1
         end
-
-        local sawmillPosition = sawmill.getPosition()
-        local sawmillRotation = sawmill.getRotation()
-
-        local woodPosition = {
-            x = sawmillPosition.x + 1,
-            y = sawmillPosition.y + 4,
-            z = sawmillPosition.z + 1
-        }
-
-        woodBagObj.takeObject({
-            position = woodPosition,
-            rotation = sawmillRotation
-        })
-        totalWood = totalWood + 1
+    
+        local playerName = Player[color].steam_name or playerColor
+        broadcastToAll(playerName .. " places " .. totalWood .. " wood in Birdsong.")
     end
-
-    local playerName = Player[color].steam_name or playerColor
-    broadcastToAll(playerName .. " places " .. totalWood .. " wood in Birdsong.")
 end
 
 function recruit(obj, color)
@@ -253,35 +254,36 @@ function recruit(obj, color)
     end
 
     if #recruiters == 0 then
-        print("No recruiters built.")
+        broadcastToAll("No recruiters found on the map.")
         return
-    end
+    elseif warriorBagObj.getQuantity() == 0 then
+        broadcastToAll("No more warriors to place.")
+        return
+    elseif warriorBagObj.getQuantity() < #recruiters then
+        broadcastToAll("Not enough warriors to auto-place. You need to add " .. #recruiters .. " warriors but only have " .. warriorBagObj.getQuantity() .. " left.")
+        return
+    else
+        local totalWarriors = 0
+        for _, recruiter in ipairs(recruiters) do
+            local recruiterPosition = recruiter.getPosition()
+            local recruiterRotation = recruiter.getRotation()
 
-    local totalWarriors = 0
-    for _, recruiter in ipairs(recruiters) do
-        if warriorBagObj.getQuantity() == 0 then
-            print("No more warriors to place.")
-            return
+            local warriorPosition = {
+                x = recruiterPosition.x + 1,
+                y = recruiterPosition.y + 4,
+                z = recruiterPosition.z + 1
+            }
+
+            warriorBagObj.takeObject({
+                position = warriorPosition,
+                rotation = recruiterRotation
+            })
+            totalWarriors = totalWarriors + 1
         end
-
-        local recruiterPosition = recruiter.getPosition()
-        local recruiterRotation = recruiter.getRotation()
-
-        local warriorPosition = {
-            x = recruiterPosition.x + 1,
-            y = recruiterPosition.y + 4,
-            z = recruiterPosition.z + 1
-        }
-
-        warriorBagObj.takeObject({
-            position = warriorPosition,
-            rotation = recruiterRotation
-        })
-        totalWarriors = totalWarriors + 1
+        
+        local playerName = Player[color].steam_name or playerColor
+        broadcastToAll(playerName .. " recruits " .. totalWarriors .. " warriors in Daylight.")
     end
-    
-    local playerName = Player[color].steam_name or playerColor
-    broadcastToAll(playerName .. " recruits " .. totalWarriors .. " warriors in Daylight.")
 end
 
 function placeAll()
@@ -308,16 +310,16 @@ function placeAll()
                             rotation = warriorMapRotation
                         })
                     else
-                        print("No more warriors to place.")
+                        broadcastToAll("No more warriors to place.")
                         return
                     end
                 end
                 self.removeButton(3)
             else
-                print("No positions found for map: " .. mapName)
+                broadcastToAll("No positions found for map: " .. mapName)
             end
             return
         end
     end
-    print("No matching map found in the game.")
+    broadcastToAll("No matching map found in the game.")
 end
