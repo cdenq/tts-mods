@@ -208,7 +208,7 @@ myHirelings = {
             "be5873",
             "d4f7bc",
             "c4f5d1",
-            "0058ec"
+            "d5fe5f"
         }
     },
     vaga = {

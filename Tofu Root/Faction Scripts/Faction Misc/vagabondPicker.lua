@@ -20,7 +20,7 @@ myColors = {
 myButtons = {
     liftHeight = 0.25,
     confirmButton = {buttonHeight = 175, buttonWidth = 300, fontSize = 50, defaultColor = myColors.white},
-    selectButtons = {buttonHeight = 75, buttonWidth = 150, fontSize = 25, defaultColor = myColors.white}
+    selectButtons = {buttonHeight = 150, buttonWidth = 300, fontSize = 50, defaultColor = myColors.white, scale = {0.5, 0.5, 0.5}}
 }
 itemBank = {
     boot = {"bdf89d", "59daee", "447872", "ddbb16"},
@@ -88,33 +88,8 @@ characters = {
         items = {"torch", "crossbow", "sword", "coin"}
     }
 }
-teardrops = {
-    cat = "c33191",
-    bird = "259983",
-    wa = "9e5675",
-    --vaga = "bb1469",
-    --vaga2 = "615fc6",
-    lizard = "d6f37d",
-    otter = "572d09",
-    mole = "c6b48f",
-    crow = "b3a6dc",
-    rat = "1093bf",
-    badger = "f1bd2f"
-}
-factionMarkers = {
-    cat = {"a13aa3", "07d1f7"},
-    bird = {"af4714", "0599e8"},
-    wa = {"4c2e2c", "45146e"},
-    lizard = {"999b06", "e6f119"},
-    otter = {"a6bab1", "ea0513"},
-    mole = {"7bd30f", "17a078"},
-    crow = {"fd4564", "f20eb8"},
-    rat = {"2af982", "76b4e5"},
-    badger = {"e863be", "01e890"}
-}
 itemBagSupplyStorage = "ea0720"
 characterMeepleSupplyStorage = "f74291"
-factionMarkersBag = "c14af7"
 itemsToPlace = {}
 selectedCharacter = ""
 
@@ -168,6 +143,7 @@ function createSelectButtons()
             width = myButtons.selectButtons.buttonWidth,
             height = myButtons.selectButtons.buttonHeight,
             font_size = myButtons.selectButtons.fontSize,
+            scale = myButtons.selectButtons.scale,
             color = myButtons.selectButtons.defaultColor
         })
     end
@@ -274,7 +250,7 @@ function confirmVagabond(obj, color, alt_click)
                 end
                 
                 if not cardFound then
-                    printToColor(string.gsub(" "..selectedCharacter, "%W%l", string.upper):sub(2) .. " is already chosen!", color)
+                    broadcastToAll(string.gsub(" "..selectedCharacter, "%W%l", string.upper):sub(2) .. " is already chosen!", color)
                     return
                 end
                 
@@ -303,7 +279,7 @@ function confirmVagabond(obj, color, alt_click)
                 
                 local player = Player[color]
                 local steam_name = player.steam_name
-                printToColor(steam_name .. " chose the " .. string.gsub(" "..selectedCharacter, "%W%l", string.upper):sub(2), color)
+                broadcastToAll(steam_name .. " chose the " .. string.gsub(" "..selectedCharacter, "%W%l", string.upper):sub(2), color)
                 
                 local itemBag = getObjectFromGUID(itemBagSupplyStorage)
                 if itemBag then
@@ -342,71 +318,23 @@ function confirmVagabond(obj, color, alt_click)
                         end
                         
                         if not itemPlaced then
-                            printToColor("No more copies of " .. itemType .. ".", color)
+                            broadcastToAll("No more copies of " .. itemType .. ".", color)
                         end
                     end
                 else
-                    printToColor("Error: Item storage bag not found.", color)
+                    print("Error: Item storage bag not found.", color)
                 end
                 
-                local markerBasePos = {
-                    x = scriptPos.x,
-                    y = scriptPos.y,
-                    z = scriptPos.z
-                }
-                local markerGridSize = 3
-                local markerSpacing = 1.25
-                local markerCount = 0
-                local factionMarkerBag = getObjectFromGUID(factionMarkersBag)
-                for teardropLabel, teardropGUID in pairs(teardrops) do
-                    local teardropObj = getObjectFromGUID(teardropGUID)
-                    if teardropObj then
-                        local factionMarkerBag = getObjectFromGUID(factionMarkersBag)
-                        if factionMarkerBag then
-                            local factionMarkers = factionMarkers[teardropLabel]
-                            local markerPlaced = false
-                            if factionMarkers then
-                                for _, markerGUID in ipairs(factionMarkers) do
-                                    for _, bagItem in ipairs(factionMarkerBag.getObjects()) do
-                                        if bagItem.guid == markerGUID then
-                                            local row = math.floor(markerCount / markerGridSize)
-                                            local col = markerCount % markerGridSize
-                                            local markerPos = {
-                                                x = markerBasePos.x + col * markerSpacing,
-                                                y = markerBasePos.y,
-                                                z = markerBasePos.z + row * markerSpacing
-                                            }
-                                            factionMarkerBag.takeObject({
-                                                guid = markerGUID,
-                                                position = markerPos,
-                                                rotation = scriptRot
-                                            })
-                                            markerPlaced = true
-                                            markerCount = markerCount + 1
-                                            break
-                                        end
-                                    end
-                                    if markerPlaced then break end
-                                end
-                                Wait.frames(function()
-                                    self.destruct()
-                                end, 10)
-                            end
-                            if not markerPlaced then
-                                printToColor("No faction marker for " .. teardropLabel, color)
-                            end
-                        else
-                            printToColor("Error: Faction marker bag not found.", color)
-                        end
-                    end
-                end
+                Wait.frames(function()
+                    self.destruct()
+                end, 10)
             else
-                printToColor("Error: Character storage bag not found.", color)
+                print("Error: Character storage bag not found.", color)
             end
         else
-            printToColor("Error: Selected character not found.", color)
+            print("Error: Selected character not found.", color)
         end
     else
-        printToColor("Please select a character first.", color)
+        broadcastToAll("Please select a character first.", color)
     end
 end
