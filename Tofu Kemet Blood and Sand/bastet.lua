@@ -2,22 +2,11 @@
 -- Created for Tofu Worldview
 -- By cdenq
 ----------------------
-self.setName("Tofu Horus Board") --edit for specific playerboard
-
-----------------------
--- set variables
--- edit for specific playerboard
-----------------------
-playerboard = {
-    faction = "Horus",
-    color = myColors.red,
-    trackerGUID = "671e0c",
-    boardGUID = "bc5d0f", --self
-}
+self.setName("Tofu Bastet Board")
 
 ----------------------
 -- standard variables
--- added here manually instead of in global to allow for 
+-- added here manually instead of in a global file to allow for 
 -- scripting to save locally on objects
 ----------------------
 myColors = {
@@ -29,6 +18,17 @@ myColors = {
     yellow = {1, 1, 0},
     purple = {0.5, 0, 0.5}
 }
+
+----------------------
+-- set variables
+----------------------
+playerboard = {
+    faction = "Bastet",
+    color = myColors.yellow,
+    trackerGUID = "70549d",
+    boardGUID = "87a22a", --self
+}
+deckZone = "d9acef"
 
 ----------------------
 -- script variables
@@ -73,6 +73,17 @@ buttonsVariables = {
         width = 250,
         fontsize = 75,
         tooltip = "Planned prayer point loss."
+    },
+    draw = {
+        position = {-1.15, 0.18, 0.85},
+        color = myColors.white,
+        fontcolor = myColors.black,
+        scale = {0.5, 0.5, 0.5},
+        height = 225,
+        width = 400,
+        fontsize = 75,
+        label = "DRAW DI",
+        tooltip = "Draw 1 DI card."
     }
 }
 buttonValues = {
@@ -110,6 +121,7 @@ function createAllButtons()
     createNetPPButton()
     createPositivePPButton()
     createNegativePPButton()
+    createDrawButton()
 end
 
 function createMainPPButton()
@@ -173,6 +185,22 @@ function createNegativePPButton()
         font_size = buttonsVariables.neg.fontsize,
         label = buttonValues.neg,
         tooltip = buttonsVariables.neg.tooltip
+    })
+end
+
+function createDrawButton()
+    self.createButton({
+        click_function = "drawDI",
+        function_owner = self,
+        position = buttonsVariables.draw.position,
+        height = buttonsVariables.draw.height,
+        width = buttonsVariables.draw.width,
+        scale = buttonsVariables.draw.scale,
+        color = buttonsVariables.draw.color,
+        font_color = buttonsVariables.draw.fontcolor,
+        font_size = buttonsVariables.draw.fontsize,
+        label = buttonsVariables.draw.label,
+        tooltip = buttonsVariables.draw.tooltip
     })
 end
 
@@ -280,4 +308,15 @@ function moveMarker(alt_click)
         z = boardPos.z + relativePos.z
     }
     marker.setPositionSmooth(newPos)
+end
+
+function drawDI(obj, color)
+    local zoneItself = getObjectFromGUID(deckZone)
+    local objInZone = zoneItself.getObjects()
+    for _, obj in ipairs(objInZone) do
+        if obj.tag == "Deck" or obj.tag == "Card" then
+            getObjectFromGUID(obj.guid).deal(1, color)
+            broadcastToAll(playerboard.faction .. " draws 1 DI card.", playerboard.color)
+        end
+    end
 end

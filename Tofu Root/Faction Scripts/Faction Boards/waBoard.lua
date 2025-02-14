@@ -31,7 +31,7 @@ end
 ----------------------
 function createDrawButton()
     self.createButton({
-        click_function = "draw",
+        click_function = "basicDraw",
         function_owner = self,
         label = "DRAW 1 CARD",
         position = {-1.01, 0.25, 0.93},
@@ -64,6 +64,15 @@ end
 ----------------------
 -- on click functions
 ----------------------
+function basicDraw(obj, color)
+    local objInZone = deckZone.getObjects()
+    for _, obj in ipairs(objInZone) do
+        if obj.tag == "Deck" or obj.tag == "Card" then
+            getObjectFromGUID(obj.guid).deal(1, color)
+        end
+    end
+end
+
 function draw(obj, color, amount, targetZone)
     amount = amount or 1
     local objInZone = deckZone.getObjects()

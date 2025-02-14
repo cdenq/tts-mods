@@ -28,6 +28,7 @@ playerboard = {
     trackerGUID = "d9b086",
     boardGUID = "6da559", --self
 }
+deckZone = "d9acef"
 
 ----------------------
 -- script variables
@@ -72,6 +73,17 @@ buttonsVariables = {
         width = 250,
         fontsize = 75,
         tooltip = "Planned prayer point loss."
+    },
+    draw = {
+        position = {-1.15, 0.18, 0.85},
+        color = myColors.white,
+        fontcolor = myColors.black,
+        scale = {0.5, 0.5, 0.5},
+        height = 225,
+        width = 400,
+        fontsize = 75,
+        label = "DRAW DI",
+        tooltip = "Draw 1 DI card."
     }
 }
 buttonValues = {
@@ -109,6 +121,7 @@ function createAllButtons()
     createNetPPButton()
     createPositivePPButton()
     createNegativePPButton()
+    createDrawButton()
 end
 
 function createMainPPButton()
@@ -172,6 +185,22 @@ function createNegativePPButton()
         font_size = buttonsVariables.neg.fontsize,
         label = buttonValues.neg,
         tooltip = buttonsVariables.neg.tooltip
+    })
+end
+
+function createDrawButton()
+    self.createButton({
+        click_function = "drawDI",
+        function_owner = self,
+        position = buttonsVariables.draw.position,
+        height = buttonsVariables.draw.height,
+        width = buttonsVariables.draw.width,
+        scale = buttonsVariables.draw.scale,
+        color = buttonsVariables.draw.color,
+        font_color = buttonsVariables.draw.fontcolor,
+        font_size = buttonsVariables.draw.fontsize,
+        label = buttonsVariables.draw.label,
+        tooltip = buttonsVariables.draw.tooltip
     })
 end
 
@@ -279,4 +308,15 @@ function moveMarker(alt_click)
         z = boardPos.z + relativePos.z
     }
     marker.setPositionSmooth(newPos)
+end
+
+function drawDI(obj, color)
+    local zoneItself = getObjectFromGUID(deckZone)
+    local objInZone = zoneItself.getObjects()
+    for _, obj in ipairs(objInZone) do
+        if obj.tag == "Deck" or obj.tag == "Card" then
+            getObjectFromGUID(obj.guid).deal(1, color)
+            broadcastToAll(playerboard.faction .. " draws 1 DI card.", playerboard.color)
+        end
+    end
 end

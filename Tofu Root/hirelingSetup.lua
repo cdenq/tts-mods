@@ -3,6 +3,7 @@
 -- By cdenq
 ----------------------
 self.setName("Tofu Hireling Randomizer")
+-- to add more, add to myIterations.hirelings + myHirelings entries
 
 ----------------------
 -- pre-helper functions
@@ -75,10 +76,10 @@ myIterations = {
         "rat", 
         "stag", 
         "hedge",
-        --[["", 
-        "", 
-        "",]] 
-        "stoat"
+        "stoat",
+        "bat",
+        "frog",
+        "duck"
     }
 }
 settingButtonLabels = {
@@ -341,36 +342,6 @@ myHirelings = {
             "1ed70a"
         }
     },
-    --[[BLANK = {
-        bagGUID = "", 
-        cardGUID = "", 
-        color = normalizeRGB({1,1,1}), 
-        buttonLabel = "NAME\nSECOND NAME", 
-        fontColor = myColors.white,
-        supplyItems = {
-            ""
-        }
-    },
-    BLANK = {
-        bagGUID = "", 
-        cardGUID = "", 
-        color = normalizeRGB({1,1,1}), 
-        buttonLabel = "NAME\nSECOND NAME", 
-        fontColor = myColors.white,
-        supplyItems = {
-            ""
-        }
-    },
-    BLANK = {
-        bagGUID = "", 
-        cardGUID = "", 
-        color = normalizeRGB({1,1,1}), 
-        buttonLabel = "NAME\nSECOND NAME", 
-        fontColor = myColors.white,
-        supplyItems = {
-            ""
-        }
-    },]]
     stoat = {
         bagGUID = "ccb556", 
         cardGUID = "5b1d86", 
@@ -383,6 +354,69 @@ myHirelings = {
             "7a3f6f",
             "cdbfc4",
             "e96f82"
+        }
+    },
+    bat = {
+        bagGUID = "2cdd81", 
+        cardGUID = "4dda4e", 
+        color = normalizeRGB({144,73,45}), 
+        buttonLabel = "Sunny Advocates\nBat Messengers", 
+        fontColor = myColors.white,
+        supplyItems = {
+            "17151d",
+            "ba502d",
+            "5a8691",
+            "1054f2",
+            "9693d0",
+            "222869",
+            "96cee4",
+            "4e6094"
+        }
+    },
+    frog = {
+        bagGUID = "13ee9a", 
+        cardGUID = "5f00a0", 
+        color = normalizeRGB({168, 145, 6}), 
+        buttonLabel = "River Roamers\nFrog Tinkers", 
+        fontColor = myColors.black,
+        supplyItems = {
+            "acc433",
+            "2c16ee",
+            "2afc34",
+            "afa4b1",
+            "7f73f5",
+            "b83d04",
+            "f23790",
+            "2ffd79",
+            "d0c162",
+            "cdfcc4",
+            "1a08a4",
+            "4945f5",
+            "079d30",
+            "8666e0",
+            "4a8526"
+        }
+    },
+    duck = {
+        bagGUID = "a79e62", 
+        cardGUID = "9f3016", 
+        color = normalizeRGB({247, 183, 40}), 
+        buttonLabel = "Prosperous Farmers\nStruggling Farmers", 
+        fontColor = myColors.black,
+        supplyItems = {
+            "73f86b",
+            "798cca",
+            "5b2996",
+            "9c46a9",
+            "5776cd",
+            "e6a236",
+            "e333d5",
+            "03af2e",
+            "a87a8c",
+            "9eac85",
+            "4dfdad",
+            "50fba7",
+            "52cda7"
         }
     }
 }
@@ -487,7 +521,7 @@ function fullReset()
     resetPlayerButton()
     resetRotation()
     returnAllItems()
-    Global.call('setHirelingsinPlay', {})
+    Global.call("setHirelingsinPlay", {})
 end
 
 function resetAvailableHirelings()
@@ -662,7 +696,7 @@ function moveHirelings()
             table.insert(selectedFactions, myBookkeepingVariables.availableHirelings[i])
         end
     end
-    Global.call('setHirelingsinPlay', selectedFactions)
+    Global.call("setHirelingsinPlay", selectedFactions)
 
     for j, selectedFaction in ipairs(selectedFactions) do
         -- get right hireling bag
