@@ -12,6 +12,7 @@ deckZone = getObjectFromGUID("cf89ff")
 relicBagGUID = "51dcca"
 relicMapRotation = {0, 0, 0}
 badgerBoardGUID = "f72cd4"
+badgerTableau = "182297"
 mapGUIDs = {
     mountain = "2255cd",
     lake = "cbb6e5",
@@ -23,6 +24,8 @@ relicGridParameters = {
     relicGridSpacing = 1.5,
     relicGridWidth = 2
 }
+retainerCardGUIDS = {"6451bb", "694eb8", "061147"}
+retainerPlacementShift = 7.28
 relicMapPositions = {
     mountain = {
         {15.05, 2.08, 5.52},
@@ -94,7 +97,6 @@ function getGridPosition(index)
 
     local row = math.floor((index - 1) / relicGridParameters.relicGridWidth)
     local col = (index - 1) % relicGridParameters.relicGridWidth
-    print(badgerBoardObject.getRotation())
     if badgerBoardObject.getRotation().y == 0 then
         x = badgerBoardObjectPosition.x - 9 + col * relicGridParameters.relicGridSpacing
         y = badgerBoardObjectPosition.y + 1
@@ -154,7 +156,42 @@ function draw(obj, color)
     end
 end
 
+function moveRetainers()
+    local tableau = getObjectFromGUID(badgerTableau)
+    local tableauPos = tableau.getPosition()
+    local tableauRot = tableau.getRotation()
+    local cardPos
+
+    for i = 1, 3 do
+        if tableauRot.y > 175 and tableauRot.y < 185 then
+            cardPos = {
+                x = tableauPos.x - retainerPlacementShift + ((i-1) * retainerPlacementShift),
+                y = tableauPos.y + 0.12,
+                z = tableauPos.z + 2.07
+            }
+        else
+            cardPos = {
+                x = tableauPos.x - retainerPlacementShift + ((i-1) * retainerPlacementShift),
+                y = tableauPos.y + 0.12,
+                z = tableauPos.z - 2.07
+            }
+        end
+        
+        local retainer = getObjectFromGUID(retainerCardGUIDS[i])
+        if retainer != nil then
+            retainer.setPositionSmooth(cardPos)
+            retainer.setRotation({
+                x = tableauRot.x,
+                y = tableauRot.y,
+                z = tableauRot.z
+            })
+        end
+    end
+end
+
 function placeRelic()
+    moveRetainers()
+
     local relicBag = getObjectFromGUID(relicBagGUID)
     if not relicBag then
         print("Error: Relic bag not found.")

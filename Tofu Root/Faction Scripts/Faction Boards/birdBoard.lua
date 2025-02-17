@@ -1,7 +1,7 @@
 ----------------------
 -- Edited for Tofu Worldview
 -- Original by Root mod
--- Changes by cdenq and Claude
+-- Changes by cdenq
 ----------------------
 self.setName("Tofu Bird Board")
 

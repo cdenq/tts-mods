@@ -1,34 +1,24 @@
-----------------------
--- Edited for Tofu Worldview
--- Original by Root mod
--- Changes by cdenq and Claude
-----------------------
 self.setName("Tofu WA Board")
 
-
-----------------------
--- Variables
-----------------------
 deckZone = getObjectFromGUID("cf89ff")
 handZoneParameters = {
-    zoneWidth = 15,
+    zoneWidth = 20,
     zoneHeight = 5,
     zoneThickness = 7,
     zoneYOffset = 5,
     zoneScale = {x = 1, y = 1, z = 1}
 }
+handZoneGUID = "aa1111"
+activeHandZone = nil
 
-----------------------
--- onload function
-----------------------
-function onLoad(save_state)
+function onLoad()
     createDrawButton()
     createHandZoneSpawnButton()
+    createCounterButton()
+    createCounterButtonR()
+    Wait.time(updateHandZoneCounter, 1, -1)
 end
 
-----------------------
--- create button functions
-----------------------
 function createDrawButton()
     self.createButton({
         click_function = "basicDraw",
@@ -61,9 +51,39 @@ function createHandZoneSpawnButton()
     })
 end
 
-----------------------
--- on click functions
-----------------------
+function createCounterButton()
+    self.createButton({
+        click_function = "doNothing",
+        function_owner = self,
+        label = "0",
+        position = {-1.23, 0.25, 0.05},
+        rotation = {0, 0, 0},
+        scale = {0.5, 0.5, 0.5},
+        width = 100,
+        height = 100,
+        font_size = 75,
+        tooltip = "Current number of supporters."
+    })
+end
+
+function createCounterButtonR()
+    self.createButton({
+        click_function = "doNothing",
+        function_owner = self,
+        label = "0",
+        position = {-1.23, 0.25, -0.05},
+        rotation = {0, 180, 0},
+        scale = {0.5, 0.5, 0.5},
+        width = 100,
+        height = 100,
+        font_size = 75,
+        tooltip = "Current number of supporters."
+    })
+end
+
+function doNothing()
+end
+
 function basicDraw(obj, color)
     local objInZone = deckZone.getObjects()
     for _, obj in ipairs(objInZone) do
@@ -104,6 +124,7 @@ end
 
 function onHandZoneButtonClick(obj, color)
     local newZone = createHandZone(color)
+    activeHandZone = newZone
     self.removeButton(1)
     Wait.frames(function() draw(obj, color, 3, newZone) end, 10)
 end
@@ -115,15 +136,15 @@ function createHandZone(playerColor)
 
     if zoneRot.y == 180 then
         zonePos = {
-            x = playerHandPos.position.x + 13,
+            x = playerHandPos.position.x + 15.6,
             y = playerHandPos.position.y - 3,
-            z = playerHandPos.position.z - 15.6
+            z = playerHandPos.position.z - 16.2
         }
     else
         zonePos = {
-            x = playerHandPos.position.x - 13,
+            x = playerHandPos.position.x - 15.6,
             y = playerHandPos.position.y - 3,
-            z = playerHandPos.position.z + 15.6
+            z = playerHandPos.position.z + 16.2
         }
     end
 
@@ -131,7 +152,8 @@ function createHandZone(playerColor)
         type = "HandTrigger",
         position = zonePos,
         rotation = zoneRot,
-        scale = handZoneParameters.zoneScale
+        scale = handZoneParameters.zoneScale,
+        guid = handZoneGUID
     })
 
     newZone.setColorTint(playerColor)
@@ -144,4 +166,34 @@ function createHandZone(playerColor)
     })
 
     return newZone
+end
+
+function updateHandZoneCounter()
+    if not self then return end
+    local zone = activeHandZone
+    if not zone then
+        zone = getObjectFromGUID(handZoneGUID)
+    end
+    local buttons = self.getButtons()
+    if not buttons then return end
+    
+    local counterButtonIndex = nil
+    for i, button in ipairs(buttons) do
+        if button.click_function == "doNothing" then
+            counterButtonIndex = i - 1
+            break
+        end
+    end
+    
+    if zone and counterButtonIndex then
+        local count = #zone.getObjects()
+        self.editButton({
+            index = counterButtonIndex,
+            label = tostring(count)
+        })
+        self.editButton({
+            index = counterButtonIndex + 1,
+            label = tostring(count)
+        })
+    end
 end

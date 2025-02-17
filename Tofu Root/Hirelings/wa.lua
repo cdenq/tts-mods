@@ -2,6 +2,7 @@
 -- Created for Tofu Worldview
 -- By cdenq
 ----------------------
+self.setName("WA Hireling")
 
 ----------------------
 -- pre-helper variables
@@ -18,7 +19,11 @@ playerboard = {
     reverse = "Rabbit Scouts",
     color = normalizeRGB({87,179,76})
 }
-buttonValues = {main = 2}
+buttonValues = {
+    main = 2,
+    claimed = "",
+    claimedBefore = false
+}
 rollValues = {"2/4", "1/2", "2/3", "2/3", "1/2", "1/2"}
 
 ----------------------
@@ -32,84 +37,102 @@ end
 -- create button functions
 ----------------------
 function createAllButtons()
-    createObverseButtons()
-    createReverseButtons()
-end
-
-function createObverseButtons()
     createControlMarkerButton()
     createRollButton()
+    createClaimButton()
 end
 
 function createControlMarkerButton()
-    self.createButton({
-        click_function = "edit",
-        function_owner = self,
-        position = {0.95, 0.25, 1.15},
-        height = 400,
-        width = 225,
-        scale = {0.5, 0.5, 0.75},
-        color = {1, 1, 1},
-        font_color = {0, 0, 0},
-        font_size = 200,
-        label = buttonValues.main,
-        tooltip = "Left/right click to in/decrement control."
-    })
+    for i = 1, 2 do
+        local pos
+        local rot
+
+        if i == 1 then
+            pos = {0.975, 1, 1.25}
+            rot = {0, 0, 0}
+        else 
+            pos = {-0.975, -1, 1.25}
+            rot = {0, 0, 180}
+        end
+
+        self.createButton({
+            click_function = "edit",
+            function_owner = self,
+            position = pos,
+            rotation = rot,
+            height = 400,
+            width = 225,
+            scale = {0.35, 0.35, 0.60},
+            color = {1, 1, 1},
+            font_color = {0, 0, 0},
+            font_size = 200,
+            label = buttonValues.main,
+            tooltip = "Left/right click to in/decrement control.",
+            visibility = 3
+        })
+    end
 end
 
 function createRollButton()
-    self.createButton({
-        click_function = "roll",
-        function_owner = self,
-        position = {0.95, 0.25, -1.25},
-        height = 250,
-        width = 250,
-        scale = {0.5, 0.5, 0.85},
-        color = {1, 1, 1},
-        font_color = {0, 0, 0},
-        font_size = 100,
-        label = "Roll",
-        tooltip = "Randomly roll for control duration."
-    })
+    for i = 1, 2 do
+        local pos
+        local rot
+
+        if i == 1 then
+            pos = {0.975, 1, -1.35}
+            rot = {0, 0, 0}
+        else 
+            pos = {-0.975, -1, -1.35}
+            rot = {0, 0, 180}
+        end
+
+        self.createButton({
+            click_function = "roll",
+            function_owner = self,
+            position = pos,
+            rotation = rot,
+            height = 250,
+            width = 250,
+            scale = {0.275, 0.275, 0.525},
+            color = {1, 1, 1},
+            font_color = {0, 0, 0},
+            font_size = 100,
+            label = "Roll",
+            tooltip = "Roll for control duration.",
+            visibility = 3
+        })
+    end
 end
 
-function createReverseButtons()
-    createControlMarkerButtonR()
-    createRollButtonR()
-end
+function createClaimButton()
+    for i = 1, 2 do
+        local pos
+        local rot
 
-function createControlMarkerButtonR()
-    self.createButton({
-        click_function = "edit",
-        function_owner = self,
-        position = {-0.95, -0.25, 1.15},
-        rotation = {0, 0, 180},
-        height = 400,
-        width = 225,
-        scale = {0.5, 0.5, 0.75},
-        color = {1, 1, 1},
-        font_color = {0, 0, 0},
-        font_size = 200,
-        label = buttonValues.main,
-        tooltip = "Left/right click to in/decrement control."
-    })
-end
+        if i == 1 then
+            pos = {-1.025, 1, 0}
+            rot = {0, 270, 0}
+        else 
+            pos = {1.025, -1, 0}
+            rot = {0, 270, 180}
+        end
 
-function createRollButtonR()
-    self.createButton({
-        click_function = "roll",
-        function_owner = self,
-        position = {-0.95, -0.25, -1.25},
-        rotation = {0, 0, 180},
-        height = 250,
-        width = 250,
-        scale = {0.5, 0.5, 0.85},
-        color = {1, 1, 1},
-        font_color = {0, 0, 0},
-        font_size = 100,
-        label = "Roll",
-        tooltip = "Randomly roll for control duration."
-    })
+        self.createButton({
+            click_function = "claim",
+            function_owner = self,
+            position = pos,
+            rotation = rot,
+            height = 250,
+            width = 1300,
+            scale = {0.35, 0.15, 0.15},
+            color = {1, 1, 1},
+            font_color = {0, 0, 0},
+            font_size = 100,
+            label = "Unclaimed",
+            tooltip = "Click to claim.",
+            visibility = 3
+        })
+    end
 end
 
 ----------------------
@@ -119,6 +142,7 @@ function edit(obj, color, alt_click)
     local oldValue = buttonValues.main
     local keyword = ""
     local side = self.getRotation()
+
     if alt_click then
         buttonValues.main = math.max(buttonValues.main - 1, 0)
         keyword = "decreases"
@@ -129,10 +153,11 @@ function edit(obj, color, alt_click)
     
     if oldValue ~= buttonValues.main then
         if side.z == 180 then 
-            broadcastToAll(playerboard.reverse .. " control " .. keyword .. " to " .. buttonValues.main .. ".", playerboard.color)
+            hirelingName = playerboard.reverse
         else
-            broadcastToAll(playerboard.obverse .. " control " .. keyword .. " to " .. buttonValues.main .. ".", playerboard.color)
+            hirelingName = playerboard.obverse
         end
+        printToAll(hirelingName .. " control " .. keyword .. " to " .. buttonValues.main .. ".", playerboard.color)
     end
     
     self.editButton({
@@ -140,9 +165,20 @@ function edit(obj, color, alt_click)
         label = buttonValues.main
     })
     self.editButton({
-        index = 2,
+        index = 1,
         label = buttonValues.main
     })
+
+    if buttonValues.main == 0 then
+        local steamColor = playerboard.color
+        for _, player in ipairs(Player.getPlayers()) do
+            if player.steam_name == buttonValues.claimed then
+                steamColor = player.color
+                break
+            end
+        end
+        broadcastToAll(buttonValues.claimed .. " relinquishes " .. hirelingName .. ".", steamColor)
+    end
 end
 
 function roll()
@@ -154,7 +190,7 @@ function roll()
     local formattedText = string.format("[FF8C00]%s[000000]/[800000]%s", firstNum, secondNum)
     
     self.editButton({
-        index = 1,
+        index = 2,
         label = formattedText
     })
     self.editButton({
@@ -163,11 +199,11 @@ function roll()
     })
     
     local broadcastText = string.format("Rolled control values: [FF8C00]%s[000000]/[800000]%s.", firstNum, secondNum)
-    broadcastToAll(broadcastText, playerboard.color)
+    printToAll(broadcastText, playerboard.color)
     
     Wait.time(function()
         self.editButton({
-            index = 1,
+            index = 2,
             label = "Roll"
         })
         self.editButton({
@@ -175,4 +211,73 @@ function roll()
             label = "Roll"
         })
     end, 5)
+end
+
+function claim(obj, color)
+    local steamName = Player[color].steam_name
+    local side = self.getRotation()
+    local hirelingName 
+    if side.z == 180 then 
+        hirelingName = playerboard.reverse
+    else
+        hirelingName = playerboard.obverse
+    end
+
+    if buttonValues.claimed == steamName then
+        buttonValues.claimed = ""
+        
+        self.editButton({
+            index = 4,
+            label = "Unclaimed",
+            color = {1, 1, 1}
+        })
+        self.editButton({
+            index = 5,
+            label = "Unclaimed",
+            color = {1, 1, 1}
+        })
+
+        printToAll(hirelingName .. " has been unclaimed.", playerboard.color)
+        buttonValues.claimedBefore = false
+    else 
+        self.editButton({
+            index = 4,
+            label = steamName,
+            color = Player[color].color
+        })
+        self.editButton({
+            index = 5,
+            label = steamName,
+            color = Player[color].color
+        })
+        
+        if buttonValues.claimed ~= "" then
+            broadcastToAll(steamName .. " claims " .. hirelingName .. " from " .. buttonValues.claimed .. ".", playerboard.color)
+        else
+            broadcastToAll(steamName .. " claims " .. hirelingName .. ".", playerboard.color)
+        end
+        buttonValues.claimed = steamName
+    end
+end
+
+----------------------
+-- Turn change
+----------------------
+function onPlayerTurn(player, previous_player)
+    local side = self.getRotation()
+    local hirelingName 
+    if side.z == 180 then 
+        hirelingName = playerboard.reverse
+    else
+        hirelingName = playerboard.obverse
+    end
+
+    if previous_player.steam_name == buttonValues.claimed then
+        if buttonValues.claimedBefore == false then
+            printToAll(hirelingName .. " control does not decrease the first time it's claimed.", playerboard.color)
+            buttonValues.claimedBefore = true
+        else
+            edit(self, previous_player.color, true)
+        end
+    end
 end
