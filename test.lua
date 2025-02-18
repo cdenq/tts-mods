@@ -2,281 +2,430 @@
 -- Created for Tofu Worldview
 -- By cdenq
 ----------------------
-self.setName("Tofu Sobek Board")
+self.setName("Tofu Timer")
+-- control buttons 0-2
+-- player name buttons 3, 4 ... numPlayers+2
+-- player time buttons numPlayers+3 ... (2*numPlayers)+2
+-- counter buttons (2*numPlayers)+3 ... (3*numPlayers)+2
 
 ----------------------
--- standard variables
--- added here manually instead of in a global file to allow for 
--- scripting to save locally on objects
+-- Variables
 ----------------------
-myColors = {
-    white = {1, 1, 1},
-    green = {0, 1, 0},
-    red = {1, 0, 0},
-    gray = {0.5, 0.5, 0.5},
-    black = {0, 0, 0},
-    yellow = {1, 1, 0},
-    purple = {0.5, 0, 0.5}
-}
-
-----------------------
--- set variables
-----------------------
-playerboard = {
-    faction = "Sobek",
-    color = myColors.blue,
-    trackerGUID = "d9b086",
-    boardGUID = "6da559", --self
-}
-
-----------------------
--- script variables
-----------------------
-buttonsVariables = {
-    main = {
-        position = {-1.1, 0.18, -0.5},
-        color = myColors.white,
-        fontcolor = myColors.black,
-        scale = {0.5, 0.5, 0.5},
-        height = 375,
-        width = 450,
-        fontsize = 200,
-        tooltip = "Prayer Points\nLeft/right click to in/decrement."
+buttonLiftHeight = 0.25
+buttonConfig = {
+    common = {
+        width = 300,
+        height = 175,
+        font_size = 70,
+        color = {1, 1, 1},
+        font_color = {0, 0, 0},
+        unlight = {0.5, 0.5, 0.5}
     },
-    net = {
-        position = {-1.3, 0.2, -0.4},
-        color = myColors.gray,
-        fontcolor = myColors.black,
-        scale = {0.5, 0.5, 0.5},
-        height = 200,
-        width = 225,
-        fontsize = 75,
-        tooltip = "Planned Prayer Points Tally\nClick to reset planned values."
+    control = {
+        y = buttonLiftHeight,
+        z = -0.8,
+        start = {label = "Start", x = -0.65, click_function = "startTimer"},
+        pause = {label = "Pause", x = 0, click_function = "pauseTimer"},
+        reset = {label = "Reset", x = 0.65, click_function = "resetTimer"},
+        scale = {0.9, 0.9, 0.9}
     },
-    pos = {
-        position = {-0.75, 0.18, -0.6},
-        color = myColors.gray,
-        fontcolor = myColors.green,
-        scale = {0.5, 0.5, 0.5},
-        height = 200,
-        width = 250,
-        fontsize = 75,
-        tooltip = "Planned prayer point gain."
+    player = {
+        y = buttonLiftHeight,
+        z = 0.25,
+        baseX = -0.8,
+        spacing_x = 0.4,
+        spacing_z = 0.45,
+        spacing_player = 0.15,
+        scale = {0.6, 0.6, 0.6}
     },
-    neg = {
-        position = {-0.75, 0.18, -0.4},
-        color = myColors.gray,
-        fontcolor = myColors.red,
-        scale = {0.5, 0.5, 0.5},
+    name = {
+        y = buttonLiftHeight,
+        width = 600,
+        height = 300,
+        z = -0.1,
+        font_size = 75,
+        scale = {0.3, 0.3, 0.3}
+    },
+    counter = {
+        y = buttonLiftHeight,
+        width = 200,
         height = 200,
-        width = 250,
-        fontsize = 75,
-        tooltip = "Planned prayer point loss."
-    }
+        z = 0.3,
+        spacing_counter = 0.15,
+        font_size = 75,
+        scale = {0.3, 0.3, 0.3}
+    },
 }
-buttonValues = {
-    main = 7,
-    pos = 0,
-    neg = 0
-}
-local scorePositions = {
-    [0] = {x = -4.880, y = 0.270, z = 3.800},
-    [1] = {x = -3.930, y = 0.270, z = 3.820},
-    [2] = {x = -2.950, y = 0.270, z = 3.790},
-    [3] = {x = -1.950, y = 0.270, z = 3.800},
-    [4] = {x = -1.000, y = 0.270, z = 3.790},
-    [5] = {x = -0.010, y = 0.270, z = 3.770},
-    [6] = {x = 0.970, y = 0.270, z = 3.760},
-    [7] = {x = 1.970, y = 0.270, z = 3.780},
-    [8] = {x = 2.940, y = 0.270, z = 3.790},
-    [9] = {x = 3.900, y = 0.270, z = 3.770},
-    [10] = {x = 4.860, y = 0.270, z = 3.750},
-    [11] = {x = 5.830, y = 0.270, z = 3.740}
-}
+startingTimeBank = 0
+addedTime = 0
+playerTimers = {}
+playerOrder = {}
+playerTurnCounts = {}
+activePlayer = 1
+isRunning = false
+lastUpdateTime = 0
+numPlayers = 10
+lastTurnColor = nil
+turnJustChanged = false
+timerCoroutine = nil
 
 ----------------------
--- onload
+-- onLoad
 ----------------------
-function onload()
-    createAllButtons()
+function onLoad()
+    setTimes()
+    createButtons()
+    lastTurnColor = Turns.turn_color
+    initializeTurnCounts()
+end
+
+----------------------
+-- Turn counting functions
+----------------------
+function initializeTurnCounts()
+    playerTurnCounts = {}
+    for i = 1, numPlayers do
+        playerTurnCounts[i] = 0
+    end
+end
+
+function onPlayerTurn(player, previous_player)
+    if previous_player then
+        local prevPlayerIndex = getPlayerIndexByColor(previous_player)
+        if prevPlayerIndex then
+            playerTurnCounts[prevPlayerIndex] = playerTurnCounts[prevPlayerIndex] + 1
+            updateCounterButton(prevPlayerIndex)
+        end
+    end
+end
+
+function updateCounterButton(index)
+    if index <= #playerOrder then
+        local buttonIndex = (2 * numPlayers) + 2 + index
+        self.editButton({
+            index = buttonIndex,
+            label = tostring(playerTurnCounts[index])
+        })
+    end
 end
 
 ----------------------
 -- create button functions
 ----------------------
-function createAllButtons()
-    createMainPPButton()
-    createNetPPButton()
-    createPositivePPButton()
-    createNegativePPButton()
+function createButtons()
+    createControlButtons()
+    createPlayerNameButtons()
+    createPlayerTimeButtons()
+    createCounterButtons()
+end 
+
+function createControlButtons()
+    for _, btnType in ipairs({"start", "pause", "reset"}) do
+        local btn = buttonConfig.control[btnType]
+        self.createButton({
+            click_function = btn.click_function,
+            function_owner = self,
+            label = btn.label,
+            position = {btn.x, buttonConfig.control.y, buttonConfig.control.z},
+            width = buttonConfig.common.width,
+            height = buttonConfig.common.height,
+            font_size = buttonConfig.common.font_size,
+            color = buttonConfig.common.color,
+            scale = buttonConfig.control.scale,
+            font_color = buttonConfig.common.font_color,
+        })
+    end
 end
 
-function createMainPPButton()
-    self.createButton({
-        click_function = "edit",
-        function_owner = self,
-        position = buttonsVariables.main.position,
-        height = buttonsVariables.main.height,
-        width = buttonsVariables.main.width,
-        scale = buttonsVariables.main.scale,
-        color = buttonsVariables.main.color,
-        font_color = buttonsVariables.main.fontcolor,
-        font_size = buttonsVariables.main.fontsize,
-        label = buttonValues.main,
-        tooltip = buttonsVariables.main.tooltip
-    })
+function createPlayerNameButtons()
+    for i = 1, numPlayers do
+        local row = math.ceil(i / 5)
+        local col = (i - 1) % 5 + 1 
+        local x = buttonConfig.player.baseX + (col - 1) * buttonConfig.player.spacing_x
+        local z = buttonConfig.player.z + (row - 1) * buttonConfig.player.spacing_z
+        
+        self.createButton({
+            click_function = "playerNameButton_" .. i,
+            function_owner = self,
+            label = "Player " .. i,
+            position = {x, buttonConfig.name.y, z},
+            width = buttonConfig.name.width,
+            height = buttonConfig.name.height / 2,
+            font_size = buttonConfig.name.font_size,
+            color = {0.8, 0.8, 0.8},
+            scale = buttonConfig.name.scale,
+            font_color = buttonConfig.common.font_color,
+        })
+    end
 end
 
-function createNetPPButton()
-    self.createButton({
-        click_function = "resetPlanButtons",
-        function_owner = self,
-        position = buttonsVariables.net.position,
-        height = buttonsVariables.net.height,
-        width = buttonsVariables.net.width,
-        scale = buttonsVariables.net.scale,
-        color = buttonsVariables.net.color,
-        font_color = buttonsVariables.net.fontcolor,
-        font_size = buttonsVariables.net.fontsize,
-        label = buttonValues.main,
-        tooltip = buttonsVariables.net.tooltip
-    })
+function createPlayerTimeButtons()
+    for i = 1, numPlayers do
+        local row = math.ceil(i / 5) 
+        local col = (i - 1) % 5 + 1
+        local x = buttonConfig.player.baseX + (col - 1) * buttonConfig.player.spacing_x
+        local z = buttonConfig.player.z + (row - 1) * buttonConfig.player.spacing_z + buttonConfig.player.spacing_player
+
+        self.createButton({
+            click_function = "playerTimerButton_" .. i,
+            function_owner = self,
+            label = formatTime(startingTimeBank),
+            position = {x, buttonConfig.player.y, z},
+            width = buttonConfig.common.width,
+            height = buttonConfig.common.height,
+            font_size = buttonConfig.common.font_size,
+            color = buttonConfig.common.color,
+            font_color = buttonConfig.common.font_color,
+            scale = buttonConfig.player.scale
+        })
+    end
 end
 
-function createPositivePPButton()
-    self.createButton({
-        click_function = "updatePosButton",
-        function_owner = self,
-        position = buttonsVariables.pos.position,
-        height = buttonsVariables.pos.height,
-        width = buttonsVariables.pos.width,
-        scale = buttonsVariables.pos.scale,
-        color = buttonsVariables.pos.color,
-        font_color = buttonsVariables.pos.fontcolor,
-        font_size = buttonsVariables.pos.fontsize,
-        label = buttonValues.pos,
-        tooltip = buttonsVariables.pos.tooltip
-    })
-end
+function createCounterButtons()
+    for i = 1, numPlayers do
+        local row = math.ceil(i / 5) 
+        local col = (i - 1) % 5 + 1
+        local x = buttonConfig.player.baseX + (col - 1) * buttonConfig.player.spacing_x
+        local z = buttonConfig.counter.z + (row - 1) * buttonConfig.player.spacing_z - buttonConfig.counter.spacing_counter
 
-function createNegativePPButton()
-    self.createButton({
-        click_function = "updateNegButton",
-        function_owner = self,
-        position = buttonsVariables.neg.position,
-        height = buttonsVariables.neg.height,
-        width = buttonsVariables.neg.width,
-        scale = buttonsVariables.neg.scale,
-        color = buttonsVariables.neg.color,
-        font_color = buttonsVariables.neg.fontcolor,
-        font_size = buttonsVariables.neg.fontsize,
-        label = buttonValues.neg,
-        tooltip = buttonsVariables.neg.tooltip
-    })
+        self.createButton({
+            click_function = "counterButton_" .. i,
+            function_owner = self,
+            label = "0",
+            position = {x, buttonConfig.counter.y, z},
+            width = buttonConfig.counter.width,
+            height = buttonConfig.counter.height,
+            font_size = buttonConfig.counter.font_size,
+            scale = buttonConfig.counter.scale
+        })
+    end
 end
 
 ----------------------
--- functions
+-- timer functions
+----------------------
+function resetTimer()
+    isRunning = false
+    if timerCoroutine then
+        Wait.stop(timerCoroutine)
+        timerCoroutine = nil
+    end
+    requeryPlayerOrder()
+    resetTimeBanks()
+    initializeTurnCounts() -- Reset turn counts
+    updatePlayerButtons()
+    updateAllCounterButtons() -- Update all counter displays
+    
+    requeryActivePlayer()
+    updateActivePlayerHighlight()
+end
+
+function updateAllCounterButtons()
+    for i = 1, numPlayers do
+        updateCounterButton(i)
+    end
+end
+
+function startTimer()
+    if not isRunning then
+        isRunning = true
+        lastUpdateTime = Time.time
+        if timerCoroutine then
+            Wait.stop(timerCoroutine)
+        end
+        timerCoroutine = Wait.time(updateTimer, 0.1, -1)
+    end
+end
+
+function pauseTimer()
+    isRunning = false
+    if timerCoroutine then
+        Wait.stop(timerCoroutine)
+        timerCoroutine = nil
+    end
+end
+
+function updateTimer()
+    if isRunning then
+        local currentTime = Time.time
+        local elapsedTime = currentTime - lastUpdateTime
+        lastUpdateTime = currentTime
+
+        playerTimers[activePlayer] = playerTimers[activePlayer] - elapsedTime
+        if playerTimers[activePlayer] <= 0 then
+            playerTimers[activePlayer] = 0
+            pauseTimer()
+        end
+
+        updatePlayerButtons()
+        updateActivePlayerHighlight()
+    end
+end
+
+function onUpdate()
+    if Turns.turn_color ~= lastTurnColor then
+        turnJustChanged = true
+        lastTurnColor = Turns.turn_color
+    end
+    
+    if turnJustChanged and isRunning then
+        handleTurnChange()
+    end
+end
+
+function handleTurnChange()
+    pauseTimer()
+    requeryActivePlayer()
+    playerTimers[activePlayer] = playerTimers[activePlayer] + addedTime
+    updatePlayerButtons()
+    updateActivePlayerHighlight()
+    startTimer()
+    turnJustChanged = false
+end
+
+----------------------
+-- helper time functions
+----------------------
+function requeryPlayerOrder()
+    playerOrder = {}
+    for _, color in ipairs(Turns.order) do
+        local steam_name
+        if Player[color] and Player[color].steam_name then
+            steam_name = Player[color].steam_name
+            table.insert(playerOrder, {color = color, steam_name = steam_name})
+        end
+    end
+end
+
+function resetTimeBanks()
+    playerTimers = {}
+    for i = 1, #playerOrder do
+        playerTimers[i] = startingTimeBank
+    end
+end
+
+function updatePlayerButtons()
+    for i = 1, numPlayers do 
+        updatePlayerButton(i)
+    end
+end 
+
+function updatePlayerButton(index)
+    local player, labelName, color, timeLabel, timeColor
+    if index <= #playerOrder then
+        player = playerOrder[index]
+        labelName = player.steam_name
+        color = stringColorToRGB(player.color)
+        timeLabel = formatTime(playerTimers[index])
+    else 
+        labelName = "Unseated"
+        color = buttonConfig.common.unlight
+        timeLabel = "-"
+    end
+    self.editButton({
+        index = index + 2,
+        label = labelName,
+        color = color
+    })
+    self.editButton({
+        index = index + 2 + numPlayers,
+        label = timeLabel,
+        color = color
+    })
+end
+
+function requeryActivePlayer()
+    local currentPlayer = Turns.turn_color
+    for index, player in ipairs(playerOrder) do
+        if player.color == currentPlayer then
+            activePlayer = index
+            return
+        end
+    end
+end
+
+function updateActivePlayerHighlight() 
+    for index, player in ipairs(playerOrder) do
+        local buttonColor
+        if index == activePlayer then
+            buttonColor = stringColorToRGB(player.color)
+        else
+            buttonColor = buttonConfig.common.unlight
+        end
+        self.editButton({
+            index = index + 2 + numPlayers, 
+            color = buttonColor
+        })
+    end
+end
+
+----------------------
+-- onclick functions
+----------------------
+for i = 1, numPlayers do
+    _G["playerTimerButton_" .. i] = function(obj, color, alt_click) 
+        doNothing()
+    end
+end
+
+for i = 1, numPlayers do
+    _G["playerNameButton_" .. i] = function(obj, color, alt_click) 
+        doNothing()
+    end
+end
+
+for i = 1, numPlayers do
+    _G["counterButton_" .. i] = function(obj, color, alt_click) 
+        doNothing()
+    end
+end
+
+----------------------
+-- debugging functions
+----------------------
+function printPlayerOrder()
+    for i, value in ipairs(playerOrder) do 
+        print(i .. " " .. value.color .. " " .. value.steam_name)
+    end
+end
+
+----------------------
+-- helper functions
 ----------------------
 function doNothing()
 end
 
-function edit(obj, color, alt_click)
-    local oldValue = buttonValues.main
-    local keyword = ""
-    if alt_click then
-        buttonValues.main = math.max(buttonValues.main - 1, 0)
-        keyword = "decreases"
-    else
-        buttonValues.main = math.min(buttonValues.main + 1, 11)
-        keyword = "increases"
+function getPlayerIndexByColor(color)
+    for i, player in ipairs(playerOrder) do
+        if player.color == color then
+            return i
+        end
+    end
+    return nil
+end
+
+function formatTime(seconds)
+    local minutes = math.floor(seconds / 60)
+    local remainingSeconds = seconds % 60
+    return string.format("%02d:%04.1f", minutes, remainingSeconds)
+end
+
+function setTimes()
+    local description = self.getDescription()
+    if description then
+        local timeBank, addTime = description:match("(%d+)[%s,]*(%d*)")
+        if timeBank then
+            startingTimeBank = tonumber(timeBank)
+            if addTime and addTime ~= "" then
+                addedTime = tonumber(addTime)
+            end
+        end
     end
     
-    if oldValue ~= buttonValues.main then
-        broadcastToAll(playerboard.faction .. " prayer points " .. keyword .. " to " .. buttonValues.main .. ".", playerboard.color)
+    if type(startingTimeBank) ~= "number" or startingTimeBank < 0 then
+        startingTimeBank = 900
     end
-    
-    moveMarker(alt_click)
-    updateMainButton()
-end
-
-function updatePosButton(obj, color, alt_click)
-    if alt_click then
-        buttonValues.pos = math.max(buttonValues.pos - 1, 0)
-    else
-        buttonValues.pos = buttonValues.pos + 1
+    if type(addedTime) ~= "number" or addedTime < 0 then
+        addedTime = 300
     end
-
-    self.editButton({
-        index = 2, --pos button index
-        label = buttonValues.pos
-    })
-
-    updateNetButton()
-end
-
-function updateNegButton(obj, color, alt_click)
-    if alt_click then
-        buttonValues.neg = math.max(buttonValues.neg - 1, 0)
-    else
-        buttonValues.neg = buttonValues.neg + 1
-    end
-
-    self.editButton({
-        index = 3, --neg button index
-        label = buttonValues.neg
-    })
-
-    updateNetButton()
-end
-
-function resetPlanButtons(obj, color, alt_click)
-    buttonValues.pos = 0
-    buttonValues.neg = 0
-    self.editButton({
-        index = 2, --pos button index
-        label = buttonValues.pos
-    })
-    self.editButton({
-        index = 3, --neg button index
-        label = buttonValues.neg
-    })
-    updateNetButton()
-end
-
-function updateMainButton()
-    self.editButton({
-        index = 0, --main button index
-        label = buttonValues.main
-    })
-end
-
-function updateNetButton()
-    local finalValue = buttonValues.main - buttonValues.neg + buttonValues.pos
-    local fontColor = myColors.black
-    
-    if finalValue > buttonValues.main then
-        fontColor = myColors.green
-    elseif finalValue < buttonValues.main then
-        fontColor = myColors.red
-    end
-
-    self.editButton({
-        index = 1, --net button index
-        font_color = fontColor,
-        label = finalValue
-    })
-end
-
-function moveMarker(alt_click)
-    local board = getObjectFromGUID(playerboard.boardGUID)
-    local marker = getObjectFromGUID(playerboard.trackerGUID)
-    local relativePos = scorePositions[buttonValues.main]
-    local boardPos = board.getPosition()
-    local newPos = {
-        x = boardPos.x + relativePos.x,
-        y = boardPos.y + relativePos.y + 2,
-        z = boardPos.z + relativePos.z
-    }
-    marker.setPositionSmooth(newPos)
 end

@@ -1,17 +1,18 @@
 ----------------------
 -- Created for Tofu Worldview
 -- By cdenq
--- Modified to include decimal seconds
+-- Modified to include decimal seconds and 2x5 layout
 ----------------------
 self.setName("Tofu Timer")
 -- control buttons 0-2
 -- player name buttons 3, 4 ... numPlayers+2
 -- player time buttons numPlayers+3 ... (2*numPlayers)+2
+-- counter buttons (2*numPlayers)+3 ... (3*numPlayers)+2
 
 ----------------------
 -- Variables
 ----------------------
-buttonLiftHeight = 0.35
+buttonLiftHeight = 0.25
 buttonConfig = {
     common = {
         width = 300,
@@ -23,42 +24,61 @@ buttonConfig = {
     },
     control = {
         y = buttonLiftHeight,
-        z = -1.2,
+        z = -0.8,
         start = {label = "Start", x = -0.65, click_function = "startTimer"},
         pause = {label = "Pause", x = 0, click_function = "pauseTimer"},
         reset = {label = "Reset", x = 0.65, click_function = "resetTimer"},
+        scale = {0.9, 0.9, 0.9}
     },
     player = {
         y = buttonLiftHeight,
-        z = -0.5,
-        baseX = -0.65,
-        spacing_x = 0.65,
-        spacing_y = 0.65,
+        z = 0.25,
+        baseX = -0.8,
+        spacing_x = 0.4,
+        spacing_z = 0.45,
+        spacing_player = 0.15,
+        scale = {0.6, 0.6, 0.6}
     },
     name = {
         y = buttonLiftHeight,
-        z = -0.3,
-        font_size = 40,
+        width = 600,
+        height = 300,
+        z = -0.1,
+        font_size = 75,
+        scale = {0.3, 0.3, 0.3}
+    },
+    counter = {
+        y = buttonLiftHeight,
+        width = 200,
+        height = 200,
+        z = 0.3,
+        spacing_counter = 0.15,
+        font_size = 75,
+        scale = {0.3, 0.3, 0.3}
     },
 }
-startingTimeBank = 1800
-addedTime = 180
+startingTimeBank = 0
+addedTime = 0
 playerTimers = {}
 playerOrder = {}
+playerTurnCounts = {}
 activePlayer = 1
 isRunning = false
 lastUpdateTime = 0
-numPlayers = 9
+numPlayers = 10
 lastTurnColor = nil
 turnJustChanged = false
 timerCoroutine = nil
+deckZone = "cf89ff"
 
 ----------------------
 -- onLoad
 ----------------------
 function onLoad()
+    setTimes()
     createButtons()
     lastTurnColor = Turns.turn_color
+    initializeTurnCounts()
 end
 
 ----------------------
@@ -68,6 +88,7 @@ function createButtons()
     createControlButtons()
     createPlayerNameButtons()
     createPlayerTimeButtons()
+    createCounterButtons()
 end 
 
 function createControlButtons()
@@ -82,6 +103,7 @@ function createControlButtons()
             height = buttonConfig.common.height,
             font_size = buttonConfig.common.font_size,
             color = buttonConfig.common.color,
+            scale = buttonConfig.control.scale,
             font_color = buttonConfig.common.font_color,
         })
     end
@@ -89,20 +111,21 @@ end
 
 function createPlayerNameButtons()
     for i = 1, numPlayers do
-        local row = math.ceil(i / 3)
-        local col = (i - 1) % 3 + 1
+        local row = math.ceil(i / 5)
+        local col = (i - 1) % 5 + 1 
         local x = buttonConfig.player.baseX + (col - 1) * buttonConfig.player.spacing_x
-        local z = buttonConfig.player.z + (row - 1) * buttonConfig.player.spacing_y - 0.3
+        local z = buttonConfig.player.z + (row - 1) * buttonConfig.player.spacing_z
         
         self.createButton({
             click_function = "playerNameButton_" .. i,
             function_owner = self,
             label = "Player " .. i,
             position = {x, buttonConfig.name.y, z},
-            width = buttonConfig.common.width,
-            height = buttonConfig.common.height / 2,
+            width = buttonConfig.name.width,
+            height = buttonConfig.name.height / 2,
             font_size = buttonConfig.name.font_size,
             color = {0.8, 0.8, 0.8},
+            scale = buttonConfig.name.scale,
             font_color = buttonConfig.common.font_color,
         })
     end
@@ -110,10 +133,10 @@ end
 
 function createPlayerTimeButtons()
     for i = 1, numPlayers do
-        local row = math.ceil(i / 3)
-        local col = (i - 1) % 3 + 1
+        local row = math.ceil(i / 5) 
+        local col = (i - 1) % 5 + 1
         local x = buttonConfig.player.baseX + (col - 1) * buttonConfig.player.spacing_x
-        local z = buttonConfig.player.z + (row - 1) * buttonConfig.player.spacing_y 
+        local z = buttonConfig.player.z + (row - 1) * buttonConfig.player.spacing_z + buttonConfig.player.spacing_player
 
         self.createButton({
             click_function = "playerTimerButton_" .. i,
@@ -125,8 +148,80 @@ function createPlayerTimeButtons()
             font_size = buttonConfig.common.font_size,
             color = buttonConfig.common.color,
             font_color = buttonConfig.common.font_color,
+            scale = buttonConfig.player.scale
         })
     end
+end
+
+function createCounterButtons()
+    for i = 1, numPlayers do
+        local row = math.ceil(i / 5) 
+        local col = (i - 1) % 5 + 1
+        local x = buttonConfig.player.baseX + (col - 1) * buttonConfig.player.spacing_x
+        local z = buttonConfig.counter.z + (row - 1) * buttonConfig.player.spacing_z - buttonConfig.counter.spacing_counter
+
+        self.createButton({
+            click_function = "playerTimerButton_" .. i,
+            function_owner = self,
+            label = "0",
+            position = {x, buttonConfig.counter.y, z},
+            width = buttonConfig.counter.width,
+            height = buttonConfig.counter.height,
+            font_size = buttonConfig.counter.font_size,
+            scale = buttonConfig.counter.scale
+        })
+    end
+end
+
+----------------------
+-- helper functions
+----------------------
+function doNothing()
+end
+
+function getPlayerIndexByColor(color)
+    for i, player in ipairs(playerOrder) do
+        if player.color == color then
+            return i
+        end
+    end
+    return nil
+end
+
+function formatTime(seconds)
+    local minutes = math.floor(seconds / 60)
+    local remainingSeconds = seconds % 60
+    return string.format("%02d:%04.1f", minutes, remainingSeconds)
+end
+
+function setTimes()
+    local description = self.getDescription()
+    if description then
+        local timeBank, addTime = description:match("(%d+)[%s,]*(%d*)")
+        if timeBank then
+            startingTimeBank = tonumber(timeBank)
+            if addTime and addTime ~= "" then
+                addedTime = tonumber(addTime)
+            end
+        end
+    end
+    
+    if type(startingTimeBank) ~= "number" or startingTimeBank < 0 then
+        startingTimeBank = 900
+    end
+    if type(addedTime) ~= "number" or addedTime < 0 then
+        addedTime = 300
+    end
+end
+
+function cycleTurnCount(obj, color, alt_click)
+    local index = tonumber(obj.getVar("click_function"):match("counterButton_(%d+)"))
+    if not alt_click then
+        playerTurnCounts[index] = playerTurnCounts[index] + 1
+    else
+        playerTurnCounts[index] = math.max(0, playerTurnCounts[index] - 1)
+    end
+    updateCounterButton(index)
 end
 
 ----------------------
@@ -140,10 +235,18 @@ function resetTimer()
     end
     requeryPlayerOrder()
     resetTimeBanks()
+    initializeTurnCounts() -- Reset turn counts
     updatePlayerButtons()
+    updateAllCounterButtons() -- Update all counter displays
     
     requeryActivePlayer()
     updateActivePlayerHighlight()
+end
+
+function updateAllCounterButtons()
+    for i = 1, numPlayers do
+        updateCounterButton(i)
+    end
 end
 
 function startTimer()
@@ -153,7 +256,15 @@ function startTimer()
         if timerCoroutine then
             Wait.stop(timerCoroutine)
         end
-        timerCoroutine = Wait.time(updateTimer, 0.1, -1)  -- Update every 0.1 seconds, repeat indefinitely
+        timerCoroutine = Wait.time(updateTimer, 0.1, -1)
+        
+        local zoneObjects = getObjectFromGUID(deckZone).getObjects()
+        for _, obj in ipairs(zoneObjects) do
+            if obj.type == "Deck" then
+                obj.shuffle()
+                break
+            end
+        end
     end
 end
 
@@ -294,6 +405,12 @@ for i = 1, numPlayers do
     end
 end
 
+for i = 1, numPlayers do
+    _G["counterButton_" .. i] = function(obj, color, alt_click) 
+        cycleTurnCount(obj, color, alt_click)
+    end
+end
+
 ----------------------
 -- debugging functions
 ----------------------
@@ -304,22 +421,31 @@ function printPlayerOrder()
 end
 
 ----------------------
--- helper functions
+-- Turn counting functions
 ----------------------
-function doNothing()
+function initializeTurnCounts()
+    playerTurnCounts = {}
+    for i = 1, numPlayers do
+        playerTurnCounts[i] = 0
+    end
 end
 
-function getPlayerIndexByColor(color)
-    for i, player in ipairs(playerOrder) do
-        if player.color == color then
-            return i
+function onPlayerTurn(player, previous_player)
+    if previous_player then
+        local prevPlayerIndex = getPlayerIndexByColor(previous_player)
+        if prevPlayerIndex then
+            playerTurnCounts[prevPlayerIndex] = playerTurnCounts[prevPlayerIndex] + 1
+            updateCounterButton(prevPlayerIndex)
         end
     end
-    return nil
 end
 
-function formatTime(seconds)
-    local minutes = math.floor(seconds / 60)
-    local remainingSeconds = seconds % 60
-    return string.format("%02d:%04.1f", minutes, remainingSeconds)
+function updateCounterButton(index)
+    if index <= #playerOrder then
+        local buttonIndex = (2 * numPlayers) + 2 + index
+        self.editButton({
+            index = buttonIndex,
+            label = tostring(playerTurnCounts[index])
+        })
+    end
 end

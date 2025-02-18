@@ -58,10 +58,11 @@ myButtons = {
         spacingX = 0.5833, 
         spacingZ = 0.3, 
         numCols = 7,
-        buttonHeight = 150, 
-        buttonWidth = 150,
+        buttonHeight = 300, 
+        buttonWidth = 300,
         buttonLift = globalButtonLift,
-        fontSize = 35, 
+        scale = {0.5, 0.5, 0.5},
+        fontSize = 45, 
         defaultColor = myColors.whiteShade
     }
 }
@@ -88,7 +89,8 @@ myBookkeepingVariables = {
     adSetPool = {},
     adSetPicked = {},
     adSetVagaPool = {},
-    adsetGUIDs = {}
+    adsetGUIDs = {},
+    availableMilitants = {}
 }
 myBagObjs = {
     playerBoardBag = getObjectFromGUID("078548"),
@@ -276,27 +278,27 @@ orderedFactionsByReach = {
 }
 spawns = {
    ["red"] = {
-       position = {60.00, 1.6, 57.00},
+       position = {60.00, 1.6, 60.00},
        rotation = {0.00, 180.00, 0.00}
    },
    ["purple"] = {
-       position = {0.00, 1.6, 57.00},
+       position = {0.00, 1.6, 60.00},
        rotation = {0.00, 180.00, 0.00}
    },
    ["white"] = {
-       position = {-60.00, 1.6, 57.00},
+       position = {-60.00, 1.6, 60.00},
        rotation = {0.00, 180.00, 0.00}
    },
    ["blue"] = {
-       position = {-60.00, 1.6, -57.00},
+       position = {-60.00, 1.6, -60.00},
        rotation = {0.00, 0.00, 0.00}
    },
    ["green"] = {
-       position = {0.00, 1.6, -57.00},
+       position = {0.00, 1.6, -60.00},
        rotation = {0.00, 0.00, 0.00}
    },
    ["yellow"] = {
-       position = {60.00, 1.6, -57.00},
+       position = {60.00, 1.6, -60.00},
        rotation = {0.00, 0.00, 0.00}
    }
 }
@@ -403,6 +405,7 @@ function createFactionButtons()
                 height = myButtons.factionButtons.buttonHeight,
                 width = myButtons.factionButtons.buttonWidth,
                 font_size = myButtons.factionButtons.fontSize,
+                scale = myButtons.factionButtons.scale, 
                 color = buttonColor,
                 label = factions[faction].owner,
                 tooltip = factions[faction].full
@@ -815,13 +818,23 @@ end
 -- adset functions
 ----------------------
 function randomizeAdset()
-    hardResetFactions()
-    deleteFactionButtons()
-    resetAdsetPool()
-    draftMilitant()
-    draftRest()
-    moveDraftedAdset()
-    adSetSelectFactions()
+    if myBookkeepingVariables.currentPlayerCount > 2 then
+        hardResetFactions()
+        deleteFactionButtons()
+        resetAdsetPool()
+        draftMilitant()
+        draftRest()
+        moveDraftedAdset()
+        adSetSelectFactions()
+        lockLastFaction()
+    else
+        hardResetFactions()
+        deleteFactionButtons()
+        resetAdsetPool()
+        draftMilitant()
+        moveDraftedAdset()
+        adSetSelectFactions()
+    end
 end
 
 function resetAdsetPool()
@@ -858,29 +871,40 @@ function resetAdsetPool()
 end
 
 function draftMilitant()
-    local availableMilitants = {}
+    myBookkeepingVariables.availableMilitants = {}
     for _, faction in ipairs(myBookkeepingVariables.adSetPool) do
         for _, militant in ipairs(myIterations.militantFactions) do
             if faction == militant then
-                table.insert(availableMilitants, faction)
+                table.insert(myBookkeepingVariables.availableMilitants, faction)
                 break
             end
         end
     end
-    
-    if #availableMilitants > 0 then
-        local randomIndex = math.random(#availableMilitants)
-        local selectedFaction = availableMilitants[randomIndex]
-        
-        for i = #myBookkeepingVariables.adSetPool, 1, -1 do
-            if myBookkeepingVariables.adSetPool[i] == selectedFaction then
-                table.remove(myBookkeepingVariables.adSetPool, i)
-                break
-            end
-        end
-        
-        table.insert(myBookkeepingVariables.adSetPicked, selectedFaction)
+
+    local draftCount
+    if myBookkeepingVariables.currentPlayerCount == 2 then
+        draftCount = 3
+    else
+        draftCount = 1
     end
+
+    for _ = 1, draftCount do
+        draftSingleMilitant()
+    end
+end
+
+function draftSingleMilitant()
+    local randomIndex = math.random(#myBookkeepingVariables.availableMilitants)
+    local selectedFaction = myBookkeepingVariables.availableMilitants[randomIndex]
+
+    for i = #myBookkeepingVariables.adSetPool, 1, -1 do
+        if myBookkeepingVariables.adSetPool[i] == selectedFaction then
+            table.remove(myBookkeepingVariables.adSetPool, i)
+            break
+        end
+    end
+    table.remove(myBookkeepingVariables.availableMilitants, randomIndex)
+    table.insert(myBookkeepingVariables.adSetPicked, selectedFaction)
 end
 
 function draftRest()
@@ -978,6 +1002,70 @@ function adSetSelectFactions()
     refreshFactionButtons()
 end
 
+function lockLastFaction()
+    local militantCount = 0
+    
+    for _, faction in ipairs(myBookkeepingVariables.adSetPicked) do
+        for _, militant in ipairs(myIterations.militantFactions) do
+            if faction == militant then
+                militantCount = militantCount + 1
+                break
+            end
+        end
+    end
+    
+    if militantCount == 1 then
+        local lastNonMilitantIndex = #myBookkeepingVariables.adSetPicked
+        local lastNonMilitantFaction = myBookkeepingVariables.adSetPicked[lastNonMilitantIndex]
+        if lastNonMilitantFaction and lastNonMilitantIndex then
+            local card = getObjectFromGUID(factions[lastNonMilitantFaction].adsetCardGUID)
+            if card then
+                local currentRotation = card.getRotation()
+                card.setRotationSmooth({
+                    x = currentRotation.x,
+                    y = currentRotation.y + 90,
+                    z = currentRotation.z
+                })
+            end
+            if factions[lastNonMilitantFaction].state == "pickable" then
+                factions[lastNonMilitantFaction].state = "banned"
+                factions[lastNonMilitantFaction].owner = ""
+            end
+        end
+        refreshFactionButtons()
+    end
+end
+
+function unlockLastFaction(recentlyPickedFaction)
+    local isMilitant = false
+    for _, militant in ipairs(myIterations.militantFactions) do
+        if recentlyPickedFaction == militant then
+            isMilitant = true
+            break
+        end
+    end
+
+    if isMilitant then
+        for _, faction in ipairs(myBookkeepingVariables.adSetPicked) do
+            if factions[faction].state == "banned" then
+                factions[faction].state = "pickable"
+                factions[faction].owner = ""
+                
+                local card = getObjectFromGUID(factions[faction].adsetCardGUID)
+                if card then
+                    card.setRotationSmooth({x = 0, y = 270, z = 0})
+                end
+                
+                broadcastToAll(factions[faction].full .. " can now be picked.")
+                refreshFactionButtons()
+                break
+            end
+        end
+    else
+        doNothing()
+    end
+end
+
 function dealAdsetFaction()
     for factionKey, faction in pairs(factions) do
         local playerColor = nil
@@ -993,7 +1081,6 @@ function dealAdsetFaction()
             end
 
             if playerColor then
-                -- Try to find the board in the bag first
                 local boardExists = false
                 for _, obj in ipairs(myBagObjs.playerBoardBag.getObjects()) do
                     if obj.guid == faction.playerBoardGUID then
@@ -1002,7 +1089,6 @@ function dealAdsetFaction()
                     end
                 end
 
-                -- Only attempt to take and place the board if it exists
                 if boardExists then
                     local selectedBoard = myBagObjs.playerBoardBag.takeObject({
                         guid = faction.playerBoardGUID,
@@ -1011,7 +1097,7 @@ function dealAdsetFaction()
                         smooth = true
                     })
                     selectedBoard.setLock(true)
-                    -- Only broadcast if we successfully dealt the board
+                    unlockLastFaction(factionKey)
                     broadcastToAll(playerName .. " drafts " .. faction.full .. ".", playerColor)
                 end
             end

@@ -1,6 +1,6 @@
 ----------------------
 -- Created for Tofu Worldview
--- Code-edited by cdenq and Claude
+-- Optimized and extended by cdenq
 -- Original by Nevakanezah
 ----------------------
 self.setName("Tofu Lizard Wizard Tool")
@@ -9,57 +9,62 @@ self.setName("Tofu Lizard Wizard Tool")
 -- variables
 ----------------------
 wait_id = 0
-buttonData = {
-    {ref = "mouse", label = "0", position = {0.45, 0.25, 0.03}},
-    {ref = "bunny", label = "0", position = {0.45, 0.25, 0.4}},
-    {ref = "fox", label = "0", position = {0.45, 0.25, 0.73}}
-}
-myCounters = {
-    mice = 0,
-    bunnies = 0,
-    foxes = 0,
-    dominance = 0
-}
-dominancePositions = {
-    fox = {-45.22, 1.60, -16.79},
-    bunny = {-45.19, 1.60, -9.80},
-    mouse = {-45.20, 1.60, -2.84},
-    bird = {-45.23, 1.60, 4.18}
-}
-discardPosition = {-34.53, 1.60, -9.77}
-outcastPositions = {
-    mouse = {-34.73, 1.89, 3.52},
-    bunny = {-33.37, 1.89, 3.56},
-    fox = {-31.98, 1.89, 3.58}
-}
 outcastMarkerGUID = "d90535"
+outcastMarker = getObjectFromGUID(outcastMarkerGUID)
+variableData = {
+    mouse = {
+        label = "0",
+        buttonPosition = {0.45, 0.25, 0.03},
+        dominancePosition = {-45.19, 1.60, -9.80},
+        markerPosition = {-34.73, 1.89, 3.52},
+        count = 0
+    },
+    bunny = {
+        label = "0",
+        buttonPosition = {0.45, 0.25, 0.4},
+        dominancePosition = {-45.20, 1.60, -2.84},
+        markerPosition = {-33.37, 1.89, 3.56},
+        count = 0
+    },
+    fox = {
+        label = "0",
+        buttonPosition = {0.45, 0.25, 0.73},
+        dominancePosition = {-45.22, 1.60, -16.79},
+        markerPosition = {-31.98, 1.89, 3.58},
+        count = 0
+    },
+    other = {
+        dominancePosition = {-45.23, 1.60, 4.18},
+        discardPosition = {-34.53, 1.60, -9.77},
+        dominanceCount = 0
+    }
+}
+myIterations = {"mouse", "bunny", "fox"}
 
 ----------------------
 -- onload function
 ----------------------
-function onLoad(save_state)
+function onLoad()
     createAllButtons()
-    wait_id = Wait.time(
-        updateAllButtons, 
-    1, -1)
+    wait_id = Wait.time(updateCardCount, 1, -1)
 end
 
 ----------------------
 -- create button functions
 ----------------------
 function createAllButtons()
-    createButtons()
-    createDominanceButton()
+    createSuitCountButtons()
+    createDomCountButton()
     createUpdateOutcastButton() 
 end
 
-function createButtons()
-    for i, data in ipairs(buttonData) do
+function createSuitCountButtons()
+    for i, suit in ipairs(myIterations) do
         self.createButton({
-            click_function = "nothing",
+            click_function = "doNothing",
             function_owner = self,
-            label = data.label,
-            position = data.position,
+            label = variableData[suit].label,
+            position = variableData[suit].buttonPosition,
             scale = {0.9, 0.5, 0.9},
             width = 0,
             height = 0,
@@ -68,9 +73,9 @@ function createButtons()
     end
 end
 
-function createDominanceButton()
+function createDomCountButton()
     self.createButton({
-        click_function = "nothing",
+        click_function = "doNothing",
         function_owner = self,
         label = "Dominance: 0",
         position = {0.72, 0.20, -0.17},
@@ -97,27 +102,38 @@ end
 ----------------------
 -- helper functions
 ----------------------
+function doNothing()
+end
+
 function onDestroy()
     Wait.stop(wait_id)
 end
 
-function nothing()
+function round(num)
+    return math.floor(num + 0.5)
+end
+
+----------------------
+-- update card functions
+----------------------
+function updateCardCount()
+    checkCards()
+    updateButtons()
 end
 
 function checkCards()
-    myCounters.mice = 0
-    myCounters.bunnies = 0
-    myCounters.foxes = 0
-    myCounters.dominance = 0
+    for i, suit in ipairs(myIterations) do
+        variableData[suit].count = 0
+    end
+    variableData["other"].dominanceCount = 0
 
     local items = getCards()
     for _, item in ipairs(items) do
         if item.hit_object.tag == "Card" then
-            addCard(item.hit_object.getDescription(), item.hit_object.getName())
-        end
-        if item.hit_object.tag == "Deck" then
+            parseCard(item.hit_object.getDescription(), item.hit_object.getName())
+        elseif item.hit_object.tag == "Deck" then
             for _, card in ipairs(item.hit_object.getObjects()) do
-                addCard(card.description, card.nickname)
+                parseCard(card.description, card.nickname)
             end
         end
     end
@@ -125,70 +141,137 @@ end
 
 function getCards()
     local result = Physics.cast({
-        origin       = self.positionToWorld({0.4, 0.2, 0.45}),
-        direction    = self.getTransformUp(),
-        type         = 3,
-        size         = {3, 0.1, 6},
+        origin = self.positionToWorld({0.4, 0.2, 0.45}),
+        direction = self.getTransformUp(),
+        type = 3,
+        size = {3, 0.1, 6},
         max_distance = 2
+        --debug = true
     })
     return result or {}
 end
 
-function addCard(suit, name)
-    suit = suit:lower()
-    if string.find(suit, "fox") and string.find(suit, "mouse") and string.find(suit, "bunny") then
-        myCounters.foxes = myCounters.foxes + 1
-        myCounters.bunnies = myCounters.bunnies + 1
-        myCounters.mice = myCounters.mice + 1
-    elseif string.find(suit, "fox") then
-        myCounters.foxes = myCounters.foxes + 1
-    elseif string.find(suit, "mouse") then
-        myCounters.mice = myCounters.mice + 1
-    elseif string.find(suit, "bunny") then
-        myCounters.bunnies = myCounters.bunnies + 1
+function parseCard(foundSuit, foundName)
+    for i, suit in ipairs(myIterations) do
+        if string.find(foundSuit:lower(), suit) then
+            variableData[suit].count = variableData[suit].count + 1
+        end
     end
-    if string.find(name:lower(), "dominance") then
-        myCounters.dominance = myCounters.dominance + 1
+
+    if string.find(foundName:lower(), "dominance") then
+        variableData["other"].dominanceCount = variableData["other"].dominanceCount + 1
     end
 end
 
 function updateButtons()
-    self.editButton({index=0, label=tostring(myCounters.mice)})
-    self.editButton({index=1, label=tostring(myCounters.bunnies)})
-    self.editButton({index=2, label=tostring(myCounters.foxes)})
+    for i = 0, 2 do
+        self.editButton({
+            index = i, 
+            label = tostring(variableData[myIterations[i + 1]].count)}
+        )
+    end 
     
-    local dominanceColor = {1, 1, 1}
-    if myCounters.dominance > 0 then
+    local dominanceColor
+    if variableData["other"].dominanceCount > 0 then
         dominanceColor = {1, 0, 0}
+    else 
+        dominanceColor = {1, 1, 1}
     end
+
     self.editButton({
         index = 3,
-        label = "Dominance: " .. tostring(myCounters.dominance),
+        label = "Dominance: " .. tostring(variableData["other"].dominanceCount),
         font_color = dominanceColor
     })
 end
 
 ----------------------
--- main function
+-- update marker function 
 ----------------------
-function updateAllButtons()
-    checkCards()
-    updateButtons()
-end
-
 function updateOutcastMarker()
-    moveMarker()
+    checkMarker()
     sortAndMoveCards()
 end
 
-----------------------
--- main helper function
-----------------------
+function checkMarker()
+    local maxCount = -1
+    local highestSuits = {}
+    
+    for _, suit in ipairs(myIterations) do
+        local currentCount = variableData[suit].count
+        if currentCount > maxCount then
+            maxCount = currentCount
+            highestSuits = {suit}
+        elseif currentCount == maxCount then
+            table.insert(highestSuits, suit)
+        end
+    end
+    
+    local currentPos = outcastMarker.getPosition()
+
+    if #highestSuits == 1 then
+        moveMarker(highestSuits[1])
+    else --tied for highest
+        flipMarkerUp()
+    end
+end
+
+function moveMarker(suit)
+    local currentPos = outcastMarker.getPosition()
+    local moveToPos = variableData[suit].markerPosition
+    compareCurrentX = round(currentPos.x)
+    compareMoveToX = round(moveToPos[1])
+    if compareCurrentX == compareMoveToX then
+        flipMarkerUp()
+    else
+        local newPos = {
+            x = moveToPos[1],
+            y = moveToPos[2] + 1,
+            z = moveToPos[3]
+        }
+        outcastMarker.setPositionSmooth(newPos)
+        flipMarkerDown()
+    end
+end
+
+function flipMarkerUp()
+    local currentPos = outcastMarker.getPosition()
+    local newPos = {
+        x = currentPos.x,
+        y = currentPos.y + 1,
+        z = currentPos.z
+    }
+
+    local currentRot = outcastMarker.getRotation()
+    if round(currentRot.z) == 0 then
+        local newRot = {
+            x = currentRot.x,
+            y = currentRot.y,
+            z = currentRot.z + 180
+        }
+        outcastMarker.setRotationSmooth(newRot)
+    end
+
+    outcastMarker.setPositionSmooth(newPos)
+end
+
+function flipMarkerDown()
+    local currentRot = outcastMarker.getRotation()
+    if round(currentRot.z) == 180 then
+        local newRot = {
+            x = currentRot.x,
+            y = currentRot.y,
+            z = currentRot.z + 180
+        }
+        outcastMarker.setRotationSmooth(newRot)
+    end
+end
+
 function sortAndMoveCards()    
     local items = getCards()
     for _, item in ipairs(items) do
         if item.hit_object.tag == "Card" then
-            moveCard(item.hit_object, dominancePositions, discardPosition)
+            moveCard(item.hit_object)
         elseif item.hit_object.tag == "Deck" then
             local deck = item.hit_object
             local cards = deck.getObjects()
@@ -197,71 +280,28 @@ function sortAndMoveCards()
                     position = {deck.getPosition().x, deck.getPosition().y + 5, deck.getPosition().z},
                     smooth = false
                 })
-                moveCard(card, dominancePositions, discardPosition)
+                moveCard(card)
             end
         end
     end
 end
 
-function moveCard(card, dominancePositions, discardPosition)
-    local name = card.getName():lower()
-    local description = card.getDescription():lower()
+function moveCard(card)
+    local foundName = card.getName():lower()
+    local foundDescription = card.getDescription():lower()
+    local placed = false
     
-    if string.find(name, "dominance") then
-        local suit
-        if string.find(description, "fox") then
-            suit = "fox"
-        elseif string.find(description, "bunny") then
-            suit = "bunny"
-        elseif string.find(description, "mouse") then
-            suit = "mouse"
-        elseif string.find(description, "bird") then
-            suit = "bird"
+    if string.find(foundName, "dominance") then
+        for i, suit in ipairs(myIterations) do
+            if string.find(foundDescription, suit) then
+                card.setPositionSmooth(variableData[suit].dominancePosition)
+                placed = true
+            end
         end
-        card.setPositionSmooth(dominancePositions[suit])
-    else
-        card.setPositionSmooth(discardPosition)
+        if placed == false then 
+            card.setPositionSmooth(variableData["other"].dominancePosition)
+        end
+    else --normal card
+        card.setPositionSmooth(variableData["other"].discardPosition)
     end
-end
-
-function moveMarker()
-    local miceLocked = myCounters.mice
-    local bunniesLocked = myCounters.bunnies
-    local foxesLocked = myCounters.foxes
-
-    local outcastMarker = getObjectFromGUID(outcastMarkerGUID)
-    if not outcastMarker then return end
-
-    local highestCount = math.max(miceLocked, bunniesLocked, foxesLocked)
-    local highestSuits = {}
-    if miceLocked == highestCount then table.insert(highestSuits, "mouse") end
-    if bunniesLocked == highestCount then table.insert(highestSuits, "bunny") end
-    if foxesLocked == highestCount then table.insert(highestSuits, "fox") end
-
-    local currentPosition = outcastMarker.getPosition()
-    local newPositionX, newPositionZ
-
-    if #highestSuits == 1 then
-        newPositionX = outcastPositions[highestSuits[1]][1]
-        newPositionZ = outcastPositions[highestSuits[1]][3]
-    else
-        newPositionX = math.floor(currentPosition.x * 100 + 0.5) / 100
-        newPositionZ = math.floor(currentPosition.z * 100 + 0.5) / 100
-    end
-
-    local newPosition = {
-        x = newPositionX,
-        y = currentPosition.y + 0.25,
-        z = newPositionZ
-    }
-
-    local newRotation
-    if newPositionX == math.floor(currentPosition.x * 100 + 0.5) / 100 then
-        newRotation = {0, 90, 180}
-    else
-        newRotation = {0, 90, 0}
-    end
-
-    outcastMarker.setPositionSmooth(newPosition)
-    outcastMarker.setRotationSmooth(newRotation)
 end

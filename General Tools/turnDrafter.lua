@@ -2,7 +2,7 @@
 -- Created for Tofu Worldview
 -- By cdenq
 ----------------------
-self.setName("Tofu Pick and Seat Tool")
+self.setName("Tofu Turn Tool")
 
 ----------------------
 -- variables
@@ -16,15 +16,27 @@ myColors = {
 }
 liftHeight = 0.18
 myButtons = {
-    buttonFeatures = {buttonWidth = 400, buttonHeight = 200, fontSize = 50, defaultColor = myColors.white},
-    slotButtonFeatures = {buttonWidth = 400, buttonHeight = 200, fontSize = 45, defaultColor = myColors.gray},
+    buttonFeatures = {
+        buttonWidth = 550, 
+        buttonHeight = 250, 
+        fontSize = 85,
+        scale = {0.75, 0.75, 0.75},
+        defaultColor = myColors.white
+    },
+    slotButtonFeatures = {
+        buttonWidth = 700, 
+        buttonHeight = 400, 
+        fontSize = 100,
+        scale = {0.45, 0.45, 0.45},
+        defaultColor = myColors.gray
+    },
     buttonPositions = {
         pickOrderPos = {-1, liftHeight, -0.5},
         promotePos = {1, liftHeight, -0.5},
         demotePos = {0, liftHeight, -0.5},
         finalizeSeatPos = {0.5, liftHeight, 0.75},
         clearSeatPos = {-0.5, liftHeight, 0.75},
-        slotButtonPos = {startX = -1.6, startZ = -0.1, spacingX = 0.8, spacingZ = 0.4}
+        slotButtonPos = {startX = -1.3, startZ = -0.1, spacingX = 0.65, spacingZ = 0.4}
     }
 }
 pickOrderSet = false
@@ -61,6 +73,7 @@ function createButtons()
         width = myButtons.buttonFeatures.buttonWidth,
         height = myButtons.buttonFeatures.buttonHeight,
         font_size = myButtons.buttonFeatures.fontSize,
+        scale = myButtons.buttonFeatures.scale,
         color = myColors.green
     })
 
@@ -72,6 +85,7 @@ function createButtons()
         width = myButtons.buttonFeatures.buttonWidth,
         height = myButtons.buttonFeatures.buttonHeight,
         font_size = myButtons.buttonFeatures.fontSize,
+        scale = myButtons.buttonFeatures.scale,
         color = myButtons.buttonFeatures.defaultColor
     })
 
@@ -83,6 +97,7 @@ function createButtons()
         width = myButtons.buttonFeatures.buttonWidth,
         height = myButtons.buttonFeatures.buttonHeight,
         font_size = myButtons.buttonFeatures.fontSize,
+        scale = myButtons.buttonFeatures.scale,
         color = myButtons.buttonFeatures.defaultColor
     })
 
@@ -94,6 +109,7 @@ function createButtons()
         width = myButtons.buttonFeatures.buttonWidth,
         height = myButtons.buttonFeatures.buttonHeight,
         font_size = myButtons.buttonFeatures.fontSize,
+        scale = myButtons.buttonFeatures.scale,
         color = myButtons.buttonFeatures.defaultColor
     })
 
@@ -105,6 +121,7 @@ function createButtons()
         width = myButtons.buttonFeatures.buttonWidth,
         height = myButtons.buttonFeatures.buttonHeight,
         font_size = myButtons.buttonFeatures.fontSize,
+        scale = myButtons.buttonFeatures.scale,
         color = myButtons.buttonFeatures.defaultColor
     })
 
@@ -121,6 +138,7 @@ function createButtons()
             width = myButtons.slotButtonFeatures.buttonWidth,
             height = myButtons.slotButtonFeatures.buttonHeight,
             font_size = myButtons.slotButtonFeatures.fontSize,
+            scale = myButtons.slotButtonFeatures.scale,
             color = myButtons.slotButtonFeatures.defaultColor,
             font_color = {1, 1, 1},
         })
@@ -131,6 +149,11 @@ end
 -- main click functions
 ----------------------
 function promoteAllPlayers()
+    if not Player.host then
+        broadcastToColor("Only the host can use this function.")
+        return
+    end
+
     local seated = getSeatedPlayers()
     for _, color in ipairs(seated) do
         if not Player[color].promoted then
@@ -173,7 +196,7 @@ function randomizePickOrder()
     --Turns.turn_color = seated[1]
     printToAll("Pick Order:")
     for i = 1, n do
-        broadcastToAll(i .. ": " .. Player[seated[i]].steam_name, stringColorToRGB(seated[i]))
+        printToAll(i .. ": " .. Player[seated[i]].steam_name, stringColorToRGB(seated[i]))
     end
 
     activeSlots = n
@@ -208,7 +231,7 @@ function clearSeats()
             })
         end
         temporarySeatOrder = {}
-        broadcastToAll("Seats have been cleared.")
+        printToAll("Seats have been cleared.")
     else
         broadcastToAll("Assign Pick Order first.")
     end
@@ -240,7 +263,7 @@ function finalizeSeats()
             
             printToAll("New Turn Order:")
             for i, color in ipairs(newOrder) do
-                broadcastToAll(i .. ": " .. Player[color].steam_name, stringColorToRGB(color))
+                printToAll(i .. ": " .. Player[color].steam_name, stringColorToRGB(color))
             end
         else
             broadcastToAll("Not all seats have been assigned.")

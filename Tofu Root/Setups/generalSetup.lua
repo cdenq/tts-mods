@@ -124,7 +124,7 @@ myBookkeepingVariables = {
     ruinsPool = {}
 }
 myDeckGUIDs = {
-    ["Base"] = "42d2c7",
+    ["Base"] = "7ac0a9",
     ["Exiles & Partisans"] = "d07572",
     ["Squires & Disciples"] = ""
 }
@@ -192,9 +192,9 @@ myMapsSetup = {
         },
         coffin = {
             GUID = "fc47b2",
-            position = {52.36, 1.53, 1.49},
+            position = {-33.48, 1.59, 14.81},
             rotation = {0, 0, 0},
-            lock = false,
+            lock = true,
             interact = true
         }
     },
