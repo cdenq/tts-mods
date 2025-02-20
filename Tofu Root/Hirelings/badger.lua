@@ -177,7 +177,7 @@ function edit(obj, color, alt_click)
                 break
             end
         end
-        broadcastToAll(buttonValues.claimed .. " relinquishes " .. hirelingName .. ".", steamColor)
+        broadcastToAll(buttonValues.claimed .. " needs to transfer " .. hirelingName .. ".", steamColor)
     end
 end
 

@@ -94,14 +94,14 @@ function checkProwess()
         direction    = {0, 1, 0},
         type         = 3,
         size         = zoneSize,
-        max_distance = 0,
-        debug        = true
+        max_distance = 2
+        --debug        = true
     })
     
     local totalItems = 0
     for _, hit in ipairs(hitList) do
         local obj = hit.hit_object
-        if obj.tag == "Tile" then
+        if obj.type == "Tile" then
             local notes = obj.getGMNotes() or ""
             if string.find(notes, "Prowess") then
                 totalItems = totalItems + 1
@@ -124,15 +124,14 @@ function recruit(obj, color)
     local activeWarlord = nil
     
     for _, obj in ipairs(boardZoneObj.getObjects()) do
-        if obj.tag == "Tile" then
-            local notes = obj.getGMNotes() or ""
-            if string.find(notes, keyWordStronghold) then
+        if obj.type == "Tile" then
+            local notes = obj.getGMNotes()
+            if notes == keyWordStronghold then
                 table.insert(spawners, obj)
             end
         elseif isWarlord(obj.getGUID()) then
             warlordFound = true
             activeWarlord = obj
-            break
         end
     end
 

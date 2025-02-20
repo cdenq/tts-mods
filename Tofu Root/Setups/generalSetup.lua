@@ -178,14 +178,21 @@ myMapsSetup = {
         },
         graveone = {
             GUID = "47b453",
-            position = {27.64, 1.53, -0.08},
+            position = {27.64, 1.53, 0.01},
             rotation = {0, 0, 0},
             lock = true,
             interact = false
         },
         gravetwo = {
             GUID = "f391db",
-            position = {-27.57, 1.53, -0.08},
+            position = {-27.57, 1.53, -11.60},
+            rotation = {0, 0, 0},
+            lock = true,
+            interact = false
+        },
+        supplyOne = {
+            GUID = "5ac3db",
+            position = {-27.57, 1.53, 11.51},
             rotation = {0, 0, 0},
             lock = true,
             interact = false
@@ -216,6 +223,13 @@ myMapsSetup = {
         draft = {
             GUID = "65521b",
             position = {104.59, 2.03, -32.50},
+            rotation = {0.00, 270.00, 0.00},
+            lock = true,
+            interact = true
+        },
+        draftAid = {
+            GUID = "442895",
+            position = {117.38, 2.13, -32.44},
             rotation = {0.00, 270.00, 0.00},
             lock = true,
             interact = true
@@ -1528,16 +1542,17 @@ function placeMarkers(mapVar)
         local markerGUID = myMarkerGUIDSetup[markerLabel].Fox
         local markerPosition = myMarkerLocationSetup[mapVar][markerLabel].position
         local markerRotation = myMarkerLocationSetup[mapVar][markerLabel].rotation
-
         local markerObj = myBagObjs.mapBag.takeObject({
             guid = markerGUID,
             position = markerPosition,
             rotation = markerRotation,
             smooth = false
         })
+
         Wait.time(function()
             markerObj.setLock(true)
         end, 2)
+
         table.insert(myBookkeepingVariables.totalPlaced, markerGUID)
     end
 end
@@ -1944,6 +1959,7 @@ end
 
 function setupDraft()
     placeDraftBoard()
+    placeDraftAid()
 end
 
 function placeDraftBoard()
@@ -1953,11 +1969,22 @@ function placeDraftBoard()
         rotation = myMapsSetup.boards.draft.rotation,
         smooth = false
     })
-    targetExtraObj.setLock(myMapsSetup.boards.hireling.lock)
+    targetExtraObj.setLock(myMapsSetup.boards.draft.lock)
     targetExtraObj.interactable = myMapsSetup.boards.draft.interact
     table.insert(myBookkeepingVariables.totalPlaced, myMapsSetup.boards.draft.GUID)
 end
 
+function placeDraftAid()
+    local targetExtraObj = myBagObjs.mapBag.takeObject({
+        guid = myMapsSetup.boards.draftAid.GUID,
+        position = myMapsSetup.boards.draftAid.position,
+        rotation = myMapsSetup.boards.draftAid.rotation,
+        smooth = false
+    })
+    targetExtraObj.setLock(myMapsSetup.boards.draftAid.lock)
+    targetExtraObj.interactable = myMapsSetup.boards.draftAid.interact
+    table.insert(myBookkeepingVariables.totalPlaced, myMapsSetup.boards.draftAid.GUID)
+end 
 
 function confirmGlobalSettings()
     --accessing global variable

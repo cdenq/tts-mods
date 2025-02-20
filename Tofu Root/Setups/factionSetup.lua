@@ -750,11 +750,18 @@ end
 -- finalize functions
 ----------------------
 function dealPlayerBoards()
+    local ruinCount = 0
     for factionKey, faction in pairs(factions) do
         local playerColor = nil
         local playerName = nil
         
         if faction.owner ~= "" and faction.owner ~= "x" then
+            if factionKey == "rat" or factionKey == "vaga" then
+                ruinCount = ruinCount + 1
+            elseif factionKey == "vaga2" then
+                ruinCount = ruinCount + 1
+            end
+
             for _, player in ipairs(Player.getPlayers()) do
                 if player.steam_name == faction.owner then
                     playerColor = player.color
@@ -771,18 +778,26 @@ function dealPlayerBoards()
                     smooth = true
                 })
                 selectedBoard.setLock(true)
-                broadcastToAll(playerName .. " drafts " .. faction.full .. ".", playerColor)
+                printToAll(playerName .. " drafts " .. faction.full .. ".", playerColor)
             end
         end
     end
+    broadcastToAll("Set " .. ruinCount .. " ruins in game.")
 end
 
 function dealClassic()
     local deck = nil
-    for _, obj in ipairs(myBagObjs.deckZone.getObjects()) do
-        if obj.tag == "Deck" then
-            deck = obj
-            break
+    if myBagObjs and myBagObjs.deckZone then
+        local objects = myBagObjs.deckZone.getObjects()
+        if objects then
+            for _, obj in ipairs(objects) do
+                if obj and obj.tag == "Deck" then
+                    deck = obj
+                    break
+                end
+            end
+        else 
+            print("No objects in deckzone.")
         end
     end
 
@@ -798,10 +813,11 @@ function dealClassic()
         turnOrder = players
     end
 
-    deck.shuffle()
-    for i, playerColor in ipairs(turnOrder) do
-        local cardsToDeal = i + 2
-        deck.dealToColor(cardsToDeal, playerColor)
+    if deck then
+        for i, playerColor in ipairs(turnOrder) do
+            local cardsToDeal = i + 2
+            deck.dealToColor(cardsToDeal, playerColor)
+        end
     end
 end
 
@@ -1056,7 +1072,7 @@ function unlockLastFaction(recentlyPickedFaction)
                     card.setRotationSmooth({x = 0, y = 270, z = 0})
                 end
                 
-                broadcastToAll(factions[faction].full .. " can now be picked.")
+                printToAll(factions[faction].full .. " can now be picked.")
                 refreshFactionButtons()
                 break
             end
@@ -1097,8 +1113,11 @@ function dealAdsetFaction()
                         smooth = true
                     })
                     selectedBoard.setLock(true)
+                    if factionKey == "rat" or factionKey == "vaga" or factionKey == "vaga2" then
+                        broadcastToAll("Adjust ruins settings, if needed.")
+                    end
                     unlockLastFaction(factionKey)
-                    broadcastToAll(playerName .. " drafts " .. faction.full .. ".", playerColor)
+                    printToAll(playerName .. " drafts " .. faction.full .. ".", playerColor)
                 end
             end
         end

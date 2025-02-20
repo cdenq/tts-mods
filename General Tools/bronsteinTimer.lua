@@ -1,13 +1,14 @@
 ----------------------
 -- Created for Tofu Worldview
 -- By cdenq
--- Modified to include decimal seconds and 2x5 layout
 ----------------------
 self.setName("Tofu Timer")
 -- control buttons 0-2
 -- player name buttons 3, 4 ... numPlayers+2
 -- player time buttons numPlayers+3 ... (2*numPlayers)+2
 -- counter buttons (2*numPlayers)+3 ... (3*numPlayers)+2
+-- note, code is scuffed. ill claen it up at some point
+-- working w timers is annoying...
 
 ----------------------
 -- Variables
@@ -161,14 +162,15 @@ function createCounterButtons()
         local z = buttonConfig.counter.z + (row - 1) * buttonConfig.player.spacing_z - buttonConfig.counter.spacing_counter
 
         self.createButton({
-            click_function = "playerTimerButton_" .. i,
+            click_function = "counterButton_" .. i,
             function_owner = self,
             label = "0",
             position = {x, buttonConfig.counter.y, z},
             width = buttonConfig.counter.width,
             height = buttonConfig.counter.height,
             font_size = buttonConfig.counter.font_size,
-            scale = buttonConfig.counter.scale
+            scale = buttonConfig.counter.scale,
+            color = buttonConfig.common.color
         })
     end
 end
@@ -214,16 +216,6 @@ function setTimes()
     end
 end
 
-function cycleTurnCount(obj, color, alt_click)
-    local index = tonumber(obj.getVar("click_function"):match("counterButton_(%d+)"))
-    if not alt_click then
-        playerTurnCounts[index] = playerTurnCounts[index] + 1
-    else
-        playerTurnCounts[index] = math.max(0, playerTurnCounts[index] - 1)
-    end
-    updateCounterButton(index)
-end
-
 ----------------------
 -- timer functions
 ----------------------
@@ -235,9 +227,9 @@ function resetTimer()
     end
     requeryPlayerOrder()
     resetTimeBanks()
-    initializeTurnCounts() -- Reset turn counts
+    initializeTurnCounts()
     updatePlayerButtons()
-    updateAllCounterButtons() -- Update all counter displays
+    updateAllCounterButtons()
     
     requeryActivePlayer()
     updateActivePlayerHighlight()
@@ -391,6 +383,45 @@ function updateActivePlayerHighlight()
 end
 
 ----------------------
+-- Turn counting functions
+----------------------
+function initializeTurnCounts()
+    playerTurnCounts = {}
+    for i = 1, numPlayers do
+        playerTurnCounts[i] = 0
+        updateCounterButton(i)
+    end
+end
+
+function updateCounterButton(index)
+    local buttonIndex = (2 * numPlayers) + 2 + index
+    self.editButton({
+        index = buttonIndex,
+        label = tostring(playerTurnCounts[index] or 0)
+    })
+end
+
+function counterButton_click(index)
+    playerTurnCounts[index] = (playerTurnCounts[index] or 0) + 1 
+    updateCounterButton(index)
+end
+
+function counterButton_alt_click(index)
+    playerTurnCounts[index] = math.max(0, (playerTurnCounts[index] or 0) - 1)
+    updateCounterButton(index)
+end
+
+function onPlayerTurn(player, previous_player)
+    if previous_player then
+        local endingPlayerIndex = getPlayerIndexByColor(previous_player.color)
+        if playerTurnCounts and playerTurnCounts[endingPlayerIndex] ~= nil then
+            playerTurnCounts[endingPlayerIndex] = (playerTurnCounts[endingPlayerIndex] or 0) + 1
+            updateCounterButton(endingPlayerIndex)
+        end
+    end
+end
+
+----------------------
 -- onclick functions
 ----------------------
 for i = 1, numPlayers do
@@ -406,46 +437,11 @@ for i = 1, numPlayers do
 end
 
 for i = 1, numPlayers do
-    _G["counterButton_" .. i] = function(obj, color, alt_click) 
-        cycleTurnCount(obj, color, alt_click)
-    end
-end
-
-----------------------
--- debugging functions
-----------------------
-function printPlayerOrder()
-    for i, value in ipairs(playerOrder) do 
-        print(i .. " " .. value.color .. " " .. value.steam_name)
-    end
-end
-
-----------------------
--- Turn counting functions
-----------------------
-function initializeTurnCounts()
-    playerTurnCounts = {}
-    for i = 1, numPlayers do
-        playerTurnCounts[i] = 0
-    end
-end
-
-function onPlayerTurn(player, previous_player)
-    if previous_player then
-        local prevPlayerIndex = getPlayerIndexByColor(previous_player)
-        if prevPlayerIndex then
-            playerTurnCounts[prevPlayerIndex] = playerTurnCounts[prevPlayerIndex] + 1
-            updateCounterButton(prevPlayerIndex)
+    _G["counterButton_" .. i] = function(obj, color, alt_click)
+        if alt_click then
+            counterButton_alt_click(i)
+        else
+            counterButton_click(i)
         end
-    end
-end
-
-function updateCounterButton(index)
-    if index <= #playerOrder then
-        local buttonIndex = (2 * numPlayers) + 2 + index
-        self.editButton({
-            index = buttonIndex,
-            label = tostring(playerTurnCounts[index])
-        })
     end
 end

@@ -3,6 +3,7 @@
 -- By cdenq
 ----------------------
 self.setName("Tofu Deck Board")
+-- TTS bug for getstates, will return 1 less in count if 3 or more states.
 
 ----------------------
 -- script variables
@@ -18,12 +19,20 @@ dominancePositions = {
 }
 myIterations = {"mouse", "bunny", "fox", "bird"}
 wait_id = 7348
+myMaps = {
+    autumn = {"43180d", "8d1572", "7f8900"},
+    winter = {"e94958"},
+    lake = {"cbb6e5", "64338c"},
+    mountain = {"2255cd"}
+    -- gorge = "",
+    -- marsh = "",
+}
+debug = false
 
 ----------------------
 -- onload
 ----------------------
 function onload()
-    Wait.stopAll()
     createAllButtons()
     wait_id = Wait.time(moveDominance, 1, -1)
 end
@@ -37,6 +46,7 @@ end
 ----------------------
 function createAllButtons()
     createReshuffle()
+    createMapVariant()
 end
 
 function createReshuffle()
@@ -53,9 +63,37 @@ function createReshuffle()
     })
 end
 
+function createMapVariant()
+    self.createButton({
+        click_function = "turnOnOff",
+        function_owner = self,
+        position = {-2.1, 0.2, 0},
+        rotation = {0, 270, 0},
+        scale = {0.75, 0.75, 0.75},
+        width = 400,
+        height = 75,
+        font_size = 50,
+        label = "Decorate Map",
+        tooltip = "RMB: Reskin the map, if available.\nLMB: Delete this button."
+    })
+end
+
 ----------------------
 -- functions
 ----------------------
+function doNothing()
+end
+
+function unlockMap(mapObj)
+    mapObj.setLock(false)
+    mapObj.interactable = true
+end
+
+function lockMap(mapObj)
+    mapObj.setLock(true)
+    mapObj.interactable = false
+end
+
 function reshuffle()
     local discardZoneObj = getObjectFromGUID(discardZone)
     local discardObjects = discardZoneObj.getObjects()
@@ -67,6 +105,59 @@ function reshuffle()
             obj.shuffle()
             obj.setPositionSmooth(pos)
             obj.setRotationSmooth({0, 90, 180})
+        end
+    end
+end
+
+function turnOnOff(obj, color, alt_click)
+    if alt_click then
+        self.removeButton(1) -- removes shift states button 
+    else
+        shiftStates()
+    end
+end
+
+function shiftStates()
+    mapObj = seekMap()
+    if mapObj then
+        if debug then print(guid) end
+        local states = mapObj.getStates()
+        if states then --if more than 1 state
+            unlockMap(mapObj)
+            local actualNumStates = #mapObj.getStates() + 1
+            local currentState = mapObj.getStateId()
+            local nextState = currentState + 1
+            if debug then
+                print("currState: " .. currentState .. "/" .. actualNumStates)
+                print("nextState: " .. nextState)
+                print("resetLimit: " .. actualNumStates + 1)
+            end
+
+            if nextState == actualNumStates + 1 then
+                if debug then
+                    print("hit limit!")
+                    print("new nextState: " .. nextState)
+                end
+                nextState = 1
+            end
+            mapObj.setState(nextState)
+            newMapObj = seekMap()
+            lockMap(newMapObj)
+        else
+            printToAll("No variants for this map.")
+        end
+    else
+        printToAll("Valid map not found.")
+    end
+end
+
+function seekMap()
+    for mapKey, mapList in pairs(myMaps) do 
+        for _, guid in ipairs(mapList) do
+            local mapObj = getObjectFromGUID(guid)
+            if mapObj then
+                return mapObj
+            end
         end
     end
 end
