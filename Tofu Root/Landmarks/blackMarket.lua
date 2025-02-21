@@ -64,4 +64,10 @@ function setup()
             smooth = true
         })
     end
+
+    deleteButton(0) --index 0 is the setup button
+end
+
+function deleteButton(i)
+    self.removeButton(i)
 end

@@ -25,6 +25,7 @@ buttonValues = {
     claimedBefore = false
 }
 rollValues = {"2/4", "1/2", "2/3", "2/3", "1/2", "1/2"}
+rollSuits = {"MOUSE", "FOX", "BUNNY"}
 
 ----------------------
 -- onload
@@ -40,6 +41,7 @@ function createAllButtons()
     createControlMarkerButton()
     createRollButton()
     createClaimButton()
+    createRollSuitButton()
 end
 
 function createControlMarkerButton()
@@ -133,6 +135,22 @@ function createClaimButton()
             visibility = 3
         })
     end
+end
+
+function createRollSuitButton()
+    self.createButton({
+        click_function = "rollSuit",
+        function_owner = self,
+        label = "ROLL",
+        position = {0.85, 1, -0.4},
+        rotation = {0, 0, 0},
+        scale = {0.15, 0.15, 0.4},
+        width = 550,
+        height = 250,
+        font_size = 100,
+        color = "Red",
+        font_color = "White",
+    })
 end
 
 ----------------------
@@ -259,6 +277,26 @@ function claim(obj, color)
         buttonValues.claimed = steamName
     end
 end
+
+function rollSuit()
+    local randomIndex = math.random(#rollSuits)
+    local selectedValue = rollSuits[randomIndex]
+    
+    self.editButton({
+        index = 6,
+        label = selectedValue
+    })
+    
+    local broadcastText = string.format("Uprising springs up in " .. selectedValue .. "!")
+    printToAll(broadcastText, playerboard.color)
+    
+    Wait.time(function()
+        self.editButton({
+            index = 6,
+            label = "Roll"
+        })
+    end, 5)
+end 
 
 ----------------------
 -- Turn change

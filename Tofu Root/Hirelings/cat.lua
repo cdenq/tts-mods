@@ -25,6 +25,87 @@ buttonValues = {
     claimedBefore = false
 }
 rollValues = {"2/4", "1/2", "2/3", "2/3", "1/2", "1/2"}
+warriorMapRotation = {0.00, 180.00, 0.00}
+warriorGUIDs = {
+    "f3ed86",
+    "cfa84e",
+    "8d6980",
+    "e0e01b",
+    "42b906",
+    "3f7e68",
+    "f30541",
+    "ca8cd7",
+    "548b49",
+    "1dcaaa",
+    "583c58",
+    "682116"
+}
+mapGUIDs = {
+    autumn = "43180d",
+    winter = "e94958",
+    lake = "cbb6e5",
+    mountain = "2255cd",
+    -- gorge = "",
+    -- marsh = "",
+}
+warriorMapPositions = {
+    mountain = {
+        {18.04, 1.59, -17.01},
+        {-0.75, 1.59, -17.11},
+        {-15.85, 1.59, -13.66},
+        {10.90, 1.59, -9.95},
+        {0.96, 1.59, -4.22},
+        {-21.50, 1.59, -2.06},
+        {22.59, 1.59, 2.40},
+        {9.41, 1.59, 7.28},
+        {-8.36, 1.59, 2.88},
+        {-19.11, 1.59, 11.34},
+        {17.58, 1.59, 14.14},
+        {-3.66, 1.59, 14.38}
+    },
+    lake = {
+        {17.61, 1.59, -16.08},
+        {0.33, 1.59, -18.20},
+        {-8.71, 1.59, -13.55},
+        {-20.87, 1.59, -8.52},
+        {10.98, 1.59, -7.30},
+        {-8.38, 1.59, -0.60},
+        {-19.29, 1.59, 2.20},
+        {9.54, 1.59, 7.89},
+        {18.81, 1.59, 13.04},
+        {20.11, 1.59, -1.97},
+        {2.08, 1.59, 15.65},
+        {-18.29, 1.59, 15.15}
+    },
+    winter = {
+        {17.14, 1.59, -17.27},
+        {4.57, 1.59, -14.63},
+        {-3.23, 1.59, -12.96},
+        {-18.21, 1.59, -13.98},
+        {-6.49, 1.59, -3.63},
+        {-17.75, 1.59, 3.04},
+        {6.11, 1.59, 0.00},
+        {17.62, 1.59, -5.06},
+        {17.27, 1.59, 12.35},
+        {9.02, 1.59, 16.15},
+        {-5.32, 1.59, 9.44},
+        {-14.78, 1.59, 16.25}
+    },
+    autumn = {
+        {20.67, 1.59, -18.69},
+        {-1.70, 1.59, -17.24},
+        {-17.74, 1.59, -11.62},
+        {3.29, 1.59, -9.29},
+        {20.70, 1.59, -3.86},
+        {-4.20, 1.59, -0.91},
+        {10.26, 1.59, 2.43},
+        {19.65, 1.59, 14.72},
+        {7.66, 1.59, 16.93},
+        {-4.11, 1.59, 12.50},
+        {-20.29, 1.59, 0.88},
+        {-15.84, 1.59, 15.23}
+    }
+}
 
 ----------------------
 -- onload
@@ -40,6 +121,7 @@ function createAllButtons()
     createControlMarkerButton()
     createRollButton()
     createClaimButton()
+    createPlaceButton()
 end
 
 function createControlMarkerButton()
@@ -133,6 +215,22 @@ function createClaimButton()
             visibility = 3
         })
     end
+end
+
+function createPlaceButton()
+    self.createButton({
+        click_function = "placeAll",
+        function_owner = self,
+        label = "PLACE ALL",
+        position = {0.5, 1, -1.15},
+        rotation = {0, 0, 0},
+        scale = {0.15, 0.15, 0.4},
+        width = 650,
+        height = 250,
+        font_size = 100,
+        color = "Red",
+        font_color = "White",
+    })
 end
 
 ----------------------
@@ -257,6 +355,34 @@ function claim(obj, color)
             broadcastToAll(steamName .. " claims " .. hirelingName .. ".", playerboard.color)
         end
         buttonValues.claimed = steamName
+    end
+end
+
+function placeAll()
+    local mapObject, mapName
+    for key, mapGUID in pairs(mapGUIDs) do
+        mapObject = getObjectFromGUID(mapGUID)
+        if mapObject then
+            mapName = key
+            break
+        end
+    end
+     
+    if mapName then
+        local positions = warriorMapPositions[mapName]
+        for i, warrGUID in ipairs(warriorGUIDs) do
+            local tarWarr = getObjectFromGUID(warrGUID)
+            if tarWarr then
+                local adjustedPosition = {
+                    x = positions[i][1],
+                    y = positions[i][2] + 2,
+                    z = positions[i][3]
+                }
+                tarWarr.setPositionSmooth(adjustedPosition)
+                tarWarr.setRotationSmooth(warriorMapRotation)
+            end
+        end
+        self.removeButton(6)
     end
 end
 

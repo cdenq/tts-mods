@@ -46,7 +46,7 @@ function createToggleButton()
         click_function = "toggleReturnPieces",
         function_owner = self,
         label = "Toggle",
-        position = {0, 0, 0.5},
+        position = {0, 0.2, 2},
         rotation = {0, 0, 0},
         width = 500,
         height = 175,

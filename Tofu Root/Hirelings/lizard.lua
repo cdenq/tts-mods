@@ -25,7 +25,47 @@ buttonValues = {
     claimedBefore = false
 }
 rollValues = {"2/4", "1/2", "2/3", "2/3", "1/2", "1/2"}
-
+warriorMapRotation = {0.00, 180.00, 0.00}
+warriorGUIDs = {
+    "c10538",
+    "da02a6",
+    "def2d2",
+    "879fa6"
+}
+mapGUIDs = {
+    autumn = "43180d",
+    winter = "e94958",
+    lake = "cbb6e5",
+    mountain = "2255cd",
+    -- gorge = "",
+    -- marsh = "",
+}
+warriorMapPositions = {
+    mountain = {
+        {11.00, 1.58, -9.84},
+        {-0.26, 1.58, -6.77},
+        {-8.08, 1.58, 2.58},
+        {7.25, 1.58, 10.29}
+    },
+    lake = {
+        {6.54, 1.58, -8.00},
+        {-10.84, 1.58, -2.79},
+        {-21.85, 1.58, 5.16},
+        {11.13, 1.58, 9.27}
+    },
+    winter = {
+        {5.79, 1.58, -1.79},
+        {-6.53, 1.58, -3.96},
+        {-5.33, 1.58, 9.82},
+        {8.87, 1.58, 17.54}
+    },
+    autumn = {
+        {1.10, 1.58, -7.53},
+        {-3.51, 1.58, 0.70},
+        {7.77, 1.58, 0.37},
+        {-22.75, 1.58, -0.92}
+    }
+}
 ----------------------
 -- onload
 ----------------------
@@ -40,6 +80,7 @@ function createAllButtons()
     createControlMarkerButton()
     createRollButton()
     createClaimButton()
+    createPlaceButton()
 end
 
 function createControlMarkerButton()
@@ -133,6 +174,22 @@ function createClaimButton()
             visibility = 3
         })
     end
+end
+
+function createPlaceButton()
+    self.createButton({
+        click_function = "placeAll",
+        function_owner = self,
+        label = "PLACE ALL",
+        position = {0.8, 1, -1.15},
+        rotation = {0, 0, 0},
+        scale = {0.15, 0.15, 0.4},
+        width = 650,
+        height = 250,
+        font_size = 100,
+        color = "Red",
+        font_color = "White",
+    })
 end
 
 ----------------------
@@ -257,6 +314,34 @@ function claim(obj, color)
             broadcastToAll(steamName .. " claims " .. hirelingName .. ".", playerboard.color)
         end
         buttonValues.claimed = steamName
+    end
+end
+
+function placeAll()
+    local mapObject, mapName
+    for key, mapGUID in pairs(mapGUIDs) do
+        mapObject = getObjectFromGUID(mapGUID)
+        if mapObject then
+            mapName = key
+            break
+        end
+    end
+     
+    if mapName then
+        local positions = warriorMapPositions[mapName]
+        for i, warrGUID in ipairs(warriorGUIDs) do
+            local tarWarr = getObjectFromGUID(warrGUID)
+            if tarWarr then
+                local adjustedPosition = {
+                    x = positions[i][1],
+                    y = positions[i][2] + 2,
+                    z = positions[i][3]
+                }
+                tarWarr.setPositionSmooth(adjustedPosition)
+                tarWarr.setRotationSmooth(warriorMapRotation)
+            end
+        end
+        self.removeButton(6)
     end
 end
 

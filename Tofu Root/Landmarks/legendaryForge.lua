@@ -31,8 +31,10 @@ myButtons = {
     startPos = {-0.595, -0.5, 0},
     rotation = {0, 0, 180},
     xIncrement = 0.595,
-    height = 100,
-    width = 100,
+    height = 1000,
+    width = 1000,
+    scale = {0.1, 0.1, 0.1},
+    font_size = 300,
     fox = {
         tooltip = "Setup fox crafting items."
     },
@@ -74,8 +76,11 @@ function createSetup()
             rotation = myButtons.rotation,
             width = myButtons.width,
             height = myButtons.height,
+            scale = myButtons.scale,
+            label = "SETUP",
             font_color = "White",
-            color = {0, 1, 1, 0.75},
+            font_size = myButtons.font_size,
+            color = {1, 0, 0, 0.8},
             tooltip = myButtons[suit].tooltip
         })
     end
@@ -98,6 +103,8 @@ function fox()
             item.setRotation({0, 270, 0})
         end
     end
+
+    deleteButtons()
 end
 
 function mouse()
@@ -114,6 +121,8 @@ function mouse()
             item.setRotation({0, 270, 0})
         end
     end
+
+    deleteButtons()
 end
 
 function bunny()
@@ -129,5 +138,13 @@ function bunny()
             item.setPosition(itemLocations[i])
             item.setRotation({0, 270, 0})
         end
+    end
+
+    deleteButtons()
+end
+
+function deleteButtons()
+    for i = 0, 2 do
+        self.removeButton(i)
     end
 end
