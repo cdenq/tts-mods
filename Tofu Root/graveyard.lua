@@ -3,6 +3,9 @@
 -- By cdenq
 ----------------------
 self.setName("Tofu Graveyard")
+-- note, all hireling warriors are figurines except
+-- bat, frog warriors are tokens
+-- all hireling cardboard are tiles
 
 ----------------------
 -- Variables
@@ -38,34 +41,34 @@ movementMappings = { -- the keys are the actual GM descriptions
         coffinKeepersGUID = "bf44eb",
         adjustment = {
             x = -0.54,
-            y = 1.84 + 2,
+            y = 1.84 + 4,
             z = 0.26
         }
     },
-    --[[hireling1 = {
-        locationGUID = "",
+    hireling1 = {
+        locationGUID = "bbf692",
         adjustment = {
-            x = 0,
+            x = 1,
             y = 2,
-            z = 0
+            z = -1.5
         }
     },
     hireling2 = {
-        locationGUID = "",
+        locationGUID = "fe56c8",
         adjustment = {
-            x = 0,
+            x = 1,
             y = 2,
-            z = 0
+            z = -1.5
         }
     },
     hireling3 = {
-        locationGUID = "",
+        locationGUID = "c16261",
         adjustment = {
-            x = 0,
+            x = 1,
             y = 2,
-            z = 0
+            z = -1.5
         }
-    },]]--
+    },
     catWarrior = {
         locationGUID = "ffa850"
     },
@@ -252,14 +255,18 @@ movementMappings = { -- the keys are the actual GM descriptions
     ]]--
 }
 myIterations = {
-    validTypes = {"Deck", "Card", "Figurine", "Tile", "Token"}
+    exceptions = {
+        byKeyword = {"ratWarrior", "lizardWarrior"}, --unused
+        byGUID = {"4f0e65", "13a694", "7a4d1c"} --otter, stag, exile is pawn
+    }
 }
 myBookkeepingVariables = {
     isReturnPiecesActive = true,
     debugMode = false,
-    spacing_x = 0.85,
-    spacing_z = 0.85,
-    currentGridPosition = 0
+    spacing_x = 1.3,
+    spacing_z = 0.9,
+    currentGridPosition = 0,
+    currentGridPositionCoffin = 0
 }
 
 ----------------------
@@ -356,6 +363,24 @@ function parseObj(collidingObj)
             else
                 moveToDiscard(collidingObj)
             end
+        elseif gmNotes == "hireling1" or gmNotes == "hireling2" or gmNotes == "hireling3" then
+            local isException = false
+            for i, guid in ipairs(myIterations.exceptions.byGUID) do
+                if collidingObj.getGUID() == guid then
+                    isException = true
+                    break
+                end
+            end
+
+            if not isException then
+                if coffinObj and collidingObj.type ~= "Tile" then
+                    moveToCoffin(collidingObj, coffinObj)
+                else
+                    moveToBoard(collidingObj)
+                end
+            else
+                print("Hireling is a pawn.")
+            end
         elseif collidingObj.type == "Figurine" or collidingObj.type == "Tile" or collidingObj.type == "Token" then
             if coffinObj then
                 moveToCoffin(collidingObj, coffinObj)
@@ -395,12 +420,24 @@ function moveToCoffin(collidingObj, coffinObj)
     if collidingObj.type == "Figurine" and gmNotes ~= "ratWarlord" and gmNotes ~= "lizardWarrior" then
         local coffinPos = coffinObj.getPosition()
         local coffinRot = coffinObj.getRotation()
+
+        local row = math.floor(myBookkeepingVariables.currentGridPositionCoffin / 3)  
+        local col = myBookkeepingVariables.currentGridPositionCoffin % 3              
+        local offset_x = (col - 1) * myBookkeepingVariables.spacing_x          
+        local offset_z = (row - 2) * myBookkeepingVariables.spacing_z         
+
         local newCoffinPos = {
-            x = coffinPos.x + movementMappings.warriorCoffin.adjustment.x,
-            y = coffinPos.y + movementMappings.warriorCoffin.adjustment.y,
-            z = coffinPos.z + movementMappings.warriorCoffin.adjustment.z
+            x = coffinPos.x + movementMappings.warriorCoffin.adjustment.x + offset_x,
+            y = coffinPos.y + movementMappings[gmNotes].adjustment.y,
+            z = coffinPos.z + movementMappings.warriorCoffin.adjustment.z + offset_z
         }
+
+        myBookkeepingVariables.currentGridPositionCoffin = (myBookkeepingVariables.currentGridPositionCoffin + 1) % 15
         moveToPlace(collidingObj, newCoffinPos, coffinRot)
+
+        Wait.time(function()
+            myBookkeepingVariables.currentGridPositionCoffin = 0
+        end, 5)
     else
         moveToBoard(collidingObj)
     end
@@ -408,7 +445,7 @@ end
 
 function moveToBoard(collidingObj)
     local gmNotes = collidingObj.getGMNotes()
-    if (collidingObj.type == "Figurine" and gmNotes ~= "ratWarlord" and gmNotes ~= "lizardWarrior") or (collidingObj.type == "Token" and gmNotes == "catWood") then
+    if (collidingObj.type == "Figurine" and gmNotes ~= "ratWarlord" and gmNotes ~= "lizardWarrior" and gmNotes ~= "hireling1" and gmNotes ~= "hireling2" and gmNotes ~= "hireling3") or (collidingObj.type == "Token" and gmNotes == "catWood") then
         local tarBag = getObjectFromGUID(movementMappings[gmNotes].locationGUID)
         moveIntoBag(collidingObj, tarBag)
     else

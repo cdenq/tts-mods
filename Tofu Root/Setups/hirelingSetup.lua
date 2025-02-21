@@ -657,6 +657,7 @@ function returnAllItems()
         for j, item in ipairs(myHirelings[hireling].supplyItems) do
             selectedItem = getObjectFromGUID(item)
             if selectedItem then
+                selectedItem.setGMNotes("") -- used by graveyard for returning
                 selectedBag.putObject(selectedItem)
             end
         end
@@ -736,6 +737,7 @@ function moveHirelings()
                 rotation = {0, 180, 0},
                 smooth = false
             })
+            item.setGMNotes("hireling" .. j) -- used by graveyard for returning
         end
         myBagObjs.hirelingBag.putObject(selectedBag)
     end
