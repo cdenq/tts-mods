@@ -92,7 +92,7 @@ function createScoreButton()
         width = 0,
         height = 0,
         font_size = 600,
-        font_color = {1, 1, 1},
+        font_color = {0, 0, 0},
         label = "0"
     })
 end
@@ -167,7 +167,7 @@ function addVP(obj, color, alt_click)
         else
             printToAll(factionName .. " score increases to " .. markerIndex .. ".", color)
         end
-        moveMarker(markerIndex)
+        moveAndCheckMarker(markerIndex, color)
     else
         printToAll(factionName .. " score cannot increase anymore.", color)
     end
@@ -181,6 +181,30 @@ function subVP(obj, color, alt_click)
         moveMarker(markerIndex)
     else
         printToAll(factionName .. " score cannot decrease anymore.", color)
+    end
+end
+
+function moveAndCheckMarker(markerIndex, color)
+    checkMarker(markerIndex, color)
+    moveMarker(markerIndex)
+end
+
+function checkMarker(markerIndex, color)
+    local keyword
+    if markerIndex == 4 then
+        keyword = "HIRELING4"
+    elseif markerIndex == 8 then
+        keyword = "HIRELING8"
+    elseif markerIndex == 12 then
+        keyword = "HIRELING12"
+    else
+        return
+    end
+
+    local checkGlobal = Global.getVar(keyword)
+    if not checkGlobal then -- if var is false
+        broadcastToAll(Player[color].steam_name .. " needs to claim a hireling!", color)
+        Global.setVar(keyword, true)
     end
 end
 

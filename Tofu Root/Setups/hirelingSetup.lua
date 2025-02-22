@@ -101,7 +101,7 @@ settingButtonLabels = {
     },
     aid = {
         label = "Player Aid",
-        color = myColors.white, 
+        color = myColors.gray, 
         tooltip = "Bring out the Hireling player aid."
     },
     reset = {
@@ -208,8 +208,7 @@ myHirelings = {
             "04655a",
             "be5873",
             "d4f7bc",
-            "c4f5d1",
-            "d5fe5f"
+            "c4f5d1"
         }
     },
     vaga = {

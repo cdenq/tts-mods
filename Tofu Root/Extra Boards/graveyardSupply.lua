@@ -42,6 +42,14 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 0.26
         }
     },
+    mountainPass = {
+        position = {-45.12, 1.69, 15.96},
+        rotation = {0.00, 90.00, 0.00}
+    },
+    retainer = {
+        position = {-45.15, 1.60, 11.38},
+        rotation = {0.00, 90.00, 0.00}
+    },
     hireling1 = {
         locationGUID = "bbf692",
         adjustment = {
@@ -361,16 +369,13 @@ function onCollisionEnter(collision_info)
 end
 
 function parseObj(collidingObj)
-    local soulsObj = getObjectFromGUID(movementMappings.cardSouls.lostSoulsGUID)
     local gmNotes = collidingObj.getGMNotes()
 
     if gmNotes ~= "" or collidingObj.type == "Deck" then
-        if collidingObj.type == "Deck" or collidingObj.type == "Card" then
-            if soulsObj then
-                moveToSouls(collidingObj, soulsObj)
-            else
-                moveToDiscard(collidingObj)
-            end
+        if collidingObj.type == "Deck" then
+            parseDeck(collidingObj)
+        elseif collidingObj.type == "Card" then
+            parseCard(collidingObj)
         elseif gmNotes == "hireling1" or gmNotes == "hireling2" or gmNotes == "hireling3" then
             local isException = false
             for i, guid in ipairs(myIterations.exceptions.byGUID) do
@@ -386,14 +391,41 @@ function parseObj(collidingObj)
                 print("Hireling is a pawn.")
             end
         elseif collidingObj.type == "Figurine" or collidingObj.type == "Tile" or collidingObj.type == "Token" then
-            moveToBoard(collidingObj)
+            if gmNotes == "mountainPass" then --if mountain pass
+                moveToDeckBoard(collidingObj)
+            else
+                moveToBoard(collidingObj)
+            end
         else
             print("Invalid type: " .. collidingObj.type .. ".")
         end
     else 
         doNothing()
     end
-end 
+end
+
+function parseDeck(collidingObj)
+    local cards = collidingObj.getObjects()
+    for key, card in pairs(cards) do
+        local cardObj = collidingObj.takeObject({
+            index = 0,
+            smooth = false
+        })
+        parseCard(cardObj)
+    end
+end
+
+function parseCard(card)
+    local gmNotes = card.getGMNotes()
+    local soulsObj = getObjectFromGUID(movementMappings.cardSouls.lostSoulsGUID)
+    if gmNotes == "retainer" then --if badgers card
+        moveToDeckBoard(card)
+    elseif soulsObj then
+        moveToSouls(card, soulsObj)
+    else
+        moveToDiscard(card)
+    end
+end
 
 ----------------------
 -- moveTo functions
@@ -459,23 +491,22 @@ function moveToBoard(collidingObj)
     end
 end
 
+function moveToDeckBoard(targetObj)
+    local tarPos = movementMappings[targetObj.getGMNotes()].position
+    local tarRot = movementMappings[targetObj.getGMNotes()].rotation
+    local newPos = {
+        x = tarPos[1],
+        y = tarPos[2] + 2,
+        z = tarPos[3]
+    }
+    moveThing(targetObj, newPos, tarRot)
+end
+
 ----------------------
 -- moveType functions
 ----------------------
 function moveCard(collidingObj, targetPos, targetRot)
-    if collidingObj.type == "Card" then
-        moveThing(collidingObj, targetPos, targetRot)
-    else 
-        local cards = collidingObj.getObjects()
-        for i = #cards, 1, -1 do
-            local card = collidingObj.takeObject({
-                guid = cards[i].guid,
-                position = targetPos,
-                rotation = targetRot,
-                smooth = true
-            })
-        end
-    end
+    moveThing(collidingObj, targetPos, targetRot)
 end
 
 function moveIntoBag(collidingObj, targetBag)

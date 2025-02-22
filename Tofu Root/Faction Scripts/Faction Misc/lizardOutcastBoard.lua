@@ -55,7 +55,7 @@ end
 function createAllButtons()
     createSuitCountButtons()
     createDomCountButton()
-    createUpdateOutcastButton() 
+    --createUpdateOutcastButton() now handled by deckboard
 end
 
 function createSuitCountButtons()

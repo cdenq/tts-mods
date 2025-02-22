@@ -320,6 +320,7 @@ function fillPlayerData()
 
         if myBookkeepingVariables.activePlayer == i then
             myPlayerData[tostring(i)].timeBank = myBookkeepingVariables.startingTimeBank + myBookkeepingVariables.addedTime
+            myPlayerData[tostring(i)].turnCount = 1
         else 
             myPlayerData[tostring(i)].timeBank = myBookkeepingVariables.startingTimeBank
         end

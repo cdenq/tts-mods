@@ -8,8 +8,10 @@ self.setName("Tofu Deck Board")
 ----------------------
 -- script variables
 ----------------------
+debug = false
 deckZone = "cf89ff"
 discardZone = "df7de8"
+lostSoulsGUID = "40abac"
 dominancePositions = {
     mouse = {-45.20, 1.60, -2.84},
     bunny = {-45.19, 1.60, -9.80},
@@ -18,7 +20,6 @@ dominancePositions = {
     count = 0
 }
 myIterations = {"mouse", "bunny", "fox", "bird"}
-wait_id = 7348
 myMaps = {
     autumn = {"43180d", "8d1572", "7f8900"},
     winter = {"e94958"},
@@ -27,18 +28,21 @@ myMaps = {
     -- gorge = "",
     -- marsh = "",
 }
-debug = false
+wait_id_dominance = 0
+wait_id_autoshuffle = 0
 
 ----------------------
 -- onload
 ----------------------
 function onload()
     createAllButtons()
-    wait_id = Wait.time(moveDominance, 1, -1)
+    wait_id_dominance = Wait.time(moveDominance, 1, -1)
+    wait_id_autoshuffle = Wait.time(autoReshuffle, 1, -1)
 end
 
 function onDestroy()
-    Wait.stop(wait_id)
+    Wait.stop(wait_id_dominance)
+    Wait.stop(wait_id_autoshuffle)
 end
 
 ----------------------
@@ -47,6 +51,7 @@ end
 function createAllButtons()
     createReshuffle()
     createMapVariant()
+    createLostSouls()
 end
 
 function createReshuffle()
@@ -74,7 +79,21 @@ function createMapVariant()
         height = 75,
         font_size = 50,
         label = "Decorate Map",
-        tooltip = "RMB: Reskin the map, if available.\nLMB: Delete this button."
+        tooltip = "Right-click: Reskin the map, if available.\nLeft-click: Delete this button."
+    })
+end
+
+function createLostSouls()
+    self.createButton({
+        click_function = "callUpdateOutcastMarker",
+        function_owner = self,
+        position = {0, 0.25, 0.1},
+        rotation = {0, 0, 0},
+        scale = {0.75, 0.75, 0.75},
+        color = {0, 0, 0, 0},
+        width = 350,
+        height = 75,
+        tooltip = "Update the Lost Souls deck and marker, if available."
     })
 end
 
@@ -105,6 +124,8 @@ function reshuffle()
             obj.shuffle()
             obj.setPositionSmooth(pos)
             obj.setRotationSmooth({0, 90, 180})
+        else
+            printToAll("No deck found in discard pile.")
         end
     end
 end
@@ -162,6 +183,15 @@ function seekMap()
     end
 end
 
+function callUpdateOutcastMarker()
+    local lostSouls = getObjectFromGUID(lostSoulsGUID)
+    if lostSouls then
+        lostSouls.call("updateOutcastMarker")
+    else
+        printToAll("Lost Souls is not in play.")
+    end
+end
+
 ----------------------
 -- dominance function
 ----------------------
@@ -207,3 +237,12 @@ function moveDominance()
         end
     end
 end
+
+function autoReshuffle()
+    local deckZoneObj = getObjectFromGUID(deckZone).getObjects()
+    local discardZoneObj = getObjectFromGUID(discardZone).getObjects()
+    if #deckZoneObj == 0 and #discardZoneObj ~= 0 then
+        printToAll("Deck is empty; immediately reshuffling.")
+        reshuffle()
+    end
+end 

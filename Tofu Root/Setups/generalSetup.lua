@@ -1103,7 +1103,7 @@ function createResetButton()
         click_function = "onClickFunction_Reset",
         function_owner = self,
         label = "Reset All",
-        tooltip = "Return all map objects to their orignal state and back to bag.",
+        tooltip = "Return all map objects to their original state and back to bag.",
         width = myButtons.genericMain.buttonWidth,
         height = myButtons.genericMain.buttonHeight,
         font_size = myButtons.genericMain.fontSize,
@@ -1478,6 +1478,7 @@ function resetAllPieces()
             myBagObjs.landmarksBag.putObject(obj)
         end
     end
+    setHirelingThreshold(false)
     myBookkeepingVariables.totalPlaced = {}
     myBookkeepingVariables.currentMap = ""
     GLOBALNUMLANDMARKS = 0
@@ -1506,7 +1507,7 @@ end
 
 function placeMap(mapVar)
     if not myMapsSetup[mapVar] then
-        broadcastToAll("Map object for " .. mapVar .. " not found.")
+        print("Map object for " .. mapVar .. " not found.")
         return
     end
 
@@ -1942,6 +1943,21 @@ end
 function setupHirelings()
     if myBookkeepingVariables.currentHirelingFormat == "Yes" then
         placeHirelingsBoard()
+        setHirelingThreshold(true)
+    end
+end
+
+function setHirelingThreshold(mode)
+    if mode then --if true
+        Global.setVar("HIRELING4", false) -- false is "turning on" hireling threshold announcements
+        Global.setVar("HIRELING8", false)
+        Global.setVar("HIRELING12", false)
+    elseif not mode then -- if false
+        Global.setVar("HIRELING4", true)
+        Global.setVar("HIRELING8", true)
+        Global.setVar("HIRELING12", true)
+    else
+        print("Invalid mode; must be T/F.")
     end
 end
 
