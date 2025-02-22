@@ -8,10 +8,10 @@ self.setName("Tofu Quest Board")
 -- variables
 ----------------------
 questDeckGUID = "ff8b6c"
-locations = {
-    {1.58, 1.60, 29.67},
-    {-4.55, 1.60, 29.67},
-    {-10.67, 1.60, 29.67}
+relativeLocations = {
+    {3.11, 0.11, -0.37},
+    {-3.01, 0.11, -0.38},
+    {-9.14, 0.11, -0.38}
 }
 
 ----------------------
@@ -52,8 +52,14 @@ function setup()
     local deck = getObjectFromGUID(questDeckGUID)
     deck.shuffle()
     for i = 1, 3 do
+        local boardPos = self.getPosition()
+        local newPos = {
+            x = boardPos.x + relativeLocations[i][1],
+            y = boardPos.y + relativeLocations[i][2] + 2,
+            z = boardPos.z + relativeLocations[i][3]
+        } 
         deck.takeObject({
-            position = locations[i],
+            position = newPos,
             rotation = {0, 0, 0},
             smooth = true
         })

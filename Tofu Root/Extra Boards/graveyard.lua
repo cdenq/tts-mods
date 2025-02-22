@@ -266,7 +266,8 @@ myBookkeepingVariables = {
     spacing_x = 1.3,
     spacing_z = 0.9,
     currentGridPosition = 0,
-    currentGridPositionCoffin = 0
+    currentGridPositionCoffin = 0,
+    recentlyProcessed = {}
 }
 
 ----------------------
@@ -343,6 +344,18 @@ function onCollisionEnter(collision_info)
     if not myBookkeepingVariables.isReturnPiecesActive then return end
 
     local collidingObj = collision_info.collision_object
+    local objGUID = collidingObj.getGUID()
+    
+    if myBookkeepingVariables.recentlyProcessed[objGUID] then
+        return
+    end
+    
+    myBookkeepingVariables.recentlyProcessed[objGUID] = true
+    
+    Wait.time(function()
+        myBookkeepingVariables.recentlyProcessed[objGUID] = nil
+    end, 1)
+    
     if myBookkeepingVariables.debugMode then 
         print(collidingObj.type) 
         print(collidingObj.getGMNotes() .. ": gm notes.")
@@ -363,7 +376,7 @@ function parseObj(collidingObj)
             else
                 moveToDiscard(collidingObj)
             end
-        elseif gmNotes == "hireling1" or gmNotes == "hireling2" or gmNotes == "hireling3" then
+        elseif (gmNotes == "hireling1" or gmNotes == "hireling2" or gmNotes == "hireling3") then
             local isException = false
             for i, guid in ipairs(myIterations.exceptions.byGUID) do
                 if collidingObj.getGUID() == guid then
@@ -381,7 +394,7 @@ function parseObj(collidingObj)
             else
                 print("Hireling is a pawn.")
             end
-        elseif collidingObj.type == "Figurine" or collidingObj.type == "Tile" or collidingObj.type == "Token" then
+        elseif (collidingObj.type == "Figurine" or collidingObj.type == "Tile" or collidingObj.type == "Token") then
             if coffinObj then
                 moveToCoffin(collidingObj, coffinObj)
             else
@@ -428,7 +441,7 @@ function moveToCoffin(collidingObj, coffinObj)
 
         local newCoffinPos = {
             x = coffinPos.x + movementMappings.warriorCoffin.adjustment.x + offset_x,
-            y = coffinPos.y + movementMappings[gmNotes].adjustment.y,
+            y = coffinPos.y + movementMappings.warriorCoffin.adjustment.y,
             z = coffinPos.z + movementMappings.warriorCoffin.adjustment.z + offset_z
         }
 
@@ -445,7 +458,7 @@ end
 
 function moveToBoard(collidingObj)
     local gmNotes = collidingObj.getGMNotes()
-    if (collidingObj.type == "Figurine" and gmNotes ~= "ratWarlord" and gmNotes ~= "lizardWarrior" and gmNotes ~= "hireling1" and gmNotes ~= "hireling2" and gmNotes ~= "hireling3") or (collidingObj.type == "Token" and gmNotes == "catWood") then
+    if (collidingObj.type == "Figurine" and gmNotes ~= "ratWarlord" and gmNotes ~= "lizardWarrior" and gmNotes ~= "hireling1" and gmNotes ~= "hireling2" and gmNotes ~= "hireling3") or (gmNotes == "catWood") then
         local tarBag = getObjectFromGUID(movementMappings[gmNotes].locationGUID)
         moveIntoBag(collidingObj, tarBag)
     else

@@ -262,7 +262,8 @@ myBookkeepingVariables = {
     debugMode = false,
     spacing_x = 0.9,
     spacing_z = 0.9,
-    currentGridPosition = 0
+    currentGridPosition = 0,
+    recentlyProcessed = {}
 }
 
 ----------------------as
@@ -339,6 +340,18 @@ function onCollisionEnter(collision_info)
     if not myBookkeepingVariables.isReturnPiecesActive then return end
 
     local collidingObj = collision_info.collision_object
+    local objGUID = collidingObj.getGUID()
+    
+    if myBookkeepingVariables.recentlyProcessed[objGUID] then
+        return
+    end
+    
+    myBookkeepingVariables.recentlyProcessed[objGUID] = true
+    
+    Wait.time(function()
+        myBookkeepingVariables.recentlyProcessed[objGUID] = nil
+    end, 1)
+    
     if myBookkeepingVariables.debugMode then 
         print(collidingObj.type) 
         print(collidingObj.getGMNotes() .. ": gm notes.")
@@ -404,7 +417,7 @@ end
 
 function moveToBoard(collidingObj)
     local gmNotes = collidingObj.getGMNotes()
-    if (collidingObj.type == "Figurine" and gmNotes ~= "ratWarlord" and gmNotes ~= "lizardWarrior" and gmNotes ~= "hireling1" and gmNotes ~= "hireling2" and gmNotes ~= "hireling3") or (collidingObj.type == "Token" and gmNotes == "catWood") then
+    if (collidingObj.type == "Figurine" and gmNotes ~= "ratWarlord" and gmNotes ~= "hireling1" and gmNotes ~= "hireling2" and gmNotes ~= "hireling3") or (gmNotes == "catWood") then
         local tarBag 
         if gmNotes == "lizardWarrior" then
             tarBag = getObjectFromGUID(movementMappings[gmNotes].bagGUID)

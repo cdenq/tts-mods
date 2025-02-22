@@ -82,14 +82,6 @@ myMapObjs = {
 function doNothing()
 end
 
---maybe not needed afterall
-function getPlayerColorByIndex(index)
-    if index and myBookkeepingVariables.playerOrder[index] then
-        return myBookkeepingVariables.playerOrder[index].color
-    end
-    return nil
-end
-
 function getPlayerIndexByColor(color)
     for i, orderedColor in ipairs(myBookkeepingVariables.playerOrder) do
         if orderedColor == color then
@@ -512,8 +504,8 @@ function onPlayerTurn(player, previous_player)
         local prevIndex = getPlayerIndexByColor(previous_player.color)
         local currIndex = getPlayerIndexByColor(player.color)
         
-        myPlayerData[tostring(prevIndex)].turnCount = myPlayerData[tostring(prevIndex)].turnCount + 1
         resetWarnings(prevIndex)
+        myPlayerData[tostring(currIndex)].turnCount = myPlayerData[tostring(currIndex)].turnCount + 1
         myPlayerData[tostring(currIndex)].timeBank = myPlayerData[tostring(currIndex)].timeBank + myBookkeepingVariables.addedTime
 
         queryActivePlayer()
