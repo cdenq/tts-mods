@@ -126,8 +126,8 @@ function turmoil(obj, color)
         direction    = {0, 1, 0},
         type         = 3,
         size         = zoneSize,
-        max_distance = 0,
-        debug        = true
+        max_distance = 0
+        --debug        = true
     })
     
     local birdCount = 0
@@ -187,8 +187,8 @@ function setupLeader()
         direction    = {0, 1, 0},
         type         = 3,
         size         = zoneSize,
-        max_distance = 0,
-        debug        = true
+        max_distance = 0
+        --debug        = true
     })
 
     local selectedLeader = nil

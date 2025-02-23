@@ -92,7 +92,7 @@ function createScoreButton()
         width = 0,
         height = 0,
         font_size = 600,
-        font_color = {0, 0, 0},
+        font_color = {1, 1, 1},
         label = "0"
     })
 end
@@ -112,7 +112,7 @@ end
 
 function createSetup()
     self.createButton({
-        click_function = "setup",
+        click_function = "startSetup",
         function_owner = self,
         position = {0, 0.05, 1.2},
         width = 800,
@@ -230,7 +230,7 @@ function updateScore()
     })
 end
 
-function setup()
+function startSetup()
     moveMarker("0")
     updateScore()
     isSetup = true

@@ -43,6 +43,8 @@ pickOrderSet = false
 temporarySeatOrder = {}
 activeSlots = 0
 maxPlayers = 10
+tofuTimerGUID = "87aca4"
+tofuTimerObj = getObjectFromGUID(tofuTimerGUID)
 
 ----------------------
 -- onload function
@@ -57,7 +59,7 @@ end
 function printSeated()
     testseated = getSeatedPlayers()
     for i, value in ipairs(testseated) do 
-        print(i..value)
+        printToAll(i..value)
     end
 end
 
@@ -172,6 +174,10 @@ function demoteAllPlayers()
 end
 
 function randomizePickOrder()
+    if tofuTimerObj then 
+        tofuTimerObj.call("activateTimer")
+    end 
+
     pickOrderSet = true
     clearSeats()
     math.randomseed(os.time())

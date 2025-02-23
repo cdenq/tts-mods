@@ -16,6 +16,9 @@ groups = {
     },
     rat = {
         factionBoardGUID = "53059f"
+    },
+    mole = {
+        factionBoardGUID = "919e94"
     }
 }
 movementMappings = { -- the keys are the actual GM descriptions
@@ -158,7 +161,15 @@ movementMappings = { -- the keys are the actual GM descriptions
         locationGUID = "39e6dd",
     },
     molePiece = {
-        locationGUID = "919e94",
+        locationGUID = groups["mole"].factionBoardGUID,
+        adjustment = {
+            x = 3,
+            y = 2,
+            z = 3
+        }
+    },
+    moleRecruiter = {
+        locationGUID = groups["mole"].factionBoardGUID,
         adjustment = {
             x = 3,
             y = 2,

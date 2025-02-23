@@ -112,7 +112,7 @@ end
 
 function createSetup()
     self.createButton({
-        click_function = "setup",
+        click_function = "startSetup",
         function_owner = self,
         position = {0, 0.05, 1.2},
         width = 800,
@@ -230,8 +230,8 @@ function updateScore()
     })
 end
 
-function setup()
-    moveMarker("0")
+function startSetup()
+    moveMarker(0)
     updateScore()
     isSetup = true
     self.removeButton(1)

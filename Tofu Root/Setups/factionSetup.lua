@@ -278,27 +278,27 @@ orderedFactionsByReach = {
 }
 spawns = {
    ["red"] = {
-       position = {60.00, 1.6, 60.00},
+       position = {55.00, 1.6, 60.00},
        rotation = {0.00, 180.00, 0.00}
    },
    ["purple"] = {
-       position = {0.00, 1.6, 60.00},
+       position = {-5.00, 1.6, 60.00},
        rotation = {0.00, 180.00, 0.00}
    },
    ["white"] = {
-       position = {-60.00, 1.6, 60.00},
+       position = {-65.00, 1.6, 60.00},
        rotation = {0.00, 180.00, 0.00}
    },
    ["blue"] = {
-       position = {-60.00, 1.6, -60.00},
+       position = {-65.00, 1.6, -60.00},
        rotation = {0.00, 0.00, 0.00}
    },
    ["green"] = {
-       position = {0.00, 1.6, -60.00},
+       position = {-5.00, 1.6, -60.00},
        rotation = {0.00, 0.00, 0.00}
    },
    ["yellow"] = {
-       position = {60.00, 1.6, -60.00},
+       position = {55.00, 1.6, -60.00},
        rotation = {0.00, 0.00, 0.00}
    }
 }
