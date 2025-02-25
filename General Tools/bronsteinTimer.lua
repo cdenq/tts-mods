@@ -119,7 +119,8 @@ myBookkeepingVariables = {
     playerOrder = {}, --by color
     activePlayer = 0, --by index
     isSetup = false,
-    isFirstStart = false
+    isFirstStart = false,
+    isActivated = false
 }
 myPlayerData = {}
 -- an entry looks like the below
@@ -167,10 +168,13 @@ function createActiveTimerButton()
 end
 
 function activateTimer()
-    delActivateTimerButton()
-    initializeAll()
-    createAllButtons()
-    startPreGame()
+    if not myBookkeepingVariables.isActivated then
+        delActivateTimerButton()
+        initializeAll()
+        createAllButtons()
+        startPreGame()
+        myBookkeepingVariables.isActivated = true
+    end
 end
 
 function delActivateTimerButton()

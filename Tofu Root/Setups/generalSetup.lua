@@ -1392,14 +1392,14 @@ end
 function onClickFunction_SuitDraw()
     local result = drawSuit()
     if result ~= nil then
-        broadcastToAll("Drawn: " .. result .. ", " .. #myBookkeepingVariables.suitPool .. " left.", myColors.suits[result])
+        printToAll("Drawn: " .. result .. ", " .. #myBookkeepingVariables.suitPool .. " left.", myColors.suits[result])
     else 
         broadcastToAll("Please select a map first.")
     end
 end
 
 function onClickFunction_SuitReset()
-    broadcastToAll("Suits reverted to default (Fox).")
+    printToAll("Suits reverted to default (Fox).")
     revertSuits()
 end
 
@@ -1448,7 +1448,7 @@ for _, formatLabel in ipairs(myIterations.formatButtonLabels) do
         elseif formatLabel == "Hirelings" then 
             -- function for Hirelings setting
         else
-            broadcastToAll("Unknown button function for myIterations.formatButtonLabels!")
+            printToAll("Unknown button function for myIterations.formatButtonLabels!")
         end
     end
 end
@@ -1552,6 +1552,7 @@ function placeMarkers(mapVar)
 
         Wait.time(function()
             markerObj.setLock(true)
+            markerObj.interactable = false
         end, 2)
 
         table.insert(myBookkeepingVariables.totalPlaced, markerGUID)
@@ -1625,7 +1626,21 @@ function randomSuits()
         else
             --else, do nothing and it remains on fox
         end
-        broadcastToAll("Suit " .. markerLabel .. " is " .. rolledSuit .. ".", myColors.suits[rolledSuit])
+        printToAll("Suit " .. markerLabel .. " is " .. rolledSuit .. ".", myColors.suits[rolledSuit])
+    end
+
+    lockMarkers()
+end
+
+function lockMarkers()
+    for clearingNum, guidDict in pairs(myMarkerGUIDSetup) do
+        for _, guid in pairs(guidDict) do
+            local tarMarker = getObjectFromGUID(guid)
+            if tarMarker then
+                tarMarker.setLock(true)
+                tarMarker.interactable = false
+            end
+        end
     end
 end
 

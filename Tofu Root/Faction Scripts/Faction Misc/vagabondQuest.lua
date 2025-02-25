@@ -51,16 +51,27 @@ end
 function setup()
     local deck = getObjectFromGUID(questDeckGUID)
     deck.shuffle()
+    local boardPos = self.getPosition()
+    local boardRot = self.getRotation()
+    
     for i = 1, 3 do
-        local boardPos = self.getPosition()
-        local newPos = {
-            x = boardPos.x + relativeLocations[i][1],
-            y = boardPos.y + relativeLocations[i][2] + 2,
-            z = boardPos.z + relativeLocations[i][3]
-        } 
+        local newPos
+        if boardRot.y > 170 and boardRot.y < 190 then
+            newPos = {
+                x = boardPos.x - relativeLocations[i][1],
+                y = boardPos.y + relativeLocations[i][2] + 2,
+                z = boardPos.z - relativeLocations[i][3]
+            } 
+        else
+            newPos = {
+                x = boardPos.x + relativeLocations[i][1],
+                y = boardPos.y + relativeLocations[i][2] + 2,
+                z = boardPos.z + relativeLocations[i][3]
+            } 
+        end
         deck.takeObject({
             position = newPos,
-            rotation = {0, 0, 0},
+            rotation = boardRot,
             smooth = true
         })
     end

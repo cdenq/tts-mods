@@ -39,13 +39,17 @@ factionMarkers = {
 -- onload function
 ----------------------
 function onLoad()
-    createDrawButton()
-    createFactioNMarkerButton()
+    createAllButtons()
 end
 
 ----------------------
 -- create button functions
 ----------------------
+function createAllButtons()
+    createDrawButton()
+    createFactionMarkerButton()
+end
+
 function createDrawButton()
     self.createButton({
         click_function = "draw",
@@ -62,7 +66,7 @@ function createDrawButton()
     })
 end
 
-function createFactioNMarkerButton()
+function createFactionMarkerButton()
     self.createButton({
         click_function = "spawn",
         function_owner = self,
@@ -90,6 +94,16 @@ function draw(obj, color)
     end
 end
 
+function getSeatedPlayerCount()
+    local count = 0
+    for _, player in ipairs(Player.getPlayers()) do
+        if player.seated then
+            count = count + 1
+        end
+    end
+    return count
+end
+
 function spawn(obj, color)
     local scriptPos = self.getPosition()
     local scriptRot = self.getRotation()
@@ -102,46 +116,58 @@ function spawn(obj, color)
     local markerSpacing = 1.25
     local markerCount = 0
     local markersPlaced = false
-    
-    for teardropLabel, teardropGUID in pairs(teardrops) do
+    local totalTeardrops = 0
+
+    for _, teardropGUID in pairs(teardrops) do
         local teardropObj = getObjectFromGUID(teardropGUID)
         if teardropObj then
-            local factionMarkerBag = getObjectFromGUID(factionMarkersBag)
-            if factionMarkerBag then
-                local factionMarkers = factionMarkers[teardropLabel]
-                local markerPlaced = false
-                if factionMarkers then
-                    for _, markerGUID in ipairs(factionMarkers) do
-                        for _, bagItem in ipairs(factionMarkerBag.getObjects()) do
-                            if bagItem.guid == markerGUID then
-                                local row = math.floor(markerCount / markerGridSize)
-                                local col = markerCount % markerGridSize
-                                local markerPos = {
-                                    x = markerBasePos.x + col * markerSpacing,
-                                    y = markerBasePos.y + 2,
-                                    z = markerBasePos.z + row * markerSpacing
-                                }
-                                factionMarkerBag.takeObject({
-                                    guid = markerGUID,
-                                    position = markerPos,
-                                    rotation = scriptRot
-                                })
-                                markerPlaced = true
-                                markerCount = markerCount + 1
-                                markersPlaced = true
-                                break
+            totalTeardrops = totalTeardrops + 1
+        end
+    end
+
+    if #totalTeardrops == getSeatedPlayerCount() then
+        for teardropLabel, teardropGUID in pairs(teardrops) do
+            local teardropObj = getObjectFromGUID(teardropGUID)
+            if teardropObj then
+                local factionMarkerBag = getObjectFromGUID(factionMarkersBag)
+                if factionMarkerBag then
+                    local factionMarkers = factionMarkers[teardropLabel]
+                    local markerPlaced = false
+                    if factionMarkers then
+                        for _, markerGUID in ipairs(factionMarkers) do
+                            for _, bagItem in ipairs(factionMarkerBag.getObjects()) do
+                                if bagItem.guid == markerGUID then
+                                    local row = math.floor(markerCount / markerGridSize)
+                                    local col = markerCount % markerGridSize
+                                    local markerPos = {
+                                        x = markerBasePos.x + col * markerSpacing,
+                                        y = markerBasePos.y + 2,
+                                        z = markerBasePos.z + row * markerSpacing
+                                    }
+                                    factionMarkerBag.takeObject({
+                                        guid = markerGUID,
+                                        position = markerPos,
+                                        rotation = scriptRot
+                                    })
+                                    markerPlaced = true
+                                    markerCount = markerCount + 1
+                                    markersPlaced = true
+                                    break
+                                end
                             end
+                            if markerPlaced then break end
                         end
-                        if markerPlaced then break end
                     end
+                    if not markerPlaced then
+                        broadcastToAll("No faction marker for " .. teardropLabel, color)
+                    end
+                else
+                    print("Error: Faction marker bag not found.", color)
                 end
-                if not markerPlaced then
-                    broadcastToAll("No faction marker for " .. teardropLabel, color)
-                end
-            else
-                print("Error: Faction marker bag not found.", color)
             end
         end
+    else
+        printToAll("Please wait until all players have selected their factions.")
     end
     
     if markersPlaced then

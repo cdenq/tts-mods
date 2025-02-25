@@ -80,7 +80,7 @@ function createButtons()
     })
 
     self.createButton({
-        click_function = "promoteAllPlayers",
+        click_function = "checkHost",
         label = "Promote",
         function_owner = self,
         position = myButtons.buttonPositions.promotePos,
@@ -151,16 +151,19 @@ end
 -- main click functions
 ----------------------
 function promoteAllPlayers()
-    if not Player.host then
-        broadcastToColor("Only the host can use this function.")
-        return
-    end
-
     local seated = getSeatedPlayers()
     for _, color in ipairs(seated) do
         if not Player[color].promoted then
             Player[color].promote()
         end
+    end
+end
+
+function checkHost(obj, color, alt_click)
+    if Player[color].host then
+        promoteAllPlayers()
+    else
+        broadcastToAll("Only the host can use this function.")
     end
 end
 
