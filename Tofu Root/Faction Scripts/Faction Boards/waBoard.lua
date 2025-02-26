@@ -134,17 +134,17 @@ function createHandZone(playerColor)
     local zonePos = {}
     local zoneRot = playerHandPos.rotation
 
-    if zoneRot.y == 180 then
+    if zoneRot.y > 170 and zoneRot.y < 190 then
         zonePos = {
-            x = playerHandPos.position.x + 15.6,
-            y = playerHandPos.position.y - 3,
-            z = playerHandPos.position.z - 16.2
+            x = playerHandPos.position.x + 15.66,
+            y = playerHandPos.position.y - 0.94,
+            z = playerHandPos.position.z - 25.15
         }
     else
         zonePos = {
-            x = playerHandPos.position.x - 15.6,
-            y = playerHandPos.position.y - 3,
-            z = playerHandPos.position.z + 16.2
+            x = playerHandPos.position.x - 15.66,
+            y = playerHandPos.position.y - 0.94,
+            z = playerHandPos.position.z + 25.15
         }
     end
 

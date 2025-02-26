@@ -9,7 +9,6 @@ self.setName("Tofu Otter VP")
 ----------------------
 markerGUID = "2b7896"
 factionName = "Riverfolk Company"
-markerObj = getObjectFromGUID(markerGUID)
 trackerPositions = {
     ["0"] = {23.30, 1.73, 21.11},
     ["1"] = {21.75, 1.73, 21.11},
@@ -209,6 +208,7 @@ function checkMarker(markerIndex, color)
 end
 
 function moveMarker(markerIndex)
+    local markerObj = getObjectFromGUID(markerGUID)
     local assignedPosition = trackerPositions[tostring(markerIndex)]
     local newPosition = {
         x = assignedPosition[1],
