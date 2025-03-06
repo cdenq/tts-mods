@@ -8,7 +8,7 @@ self.setName("Tofu Rat Board")
 ----------------------
 -- Variables
 ----------------------
-deckZone = getObjectFromGUID("cf89ff")
+deckZone = "cf89ff"
 boardZone = "29b2c0"
 warlordGUID = {"529f5a", "42a8dc"}
 ratFactionBoardGUID = "53059f"
@@ -67,7 +67,7 @@ end
 -- on click functions
 ----------------------
 function draw(obj, color)
-    local objInZone = deckZone.getObjects()
+    local objInZone = getObjectFromGUID(deckZone).getObjects()
     for _, obj in ipairs(objInZone) do
         if obj.tag == "Deck" or obj.tag == "Card" then
             getObjectFromGUID(obj.guid).deal(1, color)

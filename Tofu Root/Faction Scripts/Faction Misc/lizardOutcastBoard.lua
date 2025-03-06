@@ -10,7 +10,6 @@ self.setName("Tofu Lizard Wizard Tool")
 ----------------------
 wait_id = 0
 outcastMarkerGUID = "d90535"
-outcastMarker = getObjectFromGUID(outcastMarkerGUID)
 variableData = {
     mouse = {
         label = "0",
@@ -86,18 +85,18 @@ function createDomCountButton()
     })
 end
 
-function createUpdateOutcastButton()
-    self.createButton({
-        click_function = "updateOutcastMarker",
-        function_owner = self,
-        label = "Update Outcast",
-        position = {-0.5, 0.25, 1.1},
-        scale = {0.5, 0.5, 0.5},
-        width = 800,
-        height = 250,
-        font_size = 75
-    })
-end 
+-- function createUpdateOutcastButton()
+--     self.createButton({
+--         click_function = "updateOutcastMarker",
+--         function_owner = self,
+--         label = "Update Outcast",
+--         position = {-0.5, 0.25, 1.1},
+--         scale = {0.5, 0.5, 0.5},
+--         width = 800,
+--         height = 250,
+--         font_size = 75
+--     })
+-- end 
 
 ----------------------
 -- helper functions
@@ -207,6 +206,7 @@ function checkMarker()
         end
     end
     
+    local outcastMarker = getObjectFromGUID(outcastMarkerGUID)
     local currentPos = outcastMarker.getPosition()
 
     if #highestSuits == 1 then
@@ -217,6 +217,7 @@ function checkMarker()
 end
 
 function moveMarker(suit)
+    local outcastMarker = getObjectFromGUID(outcastMarkerGUID)
     local currentPos = outcastMarker.getPosition()
     local moveToPos = variableData[suit].markerPosition
     compareCurrentX = round(currentPos.x)
@@ -235,6 +236,7 @@ function moveMarker(suit)
 end
 
 function flipMarkerUp()
+    local outcastMarker = getObjectFromGUID(outcastMarkerGUID)
     local currentPos = outcastMarker.getPosition()
     local newPos = {
         x = currentPos.x,
@@ -256,6 +258,7 @@ function flipMarkerUp()
 end
 
 function flipMarkerDown()
+    local outcastMarker = getObjectFromGUID(outcastMarkerGUID)
     local currentRot = outcastMarker.getRotation()
     if round(currentRot.z) == 180 then
         local newRot = {

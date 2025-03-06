@@ -8,10 +8,10 @@ self.setName("Tofu Mole Board")
 ----------------------
 -- Variables
 ----------------------
-deckZone = getObjectFromGUID("cf89ff")
-boardZone = getObjectFromGUID("29b2c0")
-burrowObj = getObjectFromGUID("78c688")
-warriorBag = getObjectFromGUID("39e6dd")
+deckZoneGUID = "cf89ff"
+boardZoneGUID = "29b2c0"
+burrowObjGUID = "78c688"
+warriorBagGUID = "39e6dd"
 keyword = "moleRecruiter"
 
 ----------------------
@@ -61,6 +61,7 @@ end
 -- on click functions
 ----------------------
 function draw(obj, color)
+    local deckZone = getObjectFromGUID(deckZoneGUID)
     local objInZone = deckZone.getObjects()
     for _, obj in ipairs(objInZone) do
         if obj.tag == "Deck" or obj.tag == "Card" then
@@ -71,6 +72,7 @@ end
 
 function recruit(obj, color, alt_click)
     local playerName = Player[color].steam_name
+    local boardZone = getObjectFromGUID(boardZoneGUID)
     local recruiters = {}
     for _, obj in ipairs(boardZone.getObjects()) do
         if obj.getGMNotes() == keyword then
@@ -89,6 +91,7 @@ function recruit(obj, color, alt_click)
         numToPlace = 6
     end
 
+    local warriorBag = getObjectFromGUID(warriorBagGUID)
     if warriorBag.getQuantity() == 0 then
         broadcastToAll("No more warriors to place.")
         return
@@ -102,6 +105,8 @@ function recruit(obj, color, alt_click)
 end
 
 function placeWarrior(numToPlace)
+    local burrowObj = getObjectFromGUID(burrowObjGUID)
+    local warriorBag = getObjectFromGUID(warriorBagGUID)
     local recruiterPosition = burrowObj.getPosition()
     local recruiterRotation = burrowObj.getRotation()
     

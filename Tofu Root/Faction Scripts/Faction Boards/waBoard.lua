@@ -1,6 +1,14 @@
+----------------------
+-- Edited for Tofu Worldview
+-- Original by Root mod
+-- Changes by cdenq
+----------------------
 self.setName("Tofu WA Board")
 
-deckZone = getObjectFromGUID("cf89ff")
+----------------------
+-- Variables
+----------------------
+deckZone = "cf89ff"
 handZoneParameters = {
     zoneWidth = 20,
     zoneHeight = 5,
@@ -11,6 +19,9 @@ handZoneParameters = {
 handZoneGUID = "aa1111"
 activeHandZone = nil
 
+----------------------
+-- onload function
+----------------------
 function onLoad()
     createDrawButton()
     createHandZoneSpawnButton()
@@ -19,6 +30,9 @@ function onLoad()
     Wait.time(updateHandZoneCounter, 1, -1)
 end
 
+----------------------
+-- create button functions
+----------------------
 function createDrawButton()
     self.createButton({
         click_function = "basicDraw",
@@ -81,11 +95,14 @@ function createCounterButtonR()
     })
 end
 
+----------------------
+-- functions
+----------------------
 function doNothing()
 end
 
 function basicDraw(obj, color)
-    local objInZone = deckZone.getObjects()
+    local objInZone = getObjectFromGUID(deckZone).getObjects()
     for _, obj in ipairs(objInZone) do
         if obj.tag == "Deck" or obj.tag == "Card" then
             getObjectFromGUID(obj.guid).deal(1, color)
@@ -95,7 +112,7 @@ end
 
 function draw(obj, color, amount, targetZone)
     amount = amount or 1
-    local objInZone = deckZone.getObjects()
+    local objInZone = getObjectFromGUID(deckZone).getObjects()
     for _, obj in ipairs(objInZone) do
         if obj.tag == "Deck" or obj.tag == "Card" then
             local deck = getObjectFromGUID(obj.guid)

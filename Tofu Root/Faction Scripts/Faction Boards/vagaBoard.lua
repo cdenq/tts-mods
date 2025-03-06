@@ -8,14 +8,15 @@ self.setName("Tofu Vagabond Board")
 ----------------------
 -- Variables
 ----------------------
-deckZone = getObjectFromGUID("cf89ff")
+deckZone = "cf89ff"
 factionMarkersBag = "c14af7"
+factionDrafterGUID = "65521b"
 teardrops = {
     cat = "c33191",
     bird = "259983",
     wa = "9e5675",
-    --vaga = "bb1469",
-    --vaga2 = "615fc6",
+    vaga = "bb1469",
+    vaga2 = "615fc6",
     lizard = "d6f37d",
     otter = "572d09",
     mole = "c6b48f",
@@ -86,7 +87,7 @@ end
 -- on click functions
 ----------------------
 function draw(obj, color)
-    local objInZone = deckZone.getObjects()
+    local objInZone = getObjectFromGUID(deckZone).getObjects()
     for _, obj in ipairs(objInZone) do
         if obj.tag == "Deck" or obj.tag == "Card" then
             getObjectFromGUID(obj.guid).deal(1, color)
@@ -95,12 +96,8 @@ function draw(obj, color)
 end
 
 function getSeatedPlayerCount()
-    local count = 0
-    for _, player in ipairs(Player.getPlayers()) do
-        if player.seated then
-            count = count + 1
-        end
-    end
+    local factionDrafter = getObjectFromGUID(factionDrafterGUID)
+    local count = factionDrafter.getVar("myBookkeepingVariables.currentPlayerCount")
     return count
 end
 
@@ -125,7 +122,7 @@ function spawn(obj, color)
         end
     end
 
-    if #totalTeardrops == getSeatedPlayerCount() then
+    if totalTeardrops >= getSeatedPlayerCount() then
         for teardropLabel, teardropGUID in pairs(teardrops) do
             local teardropObj = getObjectFromGUID(teardropGUID)
             if teardropObj then

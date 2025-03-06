@@ -42,7 +42,6 @@ temporarySeatOrder = {}
 activeSlots = 0
 maxPlayers = 10
 tofuTimerGUID = "87aca4"
-tofuTimerObj = getObjectFromGUID(tofuTimerGUID)
 
 ----------------------
 -- onload function
@@ -125,6 +124,7 @@ end
 -- main click functions
 ----------------------
 function randomizePickOrder()
+    local tofuTimerObj = getObjectFromGUID(tofuTimerGUID)
     if tofuTimerObj then 
         tofuTimerObj.call("activateTimer")
     end 
@@ -161,14 +161,14 @@ function randomizePickOrder()
     for i = 1, maxPlayers do
         if i <= n then
             self.editButton({
-                index = i + 4,
+                index = i + 2,
                 label = "Seat " .. tostring(i),
                 color = myColors.gray,
                 font_color = myColors.black
             })
         else
             self.editButton({
-                index = i + 4,
+                index = i + 2,
                 label = "x",
                 color = myColors.black,
                 font_color = myColors.white
@@ -181,7 +181,7 @@ function clearSeats()
     if pickOrderSet then
         for i = 1, activeSlots do
             self.editButton({
-                index = i + 4,
+                index = i + 2,
                 label = "Seat " .. i,
                 color = myColors.gray,
                 font_color = myColors.black
@@ -222,6 +222,11 @@ function finalizeSeats()
             for i, color in ipairs(newOrder) do
                 printToAll(i .. ": " .. Player[color].steam_name, stringColorToRGB(color))
             end
+
+            local tofuTimerObj = getObjectFromGUID(tofuTimerGUID)
+            if tofuTimerObj then 
+                tofuTimerObj.call("clickSetup")
+            end 
         else
             broadcastToAll("Not all seats have been assigned.")
         end
@@ -239,7 +244,7 @@ for i = 1, maxPlayers do
             local player = Player[color]
             local newLabel = "Seat " .. i .. ":\n" .. player.steam_name
             obj.editButton({
-                index = i + 4, 
+                index = i + 2, 
                 label = newLabel, 
                 color = stringColorToRGB(color), 
                 font_color = myColors.black})

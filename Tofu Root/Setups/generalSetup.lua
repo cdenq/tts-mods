@@ -209,6 +209,7 @@ myMapsSetup = {
         landmark = {
             GUID = "a17289",
             position = {105.95, 2.03, 17.88},
+            positionClassic = {105.95, 2.03, -23.92},
             rotation = {0.00, 270.00, 0.00},
             lock = true,
             interact = true
@@ -216,6 +217,7 @@ myMapsSetup = {
         hireling = {
             GUID = "53df8e",
             position = {105.95, 2.03, -1.76},
+            positionClassic = {105.95, 2.03, -43.58},
             rotation = {0.00, 270.00, 0.00},
             lock = true,
             interact = true
@@ -223,6 +225,7 @@ myMapsSetup = {
         draft = {
             GUID = "65521b",
             position = {104.59, 2.03, -32.50},
+            positionClassic = {104.59, 2.03, 6.84},
             rotation = {0.00, 270.00, 0.00},
             lock = true,
             interact = true
@@ -230,6 +233,7 @@ myMapsSetup = {
         draftAid = {
             GUID = "442895",
             position = {117.38, 2.13, -32.44},
+            positionClassic = {117.38, 2.13, 7.00},
             rotation = {0.00, 270.00, 0.00},
             lock = true,
             interact = true
@@ -1944,9 +1948,15 @@ function placeLandmarks()
 end
 
 function placeLandmarkBoard()
+    local goPosition
+    if myBookkeepingVariables.currentFormat == "AdSet" or myBookkeepingVariables.currentFormat == "ModAdSet" then
+        goPosition = myMapsSetup.boards.landmark.position
+    else
+        goPosition = myMapsSetup.boards.landmark.positionClassic
+    end
     local targetExtraObj = myBagObjs.mapBag.takeObject({
         guid = myMapsSetup.boards.landmark.GUID,
-        position = myMapsSetup.boards.landmark.position,
+        position = goPosition,
         rotation = myMapsSetup.boards.landmark.rotation,
         smooth = false
     })
@@ -1977,9 +1987,15 @@ function setHirelingThreshold(mode)
 end
 
 function placeHirelingsBoard()
+    local goPosition
+    if myBookkeepingVariables.currentFormat == "AdSet" or myBookkeepingVariables.currentFormat == "ModAdSet" then
+        goPosition = myMapsSetup.boards.hireling.position
+    else
+        goPosition = myMapsSetup.boards.hireling.positionClassic
+    end
     local targetExtraObj = myBagObjs.mapBag.takeObject({
         guid = myMapsSetup.boards.hireling.GUID,
-        position = myMapsSetup.boards.hireling.position,
+        position = goPosition,
         rotation = myMapsSetup.boards.hireling.rotation,
         smooth = false
     })
@@ -1994,9 +2010,15 @@ function setupDraft()
 end
 
 function placeDraftBoard()
+    local goPosition
+    if myBookkeepingVariables.currentFormat == "AdSet" or myBookkeepingVariables.currentFormat == "ModAdSet" then
+        goPosition = myMapsSetup.boards.draft.position
+    else
+        goPosition = myMapsSetup.boards.draft.positionClassic
+    end
     local targetExtraObj = myBagObjs.mapBag.takeObject({
         guid = myMapsSetup.boards.draft.GUID,
-        position = myMapsSetup.boards.draft.position,
+        position = goPosition,
         rotation = myMapsSetup.boards.draft.rotation,
         smooth = false
     })
@@ -2006,9 +2028,15 @@ function placeDraftBoard()
 end
 
 function placeDraftAid()
+    local goPosition
+    if myBookkeepingVariables.currentFormat == "AdSet" or myBookkeepingVariables.currentFormat == "ModAdSet" then
+        goPosition = myMapsSetup.boards.draftAid.position
+    else
+        goPosition = myMapsSetup.boards.draftAid.positionClassic
+    end
     local targetExtraObj = myBagObjs.mapBag.takeObject({
         guid = myMapsSetup.boards.draftAid.GUID,
-        position = myMapsSetup.boards.draftAid.position,
+        position = goPosition,
         rotation = myMapsSetup.boards.draftAid.rotation,
         smooth = false
     })
