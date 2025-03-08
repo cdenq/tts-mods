@@ -22,6 +22,9 @@ groups = {
     },
     mole = {
         factionBoardGUID = "919e94"
+    },
+    wa = {
+        factionBoardGUID = "b69618"
     }
 }
 movementMappings = { -- the keys are the actual GM descriptions
@@ -125,7 +128,15 @@ movementMappings = { -- the keys are the actual GM descriptions
         locationGUID = "ebc24d",
     },
     waPiece = {
-        locationGUID = "b69618",
+        locationGUID = groups["wa"].factionBoardGUID,
+        adjustment = {
+            x = -3,
+            y = 2,
+            z = 3
+        }
+    },
+    waBase = {
+        locationGUID = groups["wa"].factionBoardGUID,
         adjustment = {
             x = -3,
             y = 2,

@@ -19,6 +19,7 @@ keyword = "moleRecruiter"
 ----------------------
 function onLoad(save_state)
     createDrawButton()
+    createPlaceButton()
     createRecruitButton()
 end
 
@@ -41,12 +42,28 @@ function createDrawButton()
     })
 end
 
+function createPlaceButton()
+    self.createButton({
+        click_function = "place",
+        function_owner = self,
+        label = "PLACE",
+        position = {0, 0.2, -0.315},
+        rotation = {0, 0, 0},
+        scale = {0.05, 0.05, 0.05},
+        width = 2100,
+        height = 600,
+        font_size = 400,
+        color = "Red",
+        font_color = "White",
+    })
+end
+
 function createRecruitButton()
     self.createButton({
         click_function = "recruit",
         function_owner = self,
         label = "RECRUIT",
-        position = {0, 0.2, -0.315},
+        position = {-0.47, 0.2, -0.14},
         rotation = {0, 0, 0},
         scale = {0.05, 0.05, 0.05},
         width = 2500,
@@ -70,7 +87,7 @@ function draw(obj, color)
     end
 end
 
-function recruit(obj, color, alt_click)
+function place(obj, color, alt_click)
     local playerName = Player[color].steam_name
     local boardZone = getObjectFromGUID(boardZoneGUID)
     local recruiters = {}
@@ -101,6 +118,18 @@ function recruit(obj, color, alt_click)
     else
         placeWarrior(numToPlace)
         broadcastToAll(playerName .. " recruits " .. numToPlace .. " warriors in Birdsong.", color)
+    end
+end
+
+function recruit(obj, color, alt_click)
+    local playerName = Player[color].steam_name
+    local warriorBag = getObjectFromGUID(warriorBagGUID)
+    if warriorBag.getQuantity() == 0 then
+        broadcastToAll("No more warriors to place.")
+        return
+    else
+        placeWarrior(1)
+        broadcastToAll(playerName .. " Assembly recruits " .. 1 .. " warriors in Daylight.", color)
     end
 end
 

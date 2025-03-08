@@ -778,6 +778,9 @@ function dealPlayerBoards()
                     smooth = true
                 })
                 selectedBoard.setLock(true)
+                Wait.time(function()
+                    selectedBoard.call("click_place")
+                end, 2.5)
                 printToAll(playerName .. " drafts " .. faction.full .. ".", playerColor)
             end
         end
@@ -1113,6 +1116,9 @@ function dealAdsetFaction()
                         smooth = true
                     })
                     selectedBoard.setLock(true)
+                    Wait.time(function()
+                        selectedBoard.call("click_place")
+                    end, 2.5)
                     if factionKey == "rat" or factionKey == "vaga" or factionKey == "vaga2" then
                         broadcastToAll("Adjust ruins settings, if needed.")
                     end

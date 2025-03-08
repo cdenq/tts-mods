@@ -16,8 +16,15 @@ handZoneParameters = {
     zoneYOffset = 5,
     zoneScale = {x = 1, y = 1, z = 1}
 }
+warriorBagGUID = "ebc24d"
 handZoneGUID = "aa1111"
 activeHandZone = nil
+myIterations = {"mouse", "bunny", "fox"}
+myColors = {
+    fox = {0.886, 0.318, 0.204},
+    mouse = {0.945, 0.573, 0.380},
+    bunny = {0.941, 0.843, 0.376}
+}
 
 ----------------------
 -- onload function
@@ -26,7 +33,7 @@ function onLoad()
     createDrawButton()
     createHandZoneSpawnButton()
     createCounterButton()
-    createCounterButtonR()
+    createDiscardSupporterButtons()
     Wait.time(updateHandZoneCounter, 1, -1)
 end
 
@@ -57,7 +64,7 @@ function createHandZoneSpawnButton()
         position = {-0.9, 0.25, 0.1},
         rotation = {0, 0, 0},
         scale = {0.05, 0.05, 0.05},
-        width = 2900,
+        width = 3500,
         height = 600,
         font_size = 400,
         color = "Red",
@@ -69,30 +76,51 @@ function createCounterButton()
     self.createButton({
         click_function = "doNothing",
         function_owner = self,
-        label = "0",
-        position = {-1.23, 0.25, 0.05},
+        label = "Supporters: 0",
+        position = {0, 0.25, -0.935},
         rotation = {0, 0, 0},
         scale = {0.5, 0.5, 0.5},
-        width = 100,
-        height = 100,
-        font_size = 75,
-        tooltip = "Current number of supporters."
+        width = 0,
+        height = 0,
+        font_color = {0, 0, 0},
+        font_size = 100
     })
 end
 
-function createCounterButtonR()
-    self.createButton({
-        click_function = "doNothing",
-        function_owner = self,
-        label = "0",
-        position = {-1.23, 0.25, -0.05},
-        rotation = {0, 180, 0},
-        scale = {0.5, 0.5, 0.5},
-        width = 100,
-        height = 100,
-        font_size = 75,
-        tooltip = "Current number of supporters."
-    })
+function createDiscardSupporterButtons()
+    for i, value in ipairs(myIterations) do 
+        self.createButton({
+            click_function = "discardSupporters" .. value,
+            function_owner = self,
+            label = "REMOVE " .. value:upper(),
+            position = {-0.3725, 0.25, 0.25 - (i-1) * 0.05},
+            rotation = {0, 0, 0},
+            scale = {0.15, 0.15, 0.15},
+            width = 600,
+            height = 150,
+            color = myColors[value],
+            font_color = {0, 0, 0},
+            font_size = 75
+        })
+    end
+end
+
+----------------------
+-- on click functions
+----------------------
+for i, value in ipairs(myIterations) do
+    _G["discardSupporters" .. value] = function(obj, color, alt_click)
+        discardSupporters(value, color)
+    end
+end
+
+----------------------
+-- helper functions
+----------------------
+function titleCase(str)
+    return (str:gsub("(%a)([%w_']*)", function(first, rest)
+        return first:upper() .. rest:lower()
+    end))
 end
 
 ----------------------
@@ -186,13 +214,11 @@ function createHandZone(playerColor)
 end
 
 function updateHandZoneCounter()
-    if not self then return end
     local zone = activeHandZone
     if not zone then
         zone = getObjectFromGUID(handZoneGUID)
     end
     local buttons = self.getButtons()
-    if not buttons then return end
     
     local counterButtonIndex = nil
     for i, button in ipairs(buttons) do
@@ -204,13 +230,97 @@ function updateHandZoneCounter()
     
     if zone and counterButtonIndex then
         local count = #zone.getObjects()
-        self.editButton({
-            index = counterButtonIndex,
-            label = tostring(count)
-        })
-        self.editButton({
-            index = counterButtonIndex + 1,
-            label = tostring(count)
-        })
+        if checkBases() == 3 and count > 5 then
+            self.editButton({
+                index = counterButtonIndex,
+                font_color = "Red",
+                label = "Supporters: " .. tostring(count)
+            })
+        else
+            self.editButton({
+                index = counterButtonIndex,
+                font_color = {0, 0, 0},
+                label = "Supporters: " .. tostring(count)
+            })
+        end
+    end
+end
+
+function discardSupporters(suit, color)
+    local zone = activeHandZone
+    if not zone then
+        zone = getObjectFromGUID(handZoneGUID)
+    end
+
+    local supportersInHand = zone.getObjects()
+    local originalCount = #supportersInHand
+    local cardsToDiscard = {}
+    
+    for _, obj in ipairs(supportersInHand) do
+        local notes = obj.getDescription()
+        if notes == "Bird" or notes == titleCase(suit) then
+            table.insert(cardsToDiscard, obj)
+        end
+    end
+    
+    local discardCount = #cardsToDiscard
+    
+    if discardCount > 0 then
+        local targetPosition = {27.84, 3.65, 25.03}
+        for i = 1, #cardsToDiscard do
+            cardsToDiscard[i].setPosition(targetPosition)
+        end
+        broadcastToAll("Woodland Alliance discards " .. discardCount .. " out of " .. originalCount .. " Supporter(s).", color)
+    end
+
+    halveOfficers(color)
+end
+
+function checkBases()
+    local hitList = Physics.cast({
+        origin       = self.getPosition(),
+        direction    = {0, 1, 0},
+        type         = 3,
+        size         = {x = 18, y = 5, z = 15},
+        max_distance = 2
+        -- debug        = true
+    })
+    local totalItems = 0
+    for _, hit in ipairs(hitList) do
+        local obj = hit.hit_object
+        if obj.type == "Tile" and obj.getGMNotes() == "waBase" then
+            totalItems = totalItems + 1
+        end
+    end
+    return totalItems
+end
+
+function halveOfficers(color)
+    local hitList = Physics.cast({
+        origin       = self.getPosition(),
+        direction    = {0, 1, 0},
+        type         = 3,
+        size         = {x = 18, y = 5, z = 15},
+        max_distance = 2
+        -- debug        = true
+    })
+    local totalOfficers = {}
+    for _, hit in ipairs(hitList) do
+        local obj = hit.hit_object
+        if obj.type == "Figurine" and obj.getGMNotes() == "waWarrior" then
+            table.insert(totalOfficers, obj)
+        end
+    end
+
+    local warriorBag = getObjectFromGUID(warriorBagGUID)
+    local lostOfficers = math.ceil(#totalOfficers / 2)
+
+    if lostOfficers > 0 then
+        for i = 1, lostOfficers do
+            if totalOfficers[i] then
+                warriorBag.putObject(totalOfficers[i])
+            end
+        end        
+        broadcastToAll("Woodland Alliance loses " .. lostOfficers .. " out of " .. #totalOfficers .. " Officer(s).", color)
     end
 end
