@@ -2,8 +2,8 @@
 -- Tofu Tumble
 -- By tofuwater
 ----------------------
-self.setName("Tofu Vagabond Picker")
-factionBoardGUID = "e41590"
+self.setName("Tofu Vagabond 2 Picker")
+factionBoardGUID = "947d73"
 
 ----------------------
 -- variables

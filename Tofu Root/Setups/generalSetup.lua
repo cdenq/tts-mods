@@ -1,6 +1,6 @@
 ----------------------
--- Created for Tofu Worldview
--- By cdenq
+-- Tofu Tumble
+-- tofuwater
 ----------------------
 self.setName("Tofu Comprehensive Setup")
 --[[
@@ -177,25 +177,25 @@ myMapsSetup = {
             interact = true
         },
         graveone = {
-            GUID = "47b453",
+            GUID = "7087d0",
             position = {27.64, 1.53, 0.01},
             rotation = {0, 0, 0},
             lock = true,
-            interact = false
+            interact = true
         },
         gravetwo = {
-            GUID = "f391db",
+            GUID = "cfbc38",
             position = {-27.57, 1.53, -11.60},
-            rotation = {0, 0, 0},
+            rotation = {0, 180.00, 0},
             lock = true,
-            interact = false
+            interact = true
         },
         supplyOne = {
-            GUID = "5ac3db",
+            GUID = "c58371",
             position = {-27.57, 1.53, 11.51},
-            rotation = {0, 0, 0},
+            rotation = {0, 180.00, 0},
             lock = true,
-            interact = false
+            interact = true
         },
         coffin = {
             GUID = "fc47b2",

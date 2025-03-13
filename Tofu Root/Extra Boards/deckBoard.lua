@@ -1,6 +1,6 @@
 ----------------------
--- Created for Tofu Worldview
--- By cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
 self.setName("Tofu Deck Board")
 -- TTS bug for getstates, will return 1 less in count if 3 or more states.
@@ -12,6 +12,7 @@ debug = false
 deckZone = "cf89ff"
 discardZone = "df7de8"
 lostSoulsGUID = "40abac"
+lizardBoardGUID = "e8687a"
 dominancePositions = {
     mouse = {-45.20, 1.60, -2.84},
     bunny = {-45.19, 1.60, -9.80},
@@ -184,11 +185,11 @@ function seekMap()
 end
 
 function callUpdateOutcastMarker()
-    local lostSouls = getObjectFromGUID(lostSoulsGUID)
-    if lostSouls then
-        lostSouls.call("updateOutcastMarker")
+    local lizardBoardObj = getObjectFromGUID(lizardBoardGUID)
+    if lizardBoardObj then
+        lizardBoardObj.call("updateLostSouls")
     else
-        printToAll("Lost Souls is not in play.")
+        broadcastToAll("Lost Souls is not in play.")
     end
 end
 
@@ -242,7 +243,12 @@ function autoReshuffle()
     local deckZoneObj = getObjectFromGUID(deckZone).getObjects()
     local discardZoneObj = getObjectFromGUID(discardZone).getObjects()
     if #deckZoneObj == 0 and #discardZoneObj ~= 0 then
-        printToAll("Deck is empty; immediately reshuffling.")
-        reshuffle()
+        for i, obj in pairs(discardZoneObj) do
+            if obj.type == "Deck" or obj.type == "Card" then
+                printToAll("Deck is empty; immediately reshuffling.")
+                reshuffle()
+                break
+            end
+        end 
     end
 end 

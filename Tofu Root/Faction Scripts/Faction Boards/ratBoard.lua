@@ -1,7 +1,6 @@
 ----------------------
--- Edited for Tofu Worldview
--- Original by Root mod
--- Changes by cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
 self.setName("Tofu Rat Board")
 
@@ -35,15 +34,16 @@ function createDrawButton()
     self.createButton({
         click_function = "draw",
         function_owner = self,
-        label = "DRAW 1 CARD",
+        label = "DRAW CARD",
         position = {-1.01, 0.25, 0.93},
         rotation = {0, 0, 0},
         scale = {0.05, 0.05, 0.05},
-        width = 2900,
+        width = 2800,
         height = 600,
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Draw 1 card from the Deck."
     })
 end
 
@@ -60,6 +60,7 @@ function createRecruitButton()
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Recruits warriors to Warlord and then to each Stronghold. Use during Birdsong upkeep."
     })
 end
 
@@ -90,12 +91,12 @@ function checkProwess()
     local zoneSize = {x = 18, y = 5, z = 15}
 
     local hitList = Physics.cast({
-        origin       = ratFactionBoardPosition,
-        direction    = {0, 1, 0},
-        type         = 3,
-        size         = zoneSize,
+        origin = ratFactionBoardPosition,
+        direction = {0, 1, 0},
+        type = 3,
+        size = zoneSize,
         max_distance = 2
-        --debug        = true
+        --debug = true
     })
     
     local totalItems = 0
@@ -114,10 +115,6 @@ end
 function recruit(obj, color)
     local boardZoneObj = getObjectFromGUID(boardZone)
     local warriorBagObj = getObjectFromGUID(warriorBagGUID)
-    if not boardZoneObj or not warriorBagObj then
-        print("Error: Board zone or warrior bag not found.", {1,0,0})
-        return
-    end
 
     local spawners = {}
     local warlordFound = false
@@ -150,10 +147,10 @@ function recruit(obj, color)
         end
 
         if warriorBagObj.getQuantity() == 0 then
-            broadcastToAll("No more warriors to place onto Warlord.")
+            broadcastToAll("No more warriors to place onto Warlord.", color)
             return
         elseif warriorBagObj.getQuantity() < finalCount then
-            broadcastToAll("Not enough warriors to auto-place. You need to add " .. finalCount .. " warriors but only have " .. warriorBagObj.getQuantity() .. " left.")
+            broadcastToAll("Not enough warriors to auto-place. You need to add " .. finalCount .. " warriors but only have " .. warriorBagObj.getQuantity() .. " left.", color)
             return
         else
             for i = 1, finalCount do
@@ -169,17 +166,17 @@ function recruit(obj, color)
             end
         end
     else 
-        broadcastToAll("No warlord anointed.", {1,0,0})
+        broadcastToAll("No warlord anointed.", color)
     end
 
     if #spawners == 0 then
-        broadcastToAll("No strongholds built.", {1,0,0})
+        broadcastToAll("No strongholds built.", color)
         return
     elseif warriorBagObj.getQuantity() == 0 then
-        broadcastToAll("No more warriors to place onto strongholds.")
+        broadcastToAll("No more warriors to place onto strongholds.", color)
         return
     elseif warriorBagObj.getQuantity() < #spawners then
-        broadcastToAll("Not enough warriors to auto-place. You need to add " .. #spawners .. " warriors but only have " .. warriorBagObj.getQuantity() .. " left.")
+        broadcastToAll("Not enough warriors to auto-place. You need to add " .. #spawners .. " warriors but only have " .. warriorBagObj.getQuantity() .. " left.", color)
         return
     else
         for _, recruiter in ipairs(spawners) do
@@ -199,8 +196,7 @@ function recruit(obj, color)
             totalWarriors = totalWarriors + 1
         end
         
-        local playerName = Player[color].steam_name or color
-        broadcastToAll(playerName .. " recruits " .. totalWarriors .. " warriors in Daylight.")
+        printToAll(Player[color].steam_name .. " recruits " .. totalWarriors .. " warriors in Daylight.", color)
     end
 end
 

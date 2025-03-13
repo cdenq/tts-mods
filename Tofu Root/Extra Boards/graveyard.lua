@@ -1,8 +1,8 @@
 ----------------------
--- Coded for Tofu Worldview
--- By cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
-self.setName("Tofu Graveyard")
+self.setName("To Grave")
 -- note, all hireling warriors are figurines except
 -- bat, frog warriors are tokens
 -- all hireling cardboard are tiles

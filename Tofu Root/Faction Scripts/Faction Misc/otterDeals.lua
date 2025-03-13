@@ -1,6 +1,6 @@
 ----------------------
--- Created for Tofu Worldview
--- By cdenq
+-- Tofu Tumble
+-- Refactored by tofuwater
 -- Original by MrStump + Archmagos Diodelosus
 ----------------------
 self.setName("River Contract")

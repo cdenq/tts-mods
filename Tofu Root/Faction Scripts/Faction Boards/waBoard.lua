@@ -1,7 +1,6 @@
 ----------------------
--- Edited for Tofu Worldview
--- Original by Root mod
--- Changes by cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
 self.setName("Tofu WA Board")
 
@@ -44,15 +43,16 @@ function createDrawButton()
     self.createButton({
         click_function = "basicDraw",
         function_owner = self,
-        label = "DRAW 1 CARD",
-        position = {-1.01, 0.25, 0.93},
+        label = "DRAW CARD",
+        position = {1.01, 0.25, -0.025},
         rotation = {0, 0, 0},
         scale = {0.05, 0.05, 0.05},
-        width = 2900,
+        width = 2800,
         height = 600,
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Draw 1 card from the Deck."
     })
 end
 
@@ -60,7 +60,7 @@ function createHandZoneSpawnButton()
     self.createButton({
         click_function = "onHandZoneButtonClick",
         function_owner = self,
-        label = "MAKE HANDZONE",
+        label = "SETUP SUPPORTERS",
         position = {-0.9, 0.25, 0.1},
         rotation = {0, 0, 0},
         scale = {0.05, 0.05, 0.05},
@@ -69,6 +69,7 @@ function createHandZoneSpawnButton()
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Draws 3 Supporters from the Deck and adds it the Supporters hand. Use during Setup."
     })
 end
 
@@ -92,15 +93,16 @@ function createDiscardSupporterButtons()
         self.createButton({
             click_function = "discardSupporters" .. value,
             function_owner = self,
-            label = "REMOVE " .. value:upper(),
-            position = {-0.3725, 0.25, 0.25 - (i-1) * 0.05},
+            label = "REMOVE " .. value:upper() .. " BASE",
+            position = {-0.36, 0.25, 0.25 - (i-1) * 0.05},
             rotation = {0, 0, 0},
-            scale = {0.15, 0.15, 0.15},
-            width = 600,
-            height = 150,
+            scale = {0.05, 0.05, 0.05},
+            width = 2000,
+            height = 450,
             color = myColors[value],
             font_color = {0, 0, 0},
-            font_size = 75
+            font_size = 200,
+            tooltip = "Halves the number of Officers and removes all Bird and " .. titleCase(value) .. " Supporters from the Supporters hand. Use when removing a " .. titleCase(value) .. " Base."
         })
     end
 end
@@ -270,7 +272,7 @@ function discardSupporters(suit, color)
         for i = 1, #cardsToDiscard do
             cardsToDiscard[i].setPosition(targetPosition)
         end
-        broadcastToAll("Woodland Alliance discards " .. discardCount .. " out of " .. originalCount .. " Supporter(s).", color)
+        printToAll("Woodland Alliance discards " .. discardCount .. " out of " .. originalCount .. " Supporter(s).", color)
     end
 
     halveOfficers(color)
@@ -278,12 +280,12 @@ end
 
 function checkBases()
     local hitList = Physics.cast({
-        origin       = self.getPosition(),
-        direction    = {0, 1, 0},
-        type         = 3,
-        size         = {x = 18, y = 5, z = 15},
+        origin = self.getPosition(),
+        direction = {0, 1, 0},
+        type = 3,
+        size = {x = 18, y = 5, z = 15},
         max_distance = 2
-        -- debug        = true
+        -- debug = true
     })
     local totalItems = 0
     for _, hit in ipairs(hitList) do
@@ -297,12 +299,12 @@ end
 
 function halveOfficers(color)
     local hitList = Physics.cast({
-        origin       = self.getPosition(),
-        direction    = {0, 1, 0},
-        type         = 3,
-        size         = {x = 18, y = 5, z = 15},
+        origin = self.getPosition(),
+        direction = {0, 1, 0},
+        type = 3,
+        size = {x = 18, y = 5, z = 15},
         max_distance = 2
-        -- debug        = true
+        -- debug = true
     })
     local totalOfficers = {}
     for _, hit in ipairs(hitList) do
@@ -321,6 +323,6 @@ function halveOfficers(color)
                 warriorBag.putObject(totalOfficers[i])
             end
         end        
-        broadcastToAll("Woodland Alliance loses " .. lostOfficers .. " out of " .. #totalOfficers .. " Officer(s).", color)
+        printToAll("Woodland Alliance loses " .. lostOfficers .. " out of " .. #totalOfficers .. " Officer(s).", color)
     end
 end

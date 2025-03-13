@@ -1,6 +1,6 @@
 ----------------------
--- Coded for Tofu Worldview
--- By cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
 self.setName("Collections Bowl")
 

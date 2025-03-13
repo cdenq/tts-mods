@@ -1,6 +1,6 @@
 ----------------------
--- Created for Tofu Worldview
--- By cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
 self.setName("Otter Money")
 

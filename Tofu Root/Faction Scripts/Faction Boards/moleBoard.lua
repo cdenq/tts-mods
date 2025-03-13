@@ -1,7 +1,6 @@
 ----------------------
--- Edited for Tofu Worldview
--- Original by Root mod
--- Changes by cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
 self.setName("Tofu Mole Board")
 
@@ -13,14 +12,23 @@ boardZoneGUID = "29b2c0"
 burrowObjGUID = "78c688"
 warriorBagGUID = "39e6dd"
 keyword = "moleRecruiter"
+handzoneGUIDS = {
+    Red = {"3ec4f1", "f001d4"},
+    Purple = {"f8e77a", "855e1e"},
+    White = {"502194", "82850f"},
+    Yellow = {"1accdc", "6ec2ec"},
+    Green = {"a02c64", "f4046f"},
+    Blue = {"fc815f", "d39fcf"},
+}
 
 ----------------------
 -- onload function
 ----------------------
-function onLoad(save_state)
+function onLoad()
     createDrawButton()
     createPlaceButton()
     createRecruitButton()
+    createDiscardButton()
 end
 
 ----------------------
@@ -30,15 +38,16 @@ function createDrawButton()
     self.createButton({
         click_function = "draw",
         function_owner = self,
-        label = "DRAW 1 CARD",
+        label = "DRAW CARD",
         position = {-1.01, 0.25, 0.93},
         rotation = {0, 0, 0},
         scale = {0.05, 0.05, 0.05},
-        width = 2900,
+        width = 2800,
         height = 600,
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Draw 1 card from the Deck."
     })
 end
 
@@ -49,12 +58,13 @@ function createPlaceButton()
         label = "PLACE",
         position = {0, 0.2, -0.315},
         rotation = {0, 0, 0},
-        scale = {0.05, 0.05, 0.05},
+        scale = {0.035, 0.035, 0.035},
         width = 2100,
         height = 600,
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Places the correct number of Mole Warriors in the Burrow. Use during your Birdsong upkeep."
     })
 end
 
@@ -65,12 +75,30 @@ function createRecruitButton()
         label = "RECRUIT",
         position = {-0.47, 0.2, -0.14},
         rotation = {0, 0, 0},
-        scale = {0.05, 0.05, 0.05},
+        scale = {0.035, 0.035, 0.035},
         width = 2500,
         height = 600,
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Recruits 1 Mole Warrior to the Burrow. Use as 1 of your Assembly actions."
+    })
+end
+
+function createDiscardButton()
+    self.createButton({
+        click_function = "discardCard",
+        function_owner = self,
+        label = "DISCARD RANDOM CARD",
+        position = {0.9, 0.25, -0.43},
+        rotation = {0, 0, 0},
+        scale = {0.04, 0.04, 0.04},
+        width = 4200,
+        height = 600,
+        font_size = 400,
+        color = "Red",
+        font_color = "White",
+        tooltip = "Randomly discards one of your cards. Use when paying Price of Failure."
     })
 end
 
@@ -110,14 +138,14 @@ function place(obj, color, alt_click)
 
     local warriorBag = getObjectFromGUID(warriorBagGUID)
     if warriorBag.getQuantity() == 0 then
-        broadcastToAll("No more warriors to place.")
+        broadcastToAll("No more warriors to place.", color)
         return
     elseif warriorBag.getQuantity() < numToPlace then
-        broadcastToAll("Not enough warriors to auto-place. You need to add " .. numToPlace .. " warriors but only have " .. warriorBag.getQuantity() .. " left.")
+        broadcastToAll("Not enough warriors to auto-place. You need to add " .. numToPlace .. " warriors but only have " .. warriorBag.getQuantity() .. " left.", color)
         return
     else
         placeWarrior(numToPlace)
-        broadcastToAll(playerName .. " recruits " .. numToPlace .. " warriors in Birdsong.", color)
+        printToAll(playerName .. " recruits " .. numToPlace .. " warrior(s) in Birdsong.", color)
     end
 end
 
@@ -129,7 +157,7 @@ function recruit(obj, color, alt_click)
         return
     else
         placeWarrior(1)
-        broadcastToAll(playerName .. " Assembly recruits " .. 1 .. " warriors in Daylight.", color)
+        printToAll(playerName .. " recruits " .. 1 .. " warrior in Daylight.", color)
     end
 end
 
@@ -149,7 +177,7 @@ function placeWarrior(numToPlace)
             if placed < numToPlace then
                 local warriorPosition = {
                     x = recruiterPosition.x + (col * spacing),
-                    y = recruiterPosition.y + 4,
+                    y = recruiterPosition.y + 9,
                     z = recruiterPosition.z + (row * spacing)
                 }
                 
@@ -162,4 +190,23 @@ function placeWarrior(numToPlace)
             end
         end
     end
+end
+
+function discardCard(obj, color, alt_click)
+    local targetPosition = {27.84, 3.65, 25.03}
+    local playerHandZones = handzoneGUIDS[color]
+    local cardsToDiscard = {}
+    
+    for _, zoneGUID in ipairs(playerHandZones) do
+        local zone = getObjectFromGUID(zoneGUID)
+        if zone then
+            local cardsInZone = zone.getObjects()
+            for _, card in ipairs(cardsInZone) do
+                table.insert(cardsToDiscard, card)
+            end
+        end
+    end
+    
+    cardsToDiscard[math.random(1, #cardsToDiscard)].setPosition(targetPosition)
+    printToAll(Player[color].steam_name .. " randomly discards " .. 1 .. " card.", color)
 end

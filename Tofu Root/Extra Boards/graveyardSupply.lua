@@ -1,8 +1,8 @@
 ----------------------
--- Coded for Tofu Worldview
--- By cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
-self.setName("Tofu Supply-Graveyard")
+self.setName("To Supply")
 
 ----------------------
 -- Variables

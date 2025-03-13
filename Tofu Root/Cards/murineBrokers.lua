@@ -20,7 +20,7 @@ mySupplyGUIDSetup = {
     coin1 = "00763e",
     coin2 = "76a02d"
 }
-forgeZoneGUID = "5c3c27"
+forgeZoneGUID = "16096e"
 boardZoneGUID = "29b2c0"
 currentItemCount = 0
 wait_id = nil
@@ -50,6 +50,7 @@ function createActivateButton()
         font_size = 150,
         color = "Red",
         font_color = "White",
+        tooltip = "Click to turn on automatic Murine Broker tracking; it is currently turned OFF."
     })
 end
 
@@ -75,7 +76,7 @@ function updateItems()
     local lastItemCount = currentItemCount
     currentItemCount = checkItems()
     if lastItemCount ~= currentItemCount then
-        broadcastToAll(playerName .. " might draw 1 card from Murine Brokers!", playerColor)
+        broadcastToAll("Item has been crafted! Manually check " .. playerName .. " for Murine Broker.", playerColor)
     end
 end
 
@@ -85,14 +86,18 @@ function checkItems()
     local items = 0
 
     for k, v in pairs(mySupplyGUIDSetup) do
-        for i, obj in ipairs(forgeZoneObjs) do
-            if obj.getGUID() == v then
-                items = items + 1
+        if forgeZoneObjs then
+            for i, obj in ipairs(forgeZoneObjs) do
+                if obj.getGUID() == v then
+                    items = items + 1
+                end
             end
         end
-        for i, obj in ipairs(boardZoneObjs) do
-            if obj.getGUID() == v then
-                items = items + 1
+        if boardZoneObjs then
+            for i, obj in ipairs(boardZoneObjs) do
+                if obj.getGUID() == v then
+                    items = items + 1
+                end
             end
         end
     end
@@ -104,7 +109,8 @@ function offButton()
     self.editButton({
         index = 0,
         label = "OFF",
-        color = "Red"
+        color = "Red",
+        tooltip = "Click to turn on automatic Murine Broker tracking; it is currently turned OFF."
     })
 end
 
@@ -112,7 +118,8 @@ function onButton()
     self.editButton({
         index = 0,
         label = "ON",
-        color = "Green"
+        color = "Green",
+        tooltip = "Click to turn off automatic Murine Broker tracking; it is currently turned ON."
     })
 end
 

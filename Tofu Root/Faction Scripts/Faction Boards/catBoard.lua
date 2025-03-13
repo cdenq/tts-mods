@@ -1,7 +1,6 @@
 ----------------------
--- Edited for Tofu Worldview
--- Original by Root mod
--- Changes by cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
 self.setName("Tofu Cat Board")
 
@@ -85,7 +84,7 @@ warriorMapPositions = {
 ----------------------
 -- onload function
 ----------------------
-function onLoad(save_state)
+function onLoad()
     createDrawButton()
     createWoodButton()
     createRecruitButton()
@@ -99,15 +98,16 @@ function createDrawButton()
     self.createButton({
         click_function = "draw",
         function_owner = self,
-        label = "DRAW 1 CARD",
+        label = "DRAW CARD",
         position = { - 1.01, 0.25, 0.93},
         rotation = {0, 0, 0},
         scale = {0.05, 0.05, 0.05},
-        width = 2900,
+        width = 2800,
         height = 600,
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Draw 1 card from the Deck."
     })
 end
 
@@ -124,6 +124,7 @@ function createWoodButton()
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Places wood at each Sawmill. Use for Birdsong upkeep."
     })
 end
 
@@ -132,14 +133,15 @@ function createRecruitButton()
         click_function = "recruit",
         function_owner = self,
         label = "RECRUIT",
-        position = {-0.67, 0.25, 0.28},
+        position = {-0.7, 0.25, 0.28},
         rotation = {0, 0, 0},
-        scale = {0.05, 0.05, 0.05},
-        width = 2900,
+        scale = {0.035, 0.035, 0.035},
+        width = 2800,
         height = 600,
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Places warriors at each Recruiter. Use for your Recruit action."
     })
 end
 
@@ -147,15 +149,16 @@ function createPlaceButton()
     self.createButton({
         click_function = "placeAll",
         function_owner = self,
-        label = "PLACE ALL",
-        position = {0.65, 0.25, -0.95},
+        label = "SETUP WARRIORS",
+        position = {0, 0.25, -0.9},
         rotation = {0, 0, 0},
-        scale = {0.05, 0.05, 0.05},
-        width = 2900,
+        scale = {0.1, 0.1, 0.1},
+        width = 3200,
         height = 600,
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Places warriors at each clearing. Use during your Setup."
     })
 end
 
@@ -190,13 +193,13 @@ function wood(obj, color)
     end
 
     if #sawmills == 0 then
-        broadcastToAll("No sawmills found on the map.")
+        broadcastToAll("No sawmills found on the map.", color)
         return
     elseif woodBagObj.getQuantity() == 0 then
-        broadcastToAll("No more wood to place.")
+        broadcastToAll("No more wood to place.", color)
         return
     elseif woodBagObj.getQuantity() < #sawmills then
-        broadcastToAll("Not enough wood to auto-place. You need to add " .. #sawmills .. " wood but only have " .. woodBagObj.getQuantity() .. " left.")
+        broadcastToAll("Not enough wood to auto-place. You need to add " .. #sawmills .. " wood but only have " .. woodBagObj.getQuantity() .. " left.", color)
         return
     else
         local totalWood = 0
@@ -217,8 +220,7 @@ function wood(obj, color)
             totalWood = totalWood + 1
         end
     
-        local playerName = Player[color].steam_name or playerColor
-        broadcastToAll(playerName .. " places " .. totalWood .. " wood in Birdsong.")
+        printToAll(Player[color].steam_name .. " places " .. totalWood .. " wood in Birdsong.", color)
     end
 end
 
@@ -241,13 +243,13 @@ function recruit(obj, color)
     end
 
     if #recruiters == 0 then
-        broadcastToAll("No recruiters found on the map.")
+        broadcastToAll("No recruiters found on the map.", color)
         return
     elseif warriorBagObj.getQuantity() == 0 then
-        broadcastToAll("No more warriors to place.")
+        broadcastToAll("No more warriors to place.", color)
         return
     elseif warriorBagObj.getQuantity() < #recruiters then
-        broadcastToAll("Not enough warriors to auto-place. You need to add " .. #recruiters .. " warriors but only have " .. warriorBagObj.getQuantity() .. " left.")
+        broadcastToAll("Not enough warriors to auto-place. You need to add " .. #recruiters .. " warriors but only have " .. warriorBagObj.getQuantity() .. " left.", color)
         return
     else
         local totalWarriors = 0
@@ -268,8 +270,7 @@ function recruit(obj, color)
             totalWarriors = totalWarriors + 1
         end
         
-        local playerName = Player[color].steam_name or playerColor
-        broadcastToAll(playerName .. " recruits " .. totalWarriors .. " warriors in Daylight.")
+        printToAll(Player[color].steam_name .. " recruits " .. totalWarriors .. " warriors in Daylight.", color)
     end
 end
 

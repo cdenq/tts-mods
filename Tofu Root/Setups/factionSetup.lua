@@ -1,6 +1,6 @@
 ----------------------
--- Created for Tofu Worldview
--- By cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
 self.setName("Tofu Draft Tool")
 -- reachButton index 0
@@ -66,6 +66,98 @@ myButtons = {
         defaultColor = myColors.whiteShade
     }
 }
+victoryMarkers = {
+    cat = "ae1082",
+    bird = "b52312",
+    wa = "c3acae",
+    vaga = "291918",
+    vaga2 = "1007ce",
+    otter = "d51ae7",
+    lizard = "1f39b6",
+    mole = "37dc45",
+    crow = "b39b0f",
+    rat = "feb8e5",
+    badger = "992368"
+}
+factionCardSpecifics = {
+    cat = {
+        relativePos = {x = -4.91, y = -0.08, z = -23.46},
+        printedClassicGUID = "",
+        modifiedClassicGUID = "56db84",
+        printedAdsetGUID = "897bc2",
+        modifiedAdsetGUID = "f0b2bc"
+    },
+    bird = {
+        relativePos = {x = 19.6, y = -0.08, z = -23.53},
+        printedClassicGUID = "",
+        modifiedClassicGUID = "ef8c43",
+        printedAdsetGUID = "7aab68",
+        modifiedAdsetGUID = "12cf7c"
+    },
+    wa = {
+        relativePos = {x = -0.17, y = -0.08, z = -23.63},
+        printedClassicGUID = "",
+        modifiedClassicGUID = "31e0de",
+        printedAdsetGUID = "b97d91",
+        modifiedAdsetGUID = "c78e38"
+    },
+    vaga = {
+        relativePos = {x = -16.37, y = -0.08, z = -28.51},
+        printedClassicGUID = "",
+        modifiedClassicGUID = "8e8784",
+        printedAdsetGUID = "9165da",
+        modifiedAdsetGUID = "c966ac"
+    },
+    vaga2 = {
+        relativePos = {x = -9.42, y = -0.08, z = -23.54},
+        printedClassicGUID = "",
+        modifiedClassicGUID = "7789b8",
+        printedAdsetGUID = "d5f7d9",
+        modifiedAdsetGUID = "6f5843"
+    },
+    otter = {
+        relativePos = {x = 14.67, y = -0.08, z = -9.17},
+        printedClassicGUID = "",
+        modifiedClassicGUID = "7fdd24",
+        printedAdsetGUID = "f5ff3b",
+        modifiedAdsetGUID = "1c7b0c"
+    },
+    lizard = {
+        relativePos = {x = 14.39, y = -0.08, z = -5.59},
+        printedClassicGUID = "",
+        modifiedClassicGUID = "638c09",
+        printedAdsetGUID = "b3f963",
+        modifiedAdsetGUID = "0a7284"
+    },
+    mole = {
+        relativePos = {x = -19.53, y = -0.08, z = -27.44},
+        printedClassicGUID = "",
+        modifiedClassicGUID = "5eec4f",
+        printedAdsetGUID = "811ec1",
+        modifiedAdsetGUID = "36fef6"
+    },
+    crow = {
+        relativePos = {x = -3.25, y = -0.08, z = -23.11},
+        printedClassicGUID = "",
+        modifiedClassicGUID = "a2f19e",
+        printedAdsetGUID = "92de2d",
+        modifiedAdsetGUID = "560ebb"
+    },
+    rat = {
+        relativePos = {x = -0.75, y = -0.08, z = -23.16},
+        printedClassicGUID = "",
+        modifiedClassicGUID = "5868d5",
+        printedAdsetGUID = "cf909e",
+        modifiedAdsetGUID = "d0aa6b"
+    },
+    badger = {
+        relativePos = {x = 13.74, y = -0.08, z = -5.77},
+        printedClassicGUID = "",
+        modifiedClassicGUID = "7761c9",
+        printedAdsetGUID = "cdb614",
+        modifiedAdsetGUID = "e90c9b"
+    }
+}
 
 ----------------------
 -- object variables
@@ -95,7 +187,8 @@ myBookkeepingVariables = {
 myBagObjs = {
     playerBoardBag = getObjectFromGUID("078548"),
     adsetCardBag = getObjectFromGUID("7528eb"),
-    deckZone = getObjectFromGUID("cf89ff")
+    deckZone = getObjectFromGUID("cf89ff"),
+    cardSetupBag = getObjectFromGUID("d22cf3")
 }
 mySettingButtons = {
     setting = {
@@ -320,6 +413,10 @@ end
 -- helper functions
 ----------------------
 function doNothing()
+end
+
+function getCurrentPlayerCount() --used by vagabond board for pulling markers
+    return myBookkeepingVariables.currentPlayerCount
 end
 
 ----------------------
@@ -749,8 +846,79 @@ end
 ----------------------
 -- finalize functions
 ----------------------
+function setupMarkers(selectedBoard, factionKey, mode)
+    local factionData = factionCardSpecifics[factionKey]
+    local goMode
+    if mode == "printedAdset" then
+        goMode = factionData.printedAdsetGUID
+    elseif mode == "printedClass" then
+        goMode = factionData.printedClassicGUID
+    elseif mode == "tofuAdset" then
+        goMode = factionData.modifiedAdsetGUID
+    elseif mode == "tofuClassic" then
+        goMode = factionData.modifiedClassicGUID
+    end
+
+    Wait.time(function()
+        selectedBoard.call("click_place")
+        
+        if factionData and goMode ~= "" then
+            local boardPos = selectedBoard.getPosition()
+            local boardRot = selectedBoard.getRotation()
+            local finalPos
+            if boardRot.y > 170 and boardRot.y < 190 then
+                finalPos = {
+                    x = boardPos.x + factionData.relativePos.x,
+                    y = boardPos.y + factionData.relativePos.y + 1,
+                    z = boardPos.z + factionData.relativePos.z
+                }
+            else
+                finalPos = {
+                    x = boardPos.x - factionData.relativePos.x,
+                    y = boardPos.y + factionData.relativePos.y + 1,
+                    z = boardPos.z - factionData.relativePos.z
+                }
+            end
+            local takenCard = myBagObjs.cardSetupBag.takeObject({
+                guid = goMode,
+                position = finalPos,
+                rotation = {
+                    boardRot.x,
+                    boardRot.y + 180,
+                    boardRot.z,
+                },
+                smooth = false
+            })
+        end
+    end, 1.75)
+
+    Wait.time(function()
+        local vpMarkerObj = getObjectFromGUID(victoryMarkers[factionKey])
+        if vpMarkerObj then
+            vpMarkerObj.call("startSetup")
+        else
+            print(factionKey " .. vp marker not found at time of running script.")
+        end
+    end, 5)
+end
+
 function dealPlayerBoards()
     local ruinCount = 0
+
+    local corners = 0
+    local cornerFactions = {"cat", "bird", "lizard", "mole", "rat", "badger"}
+    local switchAdset = false
+    for factionKey, faction in pairs(factions) do
+        for i, compare in ipairs(cornerFactions) do
+            if factionKey == compare and faction.owner ~= "" and faction.owner ~= "x" then
+                corners = corners + 1
+            end
+        end
+    end
+    if corners > 4 then
+        switchAdset = true
+    end
+
     for factionKey, faction in pairs(factions) do
         local playerColor = nil
         local playerName = nil
@@ -778,12 +946,18 @@ function dealPlayerBoards()
                     smooth = true
                 })
                 selectedBoard.setLock(true)
-                Wait.time(function()
-                    selectedBoard.call("click_place")
-                end, 2.5)
+                if switchAdset then
+                    setupMarkers(selectedBoard, factionKey, "tofuAdset") -- "printedAdset", "printedClass", "tofuAdset", "tofuClassic"
+                else
+                    setupMarkers(selectedBoard, factionKey, "tofuClassic") -- "printedAdset", "printedClass", "tofuAdset", "tofuClassic"
+                end
+                
                 printToAll(playerName .. " drafts " .. faction.full .. ".", playerColor)
             end
         end
+    end
+    if switchAdset then
+        broadcastToAll("With current draft, " .. corners .. " need to setup in corners. Thus, Setup must be done using the Advanced Setup format.")
     end
     broadcastToAll("Set " .. ruinCount .. " ruins in game.")
 end
@@ -1116,9 +1290,7 @@ function dealAdsetFaction()
                         smooth = true
                     })
                     selectedBoard.setLock(true)
-                    Wait.time(function()
-                        selectedBoard.call("click_place")
-                    end, 2.5)
+                    setupMarkers(selectedBoard, factionKey, "tofuAdset")-- "printedAdset", "printedClass", "tofuAdset", "tofuClassic"
                     if factionKey == "rat" or factionKey == "vaga" or factionKey == "vaga2" then
                         broadcastToAll("Adjust ruins settings, if needed.")
                     end

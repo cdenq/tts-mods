@@ -1,6 +1,6 @@
 ----------------------
--- Created for Tofu Worldview
--- By cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
 self.setName("Tofu Quest Board")
 
@@ -41,7 +41,7 @@ function createSetup()
         color = "Red",
         font_color = "White",
         label = "SETUP",
-        tooltip = "Setup Vagabond quests."
+        tooltip = "Sets up the initial 3 Vagabond quests. Used during Setup."
     })
 end
 

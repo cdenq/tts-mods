@@ -1,7 +1,7 @@
 ----------------------
--- Edited for Tofu Worldview
--- Original by Root mod
--- Changes by cdenq
+-- Tofu Tumble
+-- Refactored and extended by tofuwater
+-- Original by Nevakanezah
 ----------------------
 self.setName("Tofu Mole Helper Board")
 

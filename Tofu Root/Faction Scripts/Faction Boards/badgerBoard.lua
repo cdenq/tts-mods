@@ -1,7 +1,6 @@
 ----------------------
--- Edited for Tofu Worldview
--- Original by Root mod
--- Changes by cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
 self.setName("Tofu Badger Board")
 
@@ -83,7 +82,7 @@ relicMapPositions = {
 ----------------------
 -- onload function
 ----------------------
-function onLoad(save_state)
+function onLoad()
     createDrawButton()
     createRelicButton()
 end
@@ -92,21 +91,27 @@ end
 --  helper functions
 ----------------------
 function getGridPosition(index)
-    local badgerBoardObject = getObjectFromGUID(badgerBoardGUID)
-    local badgerBoardObjectPosition = badgerBoardObject.getPosition()
+    local boardObj = getObjectFromGUID(badgerBoardGUID)
+    local boardPos = boardObj.getPosition()
+    local boardRot = boardObj.getPosition()
 
     local row = math.floor((index - 1) / relicGridParameters.relicGridWidth)
     local col = (index - 1) % relicGridParameters.relicGridWidth
-    if badgerBoardObject.getRotation().y == 0 then
-        x = badgerBoardObjectPosition.x - 9 + col * relicGridParameters.relicGridSpacing
-        y = badgerBoardObjectPosition.y + 1
-        z = badgerBoardObjectPosition.z - 1.5 + row * relicGridParameters.relicGridSpacing
+    local newPos
+    if boardRot.y > 170 and boardRot.y < 190 then
+        newPos = {
+            x = boardPos.x - 9 + col * relicGridParameters.relicGridSpacing,
+            y = boardPos.y + 1,
+            z = boardPos.z - 1.5 + row * relicGridParameters.relicGridSpacing
+        }
     else
-        x = badgerBoardObjectPosition.x + 9 - col * relicGridParameters.relicGridSpacing
-        y = badgerBoardObjectPosition.y + 1
-        z = badgerBoardObjectPosition.z + 1.5 - row * relicGridParameters.relicGridSpacing
+        newPos = {
+            x = boardPos.x + 9 - col * relicGridParameters.relicGridSpacing,
+            y = boardPos.y + 1,
+            z = boardPos.z + 1.5 - row * relicGridParameters.relicGridSpacing
+        }
     end
-    return {x, y, z}
+    return newPos
 end
 
 ----------------------
@@ -116,15 +121,16 @@ function createDrawButton()
     self.createButton({
         click_function = "draw",
         function_owner = self,
-        label = "DRAW 1 CARD",
+        label = "DRAW CARD",
         position = {-1.01, 0.25, 0.93},
         rotation = {0, 0, 0},
         scale = {0.05, 0.05, 0.05},
-        width = 2900,
+        width = 2800,
         height = 600,
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Draw 1 card from the Deck."
     })
 end
 
@@ -135,12 +141,13 @@ function createRelicButton()
         label = "PLACE RELICS",
         position = {0.95, 0.25, -0.225},
         rotation = {0, 0, 0},
-        scale = {0.05, 0.05, 0.05},
-        width = 2900,
+        scale = {0.1, 0.1, 0.1},
+        width = 3000,
         height = 600,
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Randomly places Relics into available Forests. Use during Setup."
     })
 end
 
@@ -178,7 +185,7 @@ function moveRetainers()
         end
         
         local retainer = getObjectFromGUID(retainerCardGUIDS[i])
-        if retainer != nil then
+        if retainer ~= nil then
             retainer.setPositionSmooth(cardPos)
             retainer.setRotation({
                 x = tableauRot.x,
@@ -189,7 +196,7 @@ function moveRetainers()
     end
 end
 
-function placeRelic()
+function placeRelic(obj, color, alt_click)
     moveRetainers()
 
     local relicBag = getObjectFromGUID(relicBagGUID)
@@ -234,7 +241,7 @@ function placeRelic()
         return
     end
 
-    print("Remember to place the remaining " .. relicBag.getQuantity() .. " relics in the forest!")
+    printToAll("Remember to randomly place the remaining " .. relicBag.getQuantity() .. " relics in the Forests.", color)
     local objects = relicBag.getObjects()
     for i, objectData in ipairs(objects) do
         local gridPosition = getGridPosition(i)

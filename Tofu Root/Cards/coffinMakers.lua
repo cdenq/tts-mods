@@ -32,6 +32,7 @@ function createActivateButton()
         font_size = 150,
         color = "Red",
         font_color = "White",
+        tooltip = "Click to turn on automatic Coffin Makers tracking; it is currently turned OFF."
     })
 end
 
@@ -57,7 +58,8 @@ function offButton()
     self.editButton({
         index = 0,
         label = "OFF",
-        color = "Red"
+        color = "Red",
+        tooltip = "Click to turn on automatic Coffin Makers tracking; it is currently turned OFF."
     })
 end
 
@@ -65,6 +67,7 @@ function onButton()
     self.editButton({
         index = 0,
         label = "ON",
-        color = "Green"
+        color = "Green",
+        tooltip = "Click to turn off automatic Coffin Makers tracking; it is currently turned ON."
     })
 end

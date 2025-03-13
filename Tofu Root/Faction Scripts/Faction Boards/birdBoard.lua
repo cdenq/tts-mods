@@ -1,7 +1,6 @@
 ----------------------
--- Edited for Tofu Worldview
--- Original by Root mod
--- Changes by cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
 self.setName("Tofu Bird Board")
 
@@ -43,7 +42,7 @@ decreeRelativeLocations = {
 ----------------------
 -- onload function
 ----------------------
-function onLoad(save_state)
+function onLoad()
     createAllButtons()
 end
 
@@ -60,15 +59,16 @@ function createDrawButton()
     self.createButton({
         click_function = "draw",
         function_owner = self,
-        label = "DRAW 1 CARD",
+        label = "DRAW CARD",
         position = {-1.01, 0.18, 0.93},
         rotation = {0, 0, 0},
         scale = {0.05, 0.05, 0.05},
-        width = 2900,
+        width = 2800,
         height = 600,
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Draw 1 card from the Deck."
     })
 end
 
@@ -85,6 +85,7 @@ function createTurmoilButton()
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Counts Bird-suited cards in Decree and sorts all cards for discard. Use when triggering Turmoil."
     })
 end
 
@@ -93,7 +94,7 @@ function createLeaderSetupButton()
         click_function = "setupLeader",
         function_owner = self,
         label = "SET LEADER",
-        position = {0.9, 0.18, 0.97},
+        position = {0.9, 0.18, 0.96},
         rotation = {0, 0, 0},
         scale = {0.05, 0.05, 0.05},
         width = 2900,
@@ -101,6 +102,7 @@ function createLeaderSetupButton()
         font_size = 400,
         color = "Red",
         font_color = "White",
+        tooltip = "Sets the Loyal Viziers to their appropriate column. Use when selecting a new Leader."
     })
 end
 
@@ -122,12 +124,12 @@ function turmoil(obj, color)
     local zoneSize = {x = 20, y = 5, z = 12}
     
     local hitList = Physics.cast({
-        origin       = boardPosition,
-        direction    = {0, 1, 0},
-        type         = 3,
-        size         = zoneSize,
+        origin = boardPosition,
+        direction = {0, 1, 0},
+        type = 3,
+        size = zoneSize,
         max_distance = 0
-        --debug        = true
+        --debug = true
     })
     
     local birdCount = 0
@@ -149,29 +151,27 @@ function turmoil(obj, color)
         end
     end
     
-    broadcastToAll("Bird-suited cards in decree: " .. birdCount .. ".")
+    printToAll("Bird-suited cards in decree: " .. birdCount .. ".", color)
     
     local vizierPilePosition = eyrieDecreeBoardObj.positionToWorld({-0.8, 1, 0})
     local otherPilePosition = eyrieDecreeBoardObj.positionToWorld({0.8, 1, 0})
     
-    -- Add offset for each vizier card
     for i, card in ipairs(vizierPile) do
-        local xOffset = 1.2 * (i - 1)  -- Spread cards horizontally
-        local zOffset = 1.2 * (i - 1)  -- Spread cards vertically
+        local xOffset = 1.2 * (i - 1)
+        local zOffset = 1.2 * (i - 1)
         card.setPositionSmooth({
             x = vizierPilePosition.x + xOffset,
-            y = vizierPilePosition.y + (0.1 * i),  -- Keep slight height offset
+            y = vizierPilePosition.y + (0.1 * i),
             z = vizierPilePosition.z + zOffset
         })
     end
     
-    -- Add offset for other cards
     for i, card in ipairs(otherPile) do
-        local xOffset = 0.3 * (i - 1)  -- Spread cards horizontally
-        local zOffset = 0.3 * (i - 1)  -- Spread cards vertically
+        local xOffset = 0.3 * (i - 1)
+        local zOffset = 0.3 * (i - 1)
         card.setPositionSmooth({
             x = otherPilePosition.x + xOffset,
-            y = otherPilePosition.y + (0.1 * i),  -- Keep slight height offset
+            y = otherPilePosition.y + (0.1 * i),
             z = otherPilePosition.z + zOffset
         })
     end
@@ -183,12 +183,12 @@ function setupLeader()
     local zoneSize = {x = 18, y = 5, z = 15}
 
     local hitList = Physics.cast({
-        origin       = eyrieFactionBoardPosition,
-        direction    = {0, 1, 0},
-        type         = 3,
-        size         = zoneSize,
+        origin = eyrieFactionBoardPosition,
+        direction = {0, 1, 0},
+        type = 3,
+        size = zoneSize,
         max_distance = 0
-        --debug        = true
+        --debug = true
     })
 
     local selectedLeader = nil
@@ -235,7 +235,7 @@ function setupLeader()
             end
             
             if not vizierFound then
-                broadcastToAll("Error: Vizier card not found for action: " .. action, {1,0,0})
+                broadcastToAll("Error: Vizier card not found for action: " .. action)
             end
         end
     end

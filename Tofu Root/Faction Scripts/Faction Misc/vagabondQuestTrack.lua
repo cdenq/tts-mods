@@ -1,7 +1,7 @@
 ----------------------
--- Created for Tofu Worldview
--- Optimized and extended by cdenq
--- Original from Root Mod
+-- Tofu Tumble
+-- By tofuwater
+-- Original by Nevakanezah
 ----------------------
 self.setName("Tofu Quest Tracker")
 

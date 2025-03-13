@@ -2,8 +2,8 @@
 -- Tofu Tumble
 -- By tofuwater
 ----------------------
-self.setName("Tofu Vagabond Board")
-satchelGUIDs = {"9901fe", "a56f55", "9ae449", "1c3781"}
+self.setName("Tofu Vagabond 2 Board")
+satchelGUIDs = {"b1575f", "68d3c2", "2a1a9a", "b61cc9"}
 
 ----------------------
 -- Variables

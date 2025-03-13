@@ -39,6 +39,7 @@ function createDiscardButton()
         font_size = 150,
         color = "Black",
         font_color = "White",
+        tooltip = "Discards all non-" .. titleCase(partisanType) .. " cards from your hand."
     })
 end
 

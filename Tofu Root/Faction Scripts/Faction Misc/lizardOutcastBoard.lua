@@ -1,6 +1,6 @@
 ----------------------
--- Created for Tofu Worldview
--- Optimized and extended by cdenq
+-- Tofu Tumble
+-- Refactored and extended by tofuwater
 -- Original by Nevakanezah
 ----------------------
 self.setName("Tofu Lizard Wizard Tool")

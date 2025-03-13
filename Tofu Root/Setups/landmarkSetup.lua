@@ -1,6 +1,6 @@
 ----------------------
--- Created for Tofu Worldview
--- By cdenq
+-- Tofu Tumble
+-- By tofuwater
 ----------------------
 self.setName("Tofu Landmark Drafter Tool")
 -- buttonIndex 0-4 = settingButtons
@@ -30,7 +30,7 @@ myButtons = {
     },
     vetoLandmarkButtons = {
         startX = -0.6, 
-        startZ = 0.28, 
+        startZ = 0.445, 
         spacingX = 0.4, 
         spacingZ = 0.175,
         scale = {0.65, 0.65, 0.65},
@@ -40,6 +40,17 @@ myButtons = {
         fontSize = 40, 
         defaultColor = myColors.white,
         numPerRow = 4
+    },
+    confirmButtons = {
+        startX = -0.53, 
+        startZ = 0.15, 
+        spacingX = 0.53,
+        scale = {0.65, 0.65, 0.65},
+        buttonHeight = 80, 
+        buttonWidth = 300,
+        buttonLift = globalButtonLift,
+        fontSize = 40, 
+        defaultColor = myColors.white
     }
 }
 
@@ -47,7 +58,7 @@ myButtons = {
 -- object variables
 ----------------------
 myIterations = {
-    settingButtonLabels = {"select", "random", "all", "flip", "reset"},
+    settingButtonLabels = {"select", "random", "confirm", "aid" , "reset"},
     landmarks = {"city", "tree", "market", "forge", "ferry", "tower", "mouse", "rabbit", "fox"}
 }
 myBagObjs = {
@@ -61,24 +72,24 @@ settingButtons = {
         numLandmarks = Global.getVar("GLOBALNUMLANDMARKS")
     },
     random = {
-        label = "Random",
-        color = myColors.green, 
-        tooltip = "Randomize and draft landmarks based on vetos."
+        label = "Show\nDraft",
+        color = myColors.white, 
+        tooltip = "Randomize and draft Landmarks based on vetos."
     },
-    all = {
+    confirm = {
+        label = "Confirm",
+        color = myColors.green, 
+        tooltip = "Confirm your Landmark pick."
+    },
+    aid = {
         label = "Player Aid",
         color = myColors.gray, 
         tooltip = "Brings out the Landmark player aid."
     },
-    flip = {
-        label = "Flip All",
-        color = myColors.gray, 
-        tooltip = "Flip all revealed landmark cards."
-    },
     reset = {
         label = "Reset",
         color = myColors.white, 
-        tooltip = "Reset all vetos and return all landmark items back to the bag."
+        tooltip = "Reset all vetos and return all Landmarks back to the bag."
     }
 }
 vetoButtons = {
@@ -139,30 +150,31 @@ vetoButtons = {
     }
 }
 myPlacementPositions = {
-    cardRotation = {
-        self.getRotation()[1], 
-        self.getRotation()[2], 
-        self.getRotation()[3] + 180
-    },
-    markerRotation = self.getRotation(),
-    ["1"] = {
-        cardPosition = {109.12, 2.63, 23.97},
-        markerPosition = {106.7, 4, 23.97}
-    },
-    ["2"] = {
-        cardPosition = {109.12, 2.63, 17.83},
-        markerPosition = {106.7, 4, 17.83}
-    },
-    ["3"] = {
-        cardPosition = {109.12, 2.63, 11.70},
-        markerPosition = {106.7, 4, 11.70}
-    }
+    cardRotation = {0.00, 270.00, 180.00},
+    startingRelativeCardPosition = {x = 3.2, y = 0.11, z = 6.1},
+    startingRelativeMarkerPosition = {x = 0.81, y = 0.13, z = 6.09},
+    zShift = -6.14
 }
 myBookkeepingVariables = {
     validLandmarks = {},
     runningTotalGUIDs = {},
-    drawnLandmarks = {}
+    drawnLandmarks = {},
+    availableLandmarks = {
+        ["1"] = {
+            guids = {},
+            picked = false
+        },
+        ["2"] = {
+            guids = {},
+            picked = false
+        },
+        ["3"] = {
+            guids = {},
+            picked = false
+        }
+    }
 }
+firstPlaced = false
 
 ----------------------
 -- onload and once functions
@@ -178,6 +190,7 @@ end
 ----------------------
 function createAllButtons()
     createSettingButtons()
+    createConfirmButtons()
     createVetoLandmarkButtons()
 end
 
@@ -207,6 +220,27 @@ function createSettingButtons()
     end
 end
 
+function createConfirmButtons()
+    for i = 1, 3 do
+        self.createButton({
+            click_function = "onConfirmClick_" .. i,
+            function_owner = self,
+            position = {
+                myButtons.confirmButtons.startX + (i-1) * myButtons.confirmButtons.spacingX, 
+                myButtons.confirmButtons.buttonLift, 
+                myButtons.confirmButtons.startZ
+            },
+            height = myButtons.confirmButtons.buttonHeight,
+            width = myButtons.confirmButtons.buttonWidth,
+            font_size = myButtons.confirmButtons.fontSize,
+            scale = myButtons.confirmButtons.scale,
+            color = myButtons.confirmButtons.color,
+            label = "Pick",
+            tooltip = "Pick Landmark " .. i .. ". Remember to click 'CONFIRM' above to lock in choice."
+        })
+    end
+end
+
 function createVetoLandmarkButtons()
     for i, landmark in ipairs(myIterations.landmarks) do
         local row = math.floor((i - 1) / myButtons.vetoLandmarkButtons.numPerRow)
@@ -232,6 +266,45 @@ function createVetoLandmarkButtons()
 end
 
 ----------------------
+-- onclick functions
+----------------------
+function onSettingClick_select()
+    cycleSelectState()
+end
+
+function onSettingClick_random()
+    announceElderTreetop()
+    returnItemsToBag()
+    randomizeLandmarks()
+end
+
+function onSettingClick_aid()
+    print("Currently unimplemented.")
+end
+
+function onSettingClick_reset()
+    resetValidLandmarks()
+    resetPicks()
+    returnItemsToBag()
+end
+
+function onSettingClick_confirm()
+    onConfirmFinalize()
+end
+
+for _, landmark in ipairs(myIterations.landmarks) do
+    _G["onVetoClick_" .. landmark] = function(obj, color, alt_click)
+        onVetoButtonClick(landmark)
+    end
+end
+
+for i = 1, 3 do
+    _G["onConfirmClick_" .. i] = function(obj, color, alt_click)
+        onConfirmClick(i)
+    end
+end
+
+----------------------
 -- helper functions
 ----------------------
 function doNothing()
@@ -245,7 +318,17 @@ function resetValidLandmarks()
         else --vetobutton adds the landmark ot the valid list already
             table.insert(myBookkeepingVariables.validLandmarks, landmark)
         end
-    end 
+    end
+    firstPlaced = false
+end
+
+function resetPicks()
+    for num = 1, 3 do
+        if myBookkeepingVariables.availableLandmarks[tostring(num)].picked then
+            onConfirmClick(num)
+            myBookkeepingVariables.availableLandmarks[tostring(num)].guids = {}
+        end
+    end
 end
 
 function returnItemsToBag()
@@ -265,11 +348,6 @@ function announceElderTreetop()
     if n < 3 and vetoButtons["tree"].state ~= "banned" then
         broadcastToAll("Remember: Elder Treetop is banned in 2 player games.")
     end
-end
-
-function flipObject(object)
-    local rotation = object.getRotation()
-    object.setRotation({rotation.x, rotation.y, rotation.z + 180})
 end
 
 function autoVetoHomelandLandmarks()
@@ -299,7 +377,7 @@ function onVetoButtonClick(vetoedLandmark)
     for i, value in ipairs(myIterations.landmarks) do
         if value == vetoedLandmark then
             self.editButton({
-                index = i + 4,
+                index = i + 7,
                 color = myColor
             })
             break
@@ -319,17 +397,7 @@ function cycleSelectState()
     })
 end
 
-----------------------
--- onclick functions
-----------------------
-function onSettingClick_select()
-    cycleSelectState()
-end
-
-function onSettingClick_random()
-    announceElderTreetop()
-    returnItemsToBag()
-    
+function randomizeLandmarks()
     myBookkeepingVariables.drawnLandmarks = {}
 
     local numToDraw = settingButtons["select"].numLandmarks + 1
@@ -344,15 +412,29 @@ function onSettingClick_random()
         end
     end
 
+    local markerRotation = self.getRotation()
+    local startingPosition = self.getPosition()
     for i, landmark in ipairs(myBookkeepingVariables.drawnLandmarks) do
+        local newCardPos = {
+            x = startingPosition.x + myPlacementPositions.startingRelativeCardPosition.x,
+            y = startingPosition.y + myPlacementPositions.startingRelativeCardPosition.y + 1,
+            z = startingPosition.z + myPlacementPositions.startingRelativeCardPosition.z + (i-1) * myPlacementPositions.zShift
+        }
+        local newMarkerPos = {
+            x = startingPosition.x + myPlacementPositions.startingRelativeMarkerPosition.x,
+            y = startingPosition.y + myPlacementPositions.startingRelativeMarkerPosition.y + 2,
+            z = startingPosition.z + myPlacementPositions.startingRelativeMarkerPosition.z + (i-1) * myPlacementPositions.zShift
+        }
+
         if vetoButtons[landmark].cardGUID then
             local item = bag.takeObject({
                 guid = vetoButtons[landmark].cardGUID,
-                position = myPlacementPositions[tostring(i)].cardPosition,
+                position = newCardPos,
                 rotation = myPlacementPositions.cardRotation,
                 smooth = false
             })
             table.insert(myBookkeepingVariables.runningTotalGUIDs, vetoButtons[landmark].cardGUID)
+            table.insert(myBookkeepingVariables.availableLandmarks[tostring(i)].guids, vetoButtons[landmark].cardGUID)
         else
             print(landmark .. " cardGUID not found in database.")
         end
@@ -360,11 +442,12 @@ function onSettingClick_random()
         if vetoButtons[landmark].markerGUID then
             local marker = bag.takeObject({
                 guid = vetoButtons[landmark].markerGUID,
-                position = myPlacementPositions[tostring(i)].markerPosition,
-                rotation = myPlacementPositions.markerRotation,
+                position = newMarkerPos,
+                rotation = markerRotation,
                 smooth = false
             })
             table.insert(myBookkeepingVariables.runningTotalGUIDs, vetoButtons[landmark].markerGUID)
+            table.insert(myBookkeepingVariables.availableLandmarks[tostring(i)].guids, vetoButtons[landmark].markerGUID)
         else
             print(landmark .. " markerGUID not found in database.")
         end    
@@ -373,11 +456,12 @@ function onSettingClick_random()
             if vetoButtons[landmark].extraGUID then
                 local extra = bag.takeObject({
                     guid = vetoButtons[landmark].extraGUID,
-                    position = myPlacementPositions[tostring(i)].markerPosition,
-                    rotation = myPlacementPositions.markerRotation,
+                    position = newMarkerPos,
+                    rotation = markerRotation,
                     smooth = false
                 })
                 table.insert(myBookkeepingVariables.runningTotalGUIDs, vetoButtons[landmark].extraGUID)
+                table.insert(myBookkeepingVariables.availableLandmarks[tostring(i)].guids, vetoButtons[landmark].extraGUID)
             else
                 print(landmark .. " extraGUID not found in database.")
             end
@@ -385,29 +469,61 @@ function onSettingClick_random()
     end
 end
 
-function onSettingClick_all()
-    print("Currently unimplemented.")
-end
-
-function onSettingClick_flip()
-    print("Currently unimplemented.")
-    --flipObject(object)
-end
-
-function onSettingClick_reset()
-    resetValidLandmarks()
-    returnItemsToBag()
-end
-
-for _, landmark in ipairs(myIterations.landmarks) do
-    _G["onVetoClick_" .. landmark] = function(obj, color, alt_click)
-        onVetoButtonClick(landmark)
+function onConfirmClick(num)
+    local goColor
+    local currValue = myBookkeepingVariables.availableLandmarks[tostring(num)].picked
+    if currValue then
+        myBookkeepingVariables.availableLandmarks[tostring(num)].picked = false
+        goColor = "White"
+    else
+        myBookkeepingVariables.availableLandmarks[tostring(num)].picked = true
+        goColor = "Green"
     end
+    self.editButton({
+        index = 4 + num,
+        color = goColor
+    })
+end
+
+function onConfirmFinalize()
+    local newPos
+    for i = 1, 3 do
+        if myBookkeepingVariables.availableLandmarks[tostring(i)].picked then
+            if firstPlaced then
+                newPos = {35.05, 2.60, -14.13}
+            else
+                newPos = {35.10, 2.60, -8.39}
+                firstPlaced = true
+            end
+            for j, guid in ipairs(myBookkeepingVariables.availableLandmarks[tostring(i)].guids) do
+                local obj = getObjectFromGUID(guid)
+                if obj then
+                    obj.setPositionSmooth(newPos)
+                    if j == 1 then
+                        obj.setRotationSmooth({0.00, 270.00, 180.00})
+                    else
+                        obj.setRotationSmooth({0.00, 270.00, 0})
+                    end
+                end
+            end
+            myBookkeepingVariables.availableLandmarks[tostring(i)].picked = false
+        end 
+    end 
 end
 
 ----------------------
 -- debug/unused functions
 ----------------------
+function onSettingClick_flip()
+    print("Currently unimplemented.")
+    --flipObject(object)
+end
+
+function flipObject(object)
+    local rotation = object.getRotation()
+    object.setRotation({rotation.x, rotation.y, rotation.z + 180})
+end
+
 function isInAnyZone(object, zones)
     local objectPos = self.positionToLocal(object.getPosition())
     for _, zone in ipairs(zones) do
@@ -429,8 +545,8 @@ end
 
 function createZoneButtons()
     for i, zone in ipairs(zoneButtons) do
-        local width = math.abs(zone.x_max - zone.x_min) * 1000 -- Convert to button width
-        local height = math.abs(zone.z_max - zone.z_min) * 1000 -- Convert to button height
+        local width = math.abs(zone.x_max - zone.x_min) * 1000
+        local height = math.abs(zone.z_max - zone.z_min) * 1000
         local posX = (zone.x_min + zone.x_max) / 2
         local posZ = (zone.z_min + zone.z_max) / 2
 
