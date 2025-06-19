@@ -259,6 +259,17 @@ movementMappings = { -- the keys are the actual tags/GM descriptions
             y = 2,
             z = 3
         }
+    },
+    Skunk = {
+        locationGUID = "dd02f9",
+    },
+    Acclaim = {
+        locationGUID = "a5ec86",
+        adjustment = {
+            x = -0.5,
+            y = 2,
+            z = -0.5
+        }
     }
     --[[
     ,
@@ -277,17 +288,6 @@ movementMappings = { -- the keys are the actual tags/GM descriptions
         locationGUID = "",
     },
     batPiece = {
-        locationGUID = "",
-        adjustment = {
-            x = 0,
-            y = 2,
-            z = 0
-        }
-    },
-    skunkWarrior = {
-        locationGUID = "",
-    },
-    skunkPiece = {
         locationGUID = "",
         adjustment = {
             x = 0,

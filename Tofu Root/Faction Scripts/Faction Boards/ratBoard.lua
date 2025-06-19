@@ -103,7 +103,7 @@ function checkProwess()
         local obj = hit.hit_object
         if obj.type == "Tile" then
             local tagList = obj.getTags()
-            if checkHasTag("Prowess", tagList) then
+            if checkHasTag("Item Prowess", tagList) then
                 totalItems = totalItems + 1
             end
         end
