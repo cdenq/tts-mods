@@ -1,6 +1,6 @@
 ----------------------
 -- Created for Tofu Worldview
--- By cdenq
+-- By tofuwater
 ----------------------
 self.setName("Tofu Cat VP")
 

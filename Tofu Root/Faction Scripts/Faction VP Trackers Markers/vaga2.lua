@@ -1,8 +1,8 @@
 ----------------------
 -- Created for Tofu Worldview
--- By cdenq
+-- By tofuwater
 ----------------------
-self.setName("Tofu Vaga2 Marker")
+self.setName("Vagabond 2")
 
 ----------------------
 -- button variables

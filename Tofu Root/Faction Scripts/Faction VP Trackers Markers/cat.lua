@@ -1,8 +1,8 @@
 ----------------------
 -- Created for Tofu Worldview
--- By cdenq
+-- By tofuwater
 ----------------------
-self.setName("Tofu Cat Marker")
+self.setName("Marquise de Cat")
 
 ----------------------
 -- button variables

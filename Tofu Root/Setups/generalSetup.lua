@@ -1,6 +1,6 @@
 ----------------------
 -- Tofu Tumble
--- tofuwater
+-- By tofuwater
 ----------------------
 self.setName("Tofu Comprehensive Setup")
 --[[
@@ -32,7 +32,7 @@ myColors = {
         lake = {0, 0, 1},
         mountain = {0.502, 0, 0},
         marsh = {0.133, 0.545, 0.133},
-        gorge = {0.627, 0.125, 0.941}
+        gorge = {0.82, 0.71, 0.55}
     },
     suits = {
         Fox = {0.886, 0.318, 0.204},
@@ -104,7 +104,7 @@ myIterations = {
     suitButtonLabels = {"Random", "Default", "Draw", "Reset"},
     suitLabels = {"Fox", "Mouse", "Bunny"},
     ruinButtonLabels = {"None", "One", "Two", "Reset"},
-    deckButtonLabels = {"Base", "Exiles & Partisans", "Squires & Disciples"},
+    deckButtonLabels = {"Standard", "Exiles & Partisans", "Squires & Disciples"},
     landmarkCycle = {"None", "Printed", "Competitive", "Random 1", "Random 2"},
     hirelingCycle = {"No", "Yes"}
 }
@@ -124,9 +124,9 @@ myBookkeepingVariables = {
     ruinsPool = {}
 }
 myDeckGUIDs = {
-    ["Base"] = "7ac0a9",
+    ["Standard"] = "7ac0a9",
     ["Exiles & Partisans"] = "d07572",
-    ["Squires & Disciples"] = ""
+    ["Squires & Disciples"] = "ddfce3"
 }
 myMapsSetup = {
     overallPosition = {0.04, 1.48, -0.02},

@@ -1,8 +1,8 @@
-----------------------
+ ----------------------
 -- Created for Tofu Worldview
--- By cdenq
+-- By tofuwater
 ----------------------
-self.setName("Tofu Bird Marker")
+self.setName("Eyrie Dynasties")
 
 ----------------------
 -- button variables

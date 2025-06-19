@@ -1,8 +1,8 @@
 ----------------------
 -- Created for Tofu Worldview
--- By cdenq
+-- By tofuwater
 ----------------------
-self.setName("Tofu WA Marker")
+self.setName("Woodland Alliance")
 
 ----------------------
 -- button variables

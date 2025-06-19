@@ -1,6 +1,6 @@
 ----------------------
 -- Created for Tofu Worldview
--- By cdenq
+-- By tofuwater
 ----------------------
 self.setName("Tofu Bird VP")
 
@@ -91,7 +91,7 @@ function createScoreButton()
         width = 0,
         height = 0,
         font_size = 600,
-        font_color = {0, 0, 0},
+        font_color = {1, 1, 1},
         label = "0"
     })
 end

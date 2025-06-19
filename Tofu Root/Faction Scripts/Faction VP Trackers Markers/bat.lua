@@ -2,12 +2,12 @@
 -- Created for Tofu Worldview
 -- By tofuwater
 ----------------------
-self.setName("Vagabond")
+self.setName("Twilight Council")
 
 ----------------------
 -- button variables
 ----------------------
-trackerGUID = "291918"
+trackerGUID = "bfef41"
 wait_id = 0
 
 ----------------------

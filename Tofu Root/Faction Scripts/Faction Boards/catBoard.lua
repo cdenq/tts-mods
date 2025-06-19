@@ -9,8 +9,6 @@ self.setName("Tofu Cat Board")
 ----------------------
 deckZone = "cf89ff"
 boardZone = "29b2c0"
-keyWordSawmill = "catSawmill"
-keyWordRecruiter = "catRecruiter"
 woodBagGUID = "dad414"
 warriorBagGUID = "ffa850"
 warriorMapRotation = {0.00, 180.00, 0.00}
@@ -185,8 +183,7 @@ function wood(obj, color)
     local sawmills = {}
     for _, obj in ipairs(boardZoneObj.getObjects()) do
         if obj.tag == "Tile" then
-            local notes = obj.getGMNotes() or ""
-            if string.find(notes, keyWordSawmill) then
+            if obj.getName() == "Sawmill" then
                 table.insert(sawmills, obj)
             end
         end
@@ -235,8 +232,7 @@ function recruit(obj, color)
     local recruiters = {}
     for _, obj in ipairs(boardZoneObj.getObjects()) do
         if obj.tag == "Tile" then
-            local notes = obj.getGMNotes() or ""
-            if string.find(notes, keyWordRecruiter) then
+            if obj.getName() == "Recruiter" then
                 table.insert(recruiters, obj)
             end
         end

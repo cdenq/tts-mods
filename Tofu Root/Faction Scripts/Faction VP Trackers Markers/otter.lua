@@ -1,8 +1,8 @@
 ----------------------
 -- Created for Tofu Worldview
--- By cdenq
+-- By tofuwater
 ----------------------
-self.setName("Tofu Otter Marker")
+self.setName("Riverfolk Company")
 
 ----------------------
 -- button variables

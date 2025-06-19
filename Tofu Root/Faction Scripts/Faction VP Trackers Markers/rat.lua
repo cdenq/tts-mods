@@ -1,8 +1,8 @@
 ----------------------
 -- Created for Tofu Worldview
--- By cdenq
+-- By tofuwater
 ----------------------
-self.setName("Tofu Rat Marker")
+self.setName("Lord of the Hundreds")
 
 ----------------------
 -- button variables

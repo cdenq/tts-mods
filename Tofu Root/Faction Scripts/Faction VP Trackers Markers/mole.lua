@@ -1,8 +1,8 @@
 ----------------------
 -- Created for Tofu Worldview
--- By cdenq
+-- By tofuwater
 ----------------------
-self.setName("Tofu Mole Marker")
+self.setName("Underground Duchy")
 
 ----------------------
 -- button variables

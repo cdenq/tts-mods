@@ -1,8 +1,8 @@
 ----------------------
 -- Created for Tofu Worldview
--- By cdenq
+-- By tofuwater
 ----------------------
-self.setName("Tofu Crow Marker")
+self.setName("Corvid Conspiracy")
 
 ----------------------
 -- button variables

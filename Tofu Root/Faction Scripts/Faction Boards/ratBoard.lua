@@ -11,7 +11,6 @@ deckZone = "cf89ff"
 boardZone = "29b2c0"
 warlordGUID = {"529f5a", "42a8dc"}
 ratFactionBoardGUID = "53059f"
-keyWordStronghold = "ratStronghold"
 warriorBagGUID = "24fc4b"
 warriorMapRotation = {0.00, 180.00, 0.00}
 
@@ -103,8 +102,8 @@ function checkProwess()
     for _, hit in ipairs(hitList) do
         local obj = hit.hit_object
         if obj.type == "Tile" then
-            local notes = obj.getGMNotes() or ""
-            if string.find(notes, "Prowess") then
+            local tagList = obj.getTags()
+            if checkHasTag("Prowess", tagList) then
                 totalItems = totalItems + 1
             end
         end
@@ -122,13 +121,14 @@ function recruit(obj, color)
     
     for _, obj in ipairs(boardZoneObj.getObjects()) do
         if obj.type == "Tile" then
-            local notes = obj.getGMNotes()
-            if notes == keyWordStronghold then
+            if obj.getName() == "Stronghold" then
                 table.insert(spawners, obj)
             end
         elseif isWarlord(obj.getGUID()) then
             warlordFound = true
             activeWarlord = obj
+        else
+            doNothing()
         end
     end
 
@@ -200,3 +200,14 @@ function recruit(obj, color)
     end
 end
 
+function doNothing()
+end
+
+function checkHasTag(targetTag, tagList)
+    for _, tag in ipairs(tagList) do
+        if tag == targetTag then
+            return true
+        end
+    end
+    return false
+end

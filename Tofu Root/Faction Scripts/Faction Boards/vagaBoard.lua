@@ -3,7 +3,8 @@
 -- By tofuwater
 ----------------------
 self.setName("Tofu Vagabond Board")
-satchelGUIDs = {"9901fe", "a56f55", "9ae449", "1c3781"}
+satchelGUIDs = {"9901fe", "a56f55", "9ae449", "1c3781"} --states of satchel board
+-- satchel update requires the board to be in the right orientation
 
 ----------------------
 -- Variables
@@ -231,7 +232,7 @@ function checkSatchels()
     local totalItems = 0
     for _, hit in ipairs(hitList) do
         local obj = hit.hit_object
-        if obj.type == "Tile" and obj.getGMNotes() == "itemBag" then
+        if obj.getName() == "Bag" then
             totalItems = totalItems + 1
         end
     end

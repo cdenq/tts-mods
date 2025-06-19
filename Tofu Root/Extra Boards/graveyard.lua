@@ -2,14 +2,22 @@
 -- Tofu Tumble
 -- By tofuwater
 ----------------------
-self.setName("To Grave")
--- note, all hireling warriors are figurines except
--- bat, frog warriors are tokens
--- all hireling cardboard are tiles
+self.setName("Comprehensive Return")
+-- set returnMode to value to determine type of return
 
 ----------------------
 -- Variables
 ----------------------
+myBookkeepingVariables = {
+    isReturnPiecesActive = true,
+    returnMode = "0", --"0" to grave, "1" to supply, "2" to coffin
+    debugMode = false,
+    spacing_x = 1.3,
+    spacing_z = 0.9,
+    currentGridPosition = 0,
+    currentGridPositionCoffin = 0,
+    recentlyProcessed = {}
+}
 groups = {
     cat = {
         factionBoardGUID = "52c93d"
@@ -27,9 +35,17 @@ groups = {
         factionBoardGUID = "b69618"
     }
 }
-movementMappings = { -- the keys are the actual GM descriptions
+movementMappings = { -- the keys are the actual tags/GM descriptions
     cardSouls = {
         lostSoulsGUID = "40abac",
+        adjustment = {
+            x = 0.07,
+            y = 0.71 + 2,
+            z = -1.85
+        }
+    },
+    cardPond = {
+        pondGUID = "51070d",
         adjustment = {
             x = 0.07,
             y = 0.71 + 2,
@@ -39,17 +55,6 @@ movementMappings = { -- the keys are the actual GM descriptions
     cardDiscard = {
         discardZone = "df7de8",
         boardGUID = "5c414a"
-    },
-    rootCard = { --do not delete, used to sort cards in parseObj()
-        dummy = "" 
-    },
-    warriorCoffin = {
-        coffinKeepersGUID = "bf44eb",
-        adjustment = {
-            x = -0.54,
-            y = 1.84 + 4,
-            z = 0.26
-        }
     },
     mountainPass = {
         position = {-45.12, 1.69, 15.96},
@@ -83,13 +88,21 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = -1.5
         }
     },
-    catWarrior = {
+    warriorCoffin = {
+        coffinKeepersGUID = "bf44eb",
+        adjustment = {
+            x = -0.54,
+            y = 1.84 + 4,
+            z = 0.26
+        }
+    },
+    Cat = {
         locationGUID = "ffa850"
     },
-    catWood = {
+    Wood = {
         locationGUID = "dad414"
     },
-    catSawmill = {
+    Sawmill = {
         locationGUID = groups["cat"].factionBoardGUID,
         adjustment = {
             x = 0,
@@ -97,7 +110,7 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 0
         }
     },
-    catPiece = {
+    Workshop = {
         locationGUID = groups["cat"].factionBoardGUID,
         adjustment = {
             x = 0,
@@ -105,7 +118,7 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 0
         }
     },
-    catRecruiter = {
+    Recruiter = {
         locationGUID = groups["cat"].factionBoardGUID,
         adjustment = {
             x = 0,
@@ -113,10 +126,10 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 0
         }
     },
-    birdWarrior = {
+    Bird = {
         locationGUID = "5752ee",
     },
-    birdPiece = {
+    Roost = {
         locationGUID = "52af3f",
         adjustment = {
             x = 0,
@@ -124,10 +137,10 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 5
         }
     },
-    waWarrior = {
+    WA = {
         locationGUID = "ebc24d",
     },
-    waPiece = {
+    Sympathy = {
         locationGUID = groups["wa"].factionBoardGUID,
         adjustment = {
             x = -3,
@@ -135,7 +148,7 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 3
         }
     },
-    waBase = {
+    Base = {
         locationGUID = groups["wa"].factionBoardGUID,
         adjustment = {
             x = -3,
@@ -143,10 +156,10 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 3
         }
     },
-    otterWarrior = {
+    Otter = {
         locationGUID = "bfe555",
     },
-    otterPiece = {
+    ["Trade Post"] = {
         locationGUID = "386773",
         adjustment = {
             x = -3,
@@ -154,7 +167,7 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 3
         }
     },
-    lizardWarrior = {
+    Lizard = {
         locationGUID = groups["lizard"].factionBoardGUID,
         bagGUID = "748e2f",
         adjustment = {
@@ -163,7 +176,7 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 0.2
         }
     },
-    lizardPiece = {
+    Garden = {
         locationGUID = groups["lizard"].factionBoardGUID,
         adjustment = {
             x = 0,
@@ -171,10 +184,10 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 5
         }
     },
-    moleWarrior = {
+    Mole = {
         locationGUID = "39e6dd",
     },
-    molePiece = {
+    Market = {
         locationGUID = groups["mole"].factionBoardGUID,
         adjustment = {
             x = 3,
@@ -182,7 +195,7 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 3
         }
     },
-    moleRecruiter = {
+    Citadel = {
         locationGUID = groups["mole"].factionBoardGUID,
         adjustment = {
             x = 3,
@@ -190,7 +203,7 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 3
         }
     },
-    moleBurrow = {
+    Tunnel = {
         locationGUID = "4464b8",
         adjustment = {
             x = 3.5,
@@ -198,10 +211,10 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 3.75
         }
     },
-    crowWarrior = {
+    Crow = {
         locationGUID = "141966",
     },
-    crowPiece = {
+    Plot = {
         locationGUID = "b29092",
         adjustment = {
             x = 0.2,
@@ -209,10 +222,10 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 0.2
         }
     },
-    ratWarrior = {
+    Rat = {
         locationGUID = "24fc4b"
     },
-    ratWarlord = {
+    Warlord = {
         locationGUID = groups["rat"].factionBoardGUID,
         adjustment = {
             x = 0.2,
@@ -220,7 +233,7 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 0.2
         }
     },
-    ratPiece = {
+    Mob = {
         locationGUID = groups["rat"].factionBoardGUID,
         adjustment = {
             x = 0.2,
@@ -228,7 +241,7 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 0.2
         }
     },
-    ratStronghold = {
+    Stronghold = {
         locationGUID = groups["rat"].factionBoardGUID,
         adjustment = {
             x = 0.2,
@@ -236,10 +249,10 @@ movementMappings = { -- the keys are the actual GM descriptions
             z = 0.2
         }
     },
-    badgerWarrior = {
+    Badger = {
         locationGUID = "948279",
     },
-    badgerPiece = {
+    Waystation = {
         locationGUID = "f72cd4",
         adjustment = {
             x = -3,
@@ -286,18 +299,9 @@ movementMappings = { -- the keys are the actual GM descriptions
 }
 myIterations = {
     exceptions = {
-        byKeyword = {"ratWarrior", "lizardWarrior"}, --unused
+        byKeyword = {"lizardWarrior"}, --unused
         byGUID = {"4f0e65", "13a694", "7a4d1c"}, --otter, stag, exile is pawn
     }
-}
-myBookkeepingVariables = {
-    isReturnPiecesActive = true,
-    debugMode = false,
-    spacing_x = 1.3,
-    spacing_z = 0.9,
-    currentGridPosition = 0,
-    currentGridPositionCoffin = 0,
-    recentlyProcessed = {}
 }
 
 ----------------------
@@ -347,72 +351,61 @@ function onCollisionEnter(collision_info)
     local collidingObj = collision_info.collision_object
     local objGUID = collidingObj.getGUID()
     
+    -- Buffer timer
     if myBookkeepingVariables.recentlyProcessed[objGUID] then
         return
-    end
-    
-    myBookkeepingVariables.recentlyProcessed[objGUID] = true
-    
-    Wait.time(function()
-        myBookkeepingVariables.recentlyProcessed[objGUID] = nil
-    end, 1)
-    
-    if myBookkeepingVariables.debugMode then 
-        print(collidingObj.type) 
-        print(collidingObj.getGMNotes() .. ": gm notes.")
+    else
+        myBookkeepingVariables.recentlyProcessed[objGUID] = true
+        Wait.time(function()
+            myBookkeepingVariables.recentlyProcessed[objGUID] = nil
+        end, 1)
     end
     
     parseObj(collidingObj)
 end
 
+----------------------
+-- main parse function
+----------------------
 function parseObj(collidingObj)
-    local coffinObj = getObjectFromGUID(movementMappings.warriorCoffin.coffinKeepersGUID)
-    local soulsObj = getObjectFromGUID(movementMappings.cardSouls.lostSoulsGUID)
-    local gmNotes = collidingObj.getGMNotes()
-
-    if gmNotes ~= "" or collidingObj.type == "Deck" then
-        if collidingObj.type == "Deck" then
-            parseDeck(collidingObj)
-        elseif collidingObj.type == "Card" then
-            parseCard(collidingObj)
-        elseif (gmNotes == "hireling1" or gmNotes == "hireling2" or gmNotes == "hireling3") then
-            local isException = false
-            for i, guid in ipairs(myIterations.exceptions.byGUID) do
-                if collidingObj.getGUID() == guid then
-                    isException = true
-                    break
-                end
-            end
-
-            if not isException then
-                if coffinObj and collidingObj.type ~= "Tile" then
-                    moveToCoffin(collidingObj, coffinObj)
-                else
-                    moveToBoard(collidingObj)
-                end
-            else
-                print("Hireling is a pawn.")
-            end
-        elseif (collidingObj.type == "Figurine" or collidingObj.type == "Tile" or collidingObj.type == "Token") then
-            if gmNotes == "mountainPass" then --if mountain pass
-                moveToDeckBoard(collidingObj)
-            elseif coffinObj then
-                moveToCoffin(collidingObj, coffinObj)
-            else
-                moveToBoard(collidingObj)
-            end
-        else
-            print("Invalid type: " .. collidingObj.type .. ".")
+    -- Debug
+    local objTags = collidingObj.getTags()
+    if myBookkeepingVariables.debugMode then
+        local gmNotes = collidingObj.getGMNotes()
+        local descNotes = collidingObj.getDescription()
+        print("Type: " .. collidingObj.type)
+        print("Desc: " .. descNotes)
+        print("GMNotes: " .. gmNotes)
+        print("Tags:")
+        for i, tag in ipairs(objTags) do
+            print("   " .. tag)
         end
-    else 
-        doNothing()
+        print("--")
     end
-end 
 
-function parseDeck(collidingObj)
-    local cards = collidingObj.getObjects()
+    -- Main
+    if collidingObj.type == "Deck" then
+        parseDeck(collidingObj)
+    elseif collidingObj.type == "Card" then
+        parseCard(collidingObj)
+    elseif collidingObj.type == "Figurine" then
+        parseFigurine(collidingObj)
+    elseif collidingObj.type == "Tile" then 
+        parseTile(collidingObj)
+    else
+        if myBookkeepingVariables.debugMode then
+            print("Object type: " .. collidingObj.type .. " doesn't have handling.")
+        end
+    end
+end
+
+----------------------
+-- parse functions
+----------------------
+function parseDeck(deck)
+    local cards = deck.getObjects()
     for key, card in pairs(cards) do
-        local cardObj = collidingObj.takeObject({
+        local cardObj = deck.takeObject({
             index = 0,
             smooth = false
         })
@@ -421,14 +414,70 @@ function parseDeck(collidingObj)
 end
 
 function parseCard(card)
-    local gmNotes = card.getGMNotes()
-    local soulsObj = getObjectFromGUID(movementMappings.cardSouls.lostSoulsGUID)
-    if gmNotes == "retainer" then --if badgers card
-        moveToDeckBoard(card)
-    elseif soulsObj then
-        moveToSouls(card, soulsObj)
+    local objTags = card.getTags()
+    if checkHasTag("Root Card", objTags) then
+        local soulsObj = getObjectFromGUID(movementMappings.cardSouls.lostSoulsGUID)
+        local pondObj = getObjectFromGUID(movementMappings.cardPond.pondGUID)
+        local gmNotes = card.getGMNotes()
+        local name = card.getName()
+        
+        if name == "Faithful Retainer" then
+            moveToDeckBoard(card)
+        elseif gmNotes == "Frog" then
+            moveToPond(card, pondObj)
+        elseif soulsObj then
+            moveToSouls(card, soulsObj)
+        else
+            moveToDiscard(card)
+        end
     else
-        moveToDiscard(card)
+        print("Card is not tagged as a Root card.")
+    end
+end
+
+function parseFigurine(figurine)
+    local coffinObj = getObjectFromGUID(movementMappings.warriorCoffin.coffinKeepersGUID)
+    local gmNotes = figurine.getGMNotes()
+    local objTags = figurine.getTags()
+
+    if checkHasTag("Pawn", objTags) then
+        printToAll("This piece is a pawn and cannot be removed.")
+    elseif checkHasTag("Warrior", objTags) then
+        if myBookkeepingVariables.returnMode == "1" then --forced supply
+            moveToSupply(figurine)
+        elseif myBookkeepingVariables.returnMode == "2" then --forced coffin
+            if coffinObj then
+                moveToCoffin(figurine)
+            else
+                printToAll("Coffin Makers is not in play; returning to supply instead.")
+                moveToSupply(figurine)
+            end
+        else --to grave
+            if checkHasTag("Acolyte", objTags) then
+                moveToBoard(figurine)
+            elseif coffinObj then
+                moveToCoffin(figurine)
+            else 
+                moveToSupply(figurine)
+            end
+        end
+    else
+        print("This figurine has no handling!")
+    end
+end
+
+function parseTile(tile)
+    local objTags = tile.getTags()
+    if checkHasTag("Mountain Path Marker", objTags) then --if mountain pass
+        moveToDeckBoard(tile)
+    elseif checkHasTag("Token", objTags) or checkHasTag("Building", objTags) then
+        if tile.getName() == "Wood" then
+            moveToSupply(tile)
+        else
+            moveToBoard(tile)
+        end
+    else
+        print("This tile has no handling!")
     end
 end
 
@@ -446,15 +495,48 @@ function moveToSouls(collidingObj, soulsObj)
     moveCard(collidingObj, newPos, tarRot)
 end
 
+function moveToPond(collidingObj, pondObj)
+    local tarPos = pondObj.getPosition()
+    local tarRot = pondObj.getRotation()
+    local newPos = {
+        x = tarPos.x + movementMappings.cardPond.adjustment.x,
+        y = tarPos.y + movementMappings.cardPond.adjustment.y,
+        z = tarPos.z + movementMappings.cardPond.adjustment.z
+    }
+    moveCard(collidingObj, newPos, tarRot)
+end
+
+function moveToDeckBoard(targetObj)
+    if targetObj.getName() == "Faithful Retainer" then
+        tarIdentifier = "retainer" --key in the movement mapping
+    elseif targetObj.getName() == "Closed Path Marker" then
+        tarIdentifier = "mountainPass"
+    else
+        tarIdentifier = targetObj.getGMNotes()
+    end 
+
+    local tarPos = movementMappings[tarIdentifier].position
+    local tarRot = movementMappings[tarIdentifier].rotation
+    local newPos = {
+        x = tarPos[1],
+        y = tarPos[2] + 2,
+        z = tarPos[3]
+    }
+    moveThing(targetObj, newPos, tarRot)
+end
+
 function moveToDiscard(collidingObj)
     local tarPos = getObjectFromGUID(movementMappings.cardDiscard.discardZone).getPosition()
     local tarRot = getObjectFromGUID(movementMappings.cardDiscard.boardGUID).getRotation()
     moveCard(collidingObj, tarPos, tarRot)
 end
 
-function moveToCoffin(collidingObj, coffinObj)
-    local gmNotes = collidingObj.getGMNotes()
-    if collidingObj.type == "Figurine" and gmNotes ~= "ratWarlord" and gmNotes ~= "lizardWarrior" then
+function moveToCoffin(collidingObj)
+    local coffinObj = getObjectFromGUID(movementMappings.warriorCoffin.coffinKeepersGUID)
+    local objTags = collidingObj.getTags()
+    if checkHasTag("Warlord", objTags) then
+        moveToBoard(collidingObj)
+    else
         local coffinPos = coffinObj.getPosition()
         local coffinRot = coffinObj.getRotation()
 
@@ -475,19 +557,34 @@ function moveToCoffin(collidingObj, coffinObj)
         Wait.time(function()
             myBookkeepingVariables.currentGridPositionCoffin = 0
         end, 5)
-    else
+    end
+end
+
+function moveToSupply(collidingObj)
+    local objTags = collidingObj.getTags()
+    if checkHasTag("Hireling", objTags) or checkHasTag("Warlord", objTags) or checkHasTag("Captain", objTags) then
         moveToBoard(collidingObj)
+    else
+        -- otherwise its just normal warrior or is cat wood
+        local key = collidingObj.getName()
+        local tarBag = getObjectFromGUID(movementMappings[key].locationGUID)
+        moveIntoBag(collidingObj, tarBag)
     end
 end
 
 function moveToBoard(collidingObj)
-    local gmNotes = collidingObj.getGMNotes()
-    if (collidingObj.type == "Figurine" and gmNotes ~= "ratWarlord" and gmNotes ~= "lizardWarrior" and gmNotes ~= "hireling1" and gmNotes ~= "hireling2" and gmNotes ~= "hireling3") or (gmNotes == "catWood") then
-        local tarBag = getObjectFromGUID(movementMappings[gmNotes].locationGUID)
-        moveIntoBag(collidingObj, tarBag)
+    local objTags = collidingObj.getTags()
+    local objName = collidingObj.getName()
+
+    if objName == "Relic" then
+        printToAll("Place the removed relic in a forest.")
     else
-        local tarPos = getObjectFromGUID(movementMappings[gmNotes].locationGUID).getPosition()
-        local tarRot = getObjectFromGUID(movementMappings[gmNotes].locationGUID).getRotation()
+        if checkHasTag("Hireling", objTags) then
+            objName = collidingObj.getGMNotes() --uses GMNotes for movement mapping
+        end
+        
+        local tarPos = getObjectFromGUID(movementMappings[objName].locationGUID).getPosition()
+        local tarRot = getObjectFromGUID(movementMappings[objName].locationGUID).getRotation()
 
         local row = math.floor(myBookkeepingVariables.currentGridPosition / 5)
         local col = myBookkeepingVariables.currentGridPosition % 5
@@ -495,12 +592,13 @@ function moveToBoard(collidingObj)
         local offset_z = (row - 1) * myBookkeepingVariables.spacing_z
 
         local newPos = {
-            x = tarPos.x + movementMappings[gmNotes].adjustment.x + offset_x,
-            y = tarPos.y + movementMappings[gmNotes].adjustment.y,
-            z = tarPos.z + movementMappings[gmNotes].adjustment.z + offset_z
+            x = tarPos.x + movementMappings[objName].adjustment.x + offset_x,
+            y = tarPos.y + movementMappings[objName].adjustment.y,
+            z = tarPos.z + movementMappings[objName].adjustment.z + offset_z
         }
         local newRot
-        if gmNotes == "crowPiece" then
+
+        if objName == "Plot" then
             newRot = {
                 x = tarRot.x,
                 y = tarRot.y,
@@ -517,17 +615,6 @@ function moveToBoard(collidingObj)
             myBookkeepingVariables.currentGridPosition = 0
         end, 5)
     end
-end
-
-function moveToDeckBoard(targetObj)
-    local tarPos = movementMappings[targetObj.getGMNotes()].position
-    local tarRot = movementMappings[targetObj.getGMNotes()].rotation
-    local newPos = {
-        x = tarPos[1],
-        y = tarPos[2] + 2,
-        z = tarPos[3]
-    }
-    moveThing(targetObj, newPos, tarRot)
 end
 
 ----------------------
@@ -572,4 +659,13 @@ end
 
 function depositThing(targetObj, targetBag)
     targetBag.putObject(targetObj)
+end
+
+function checkHasTag(targetTag, tagList)
+    for _, tag in ipairs(tagList) do
+        if tag == targetTag then
+            return true
+        end
+    end
+    return false
 end

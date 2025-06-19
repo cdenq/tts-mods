@@ -15,13 +15,13 @@ lostSoulsGUID = "40abac"
 lizardBoardGUID = "e8687a"
 dominancePositions = {
     mouse = {-45.20, 1.60, -2.84},
-    bunny = {-45.19, 1.60, -9.80},
+    rabbit = {-45.19, 1.60, -9.80},
     fox = {-45.22, 1.60, -16.79},
     bird = {-45.23, 1.60, 4.17},
     count = 0
 }
-myIterations = {"mouse", "bunny", "fox", "bird"}
-myMaps = {
+myIterations = {"mouse", "rabbit", "fox", "bird"}
+myMaps = { --contains map variants for swapping map
     autumn = {"43180d", "8d1572", "7f8900"},
     winter = {"e94958"},
     lake = {"cbb6e5", "64338c"},

@@ -2,12 +2,12 @@
 -- Created for Tofu Worldview
 -- By tofuwater
 ----------------------
-self.setName("Vagabond")
+self.setName("Knaves of the Deepwood")
 
 ----------------------
 -- button variables
 ----------------------
-trackerGUID = "291918"
+trackerGUID = "1ac332"
 wait_id = 0
 
 ----------------------

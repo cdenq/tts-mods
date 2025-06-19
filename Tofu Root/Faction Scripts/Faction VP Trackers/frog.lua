@@ -2,13 +2,13 @@
 -- Created for Tofu Worldview
 -- By tofuwater
 ----------------------
-self.setName("Tofu Rat VP")
+self.setName("Tofu Frog VP")
 
 ----------------------
 -- button variables
 ----------------------
-markerGUID = "09c933"
-factionName = "Lord of the Hundreds"
+markerGUID = "acb0a5"
+factionName = "Lilypad Diaspora"
 trackerPositions = {
     ["0"] = {23.30, 1.73, 21.11},
     ["1"] = {21.75, 1.73, 21.11},
@@ -118,7 +118,7 @@ function createSetup()
         height = 300,
         font_size = 200,
         font_color = "White",
-        color = "Black",
+        color = "Red",
         label = "SETUP",
         tooltip = "Place marker on 0."
     })

@@ -7,20 +7,6 @@ self.setName("Collections Bowl")
 ----------------------
 -- Variables
 ----------------------
-gmNoteKeywords = {
-    "catWarrior",
-    "birdWarrior",
-    "waWarrior",
-    "otterWarrior",
-    "lizardWarrior",
-    "moleWarrior",
-    "crowWarrior",
-    "ratWarrior",
-    "badgerWarrior",
-    "frogWarrior",
-    "batWarrior",
-    "skunkWarrior"
-}
 otterFactionBoardGUID = "4a4924"
 myBookkeepingVariables = {
     isReturnPiecesActive = true,
@@ -34,7 +20,7 @@ myBookkeepingVariables = {
 -- onload function
 ----------------------
 function onLoad()
-    if myBookkeepingVariables.debugMode then broadcastToAll("Bowl debug mode is on.") end
+    if myBookkeepingVariables.debugMode then broadcastToAll("Otter bowl debug mode is on.") end
     createToggleButton()
 end
 
@@ -109,15 +95,8 @@ function onCollisionEnter(collision_info)
 end
 
 function parseObj(collidingObj)
-    local gmNotes = collidingObj.getGMNotes()
-    local matchesKeyword = false
-    for i, keyword in ipairs(gmNoteKeywords) do 
-        if gmNotes == keyword then 
-            matchesKeyword = true 
-        end
-    end 
-
-    if gmNotes ~= "" and collidingObj.type == "Figurine" and matchesKeyword then
+    local objTags = collidingObj.getTags()
+    if (checkHasTag("Warrior", objTags)) and (not checkHasTag("Warlord", objTags)) and (not checkHasTag("Captain", objTags)) then
         moveToBoard(collidingObj)
     else 
         doNothing()
@@ -163,4 +142,16 @@ end
 
 function moveToPlace(collidingObj, tarPos, tarRot)
     moveThing(collidingObj, tarPos, tarRot)
+end
+
+----------------------
+-- helper functions
+----------------------
+function checkHasTag(targetTag, tagList)
+    for _, tag in ipairs(tagList) do
+        if tag == targetTag then
+            return true
+        end
+    end
+    return false
 end

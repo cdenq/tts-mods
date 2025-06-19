@@ -11,7 +11,6 @@ deckZone = "cf89ff"
 boardZone = "29b2c0"
 factionBoardGUID = "4a4924"
 warriorBagGUID = "bfe555"
-keyWordTradePost = "otterPiece"
 myButtons = {
     zShift = 0.09,
     fund = {
@@ -230,7 +229,8 @@ function checkFunds()
     local totalFunds = 0
     for _, hit in ipairs(hitList) do
         local obj = hit.hit_object
-        if obj.type == "Figurine" then
+        local objTags = obj.getTags()
+        if checkHasTag("Warrior", objTags) then
             totalFunds = totalFunds + 1
         end
     end
@@ -244,8 +244,7 @@ function checkTradePosts()
     
     for _, obj in ipairs(boardZoneObj.getObjects()) do
         if obj.type == "Token" or obj.type == "Tile" then
-            local notes = obj.getGMNotes()
-            if notes == keyWordTradePost then
+            if obj.getName() == "Trade Post" then
                 return true
             end
         end
@@ -277,11 +276,9 @@ function getAllFigurinesOnBoard()
     local totalWarriors = {}
     for _, hit in ipairs(hitList) do
         local obj = hit.hit_object
-        if obj.type == "Figurine" then
-            local notes = obj.getGMNotes() or ""
-            if string.find(notes, "Warrior") then
-                table.insert(totalWarriors, obj)
-            end
+        local objTags = obj.getTags()
+        if checkHasTag("Warrior", objTags) then
+            table.insert(totalWarriors, obj)
         end
     end
     return totalWarriors
@@ -361,4 +358,13 @@ function placeItemsInGrid(items)
             end
         end
     end
+end
+
+function checkHasTag(targetTag, tagList)
+    for _, tag in ipairs(tagList) do
+        if tag == targetTag then
+            return true
+        end
+    end
+    return false
 end

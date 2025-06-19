@@ -1,8 +1,8 @@
 ----------------------
 -- Created for Tofu Worldview
--- By cdenq
+-- By tofuwater
 ----------------------
-self.setName("Tofu Lizard Marker")
+self.setName("Lizard Cult")
 
 ----------------------
 -- button variables

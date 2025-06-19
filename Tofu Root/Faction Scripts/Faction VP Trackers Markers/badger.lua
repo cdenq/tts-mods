@@ -1,8 +1,8 @@
 ----------------------
 -- Created for Tofu Worldview
--- By cdenq
+-- By tofuwater
 ----------------------
-self.setName("Tofu Badger Marker")
+self.setName("Keepers in Iron")
 
 ----------------------
 -- button variables

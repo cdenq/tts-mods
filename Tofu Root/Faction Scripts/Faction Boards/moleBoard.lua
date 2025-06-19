@@ -11,7 +11,6 @@ deckZoneGUID = "cf89ff"
 boardZoneGUID = "29b2c0"
 burrowObjGUID = "78c688"
 warriorBagGUID = "39e6dd"
-keyword = "moleRecruiter"
 handzoneGUIDS = {
     Red = {"3ec4f1", "f001d4"},
     Purple = {"f8e77a", "855e1e"},
@@ -120,7 +119,7 @@ function place(obj, color, alt_click)
     local boardZone = getObjectFromGUID(boardZoneGUID)
     local recruiters = {}
     for _, obj in ipairs(boardZone.getObjects()) do
-        if obj.getGMNotes() == keyword then
+        if obj.getName() == "Citadel" then
             table.insert(recruiters, obj)
         end
     end

@@ -2,12 +2,12 @@
 -- Created for Tofu Worldview
 -- By tofuwater
 ----------------------
-self.setName("Vagabond")
+self.setName("Lilypad Diaspora")
 
 ----------------------
 -- button variables
 ----------------------
-trackerGUID = "291918"
+trackerGUID = "d22dc3"
 wait_id = 0
 
 ----------------------

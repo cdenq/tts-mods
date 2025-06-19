@@ -18,7 +18,7 @@ variableData = {
         markerPosition = {-34.73, 1.89, 3.52},
         count = 0
     },
-    bunny = {
+    rabbit = {
         label = "0",
         buttonPosition = {0.45, 0.25, 0.4},
         dominancePosition = {-45.20, 1.60, -2.84},
@@ -38,7 +38,7 @@ variableData = {
         dominanceCount = 0
     }
 }
-myIterations = {"mouse", "bunny", "fox"}
+myIterations = {"mouse", "rabbit", "fox"}
 
 ----------------------
 -- onload function
